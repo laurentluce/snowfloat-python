@@ -12,7 +12,7 @@ import snowfloat.settings
 
 class Tests(unittest.TestCase):
    
-    url_prefix = 'http://%s' % (snowfloat.settings.HOST,)
+    url_prefix = 'https://%s' % (snowfloat.settings.HOST,)
 
     def setUp(self):
         snowfloat.settings.HTTP_RETRY_INTERVAL = 0.1
