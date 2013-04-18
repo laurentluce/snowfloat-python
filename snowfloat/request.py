@@ -66,7 +66,6 @@ def send(method, uri, params={}, data={}, headers=None):
                 break
         except Exception, e:
             print str(e)
-            pass
         time.sleep(snowfloat.settings.HTTP_RETRY_INTERVAL)
         retries -= 1
    
