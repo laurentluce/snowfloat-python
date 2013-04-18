@@ -40,7 +40,7 @@ class Geometry(object):
         self.ts_modified = ts_modified
     
     def __str__(self):
-        return '%s(coordinates=%s, dat=%s, ts=%s, id=%s, uri=%s' \
+        return '%s(coordinates=%s, dat=%s, ts=%s, id=%s, uri=%s, ' \
                 'ts_created=%d, ts_modified=%d)' \
             % (self.__class__.__name__, self.coordinates, self.dat, self.ts,
                self.id, self.uri, self.ts_created, self.ts_modified)
