@@ -38,10 +38,13 @@ class Container(object):
 
         Example:
         
-        >>> points = [Point(coordinates=[p1x, p1y, p1z], ts=ts1, dat=dat1),
-        ...           Point(coordinates=[p2x, p2y, p2z], ts=ts2, dat=dat2)]
+        >>> points = [
+        ...           snowfloat.geometries.Point(
+        ...               coordinates=[p1x, p1y, p1z], ts=ts1, dat=dat1),
+        ...           snowfloat.geometries.Point(
+        ...               coordinates=[p2x, p2y, p2z], ts=ts2, dat=dat2)]
         >>> points = container.add_geometries(points)
-        >>> points[0]
+        >>> print points[0]
         Point(id=6bf3f0bc551f41a6b6d435d51793c850,
               uri=/geo/1/containers/11d53e204a9b45299e68d186e7405779/geometries/6bf3f0bc551f41a6b6d435d51793c850
               coordinates=[p1x, p1y, p1z],
@@ -62,7 +65,7 @@ class Container(object):
             
             ts_range (tuple): Geometries timestamps range.
             
-            query (str): distance_[lte|lt|gte|gt], dwithin.
+            query (str): Distance or spatial query.
             
             geometry (Geometry): Geometry object for query lookup.
             

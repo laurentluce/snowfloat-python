@@ -44,10 +44,10 @@ class Client(object):
 
         Example:
     
-        >>> containers = [Container(dat='Sally'),
-                          Container(dat='Bob')]
+        >>> containers = [snowfloat.container.Container(dat='Sally'),
+                          snowfloat.container.Container(dat='Bob')]
         >>> containers = client.add_containers(containers)
-        >>> containers[0]
+        >>> print containers[0]
         Container(id=11d53e204a9b45299e68d186e7405779,
                   uri=/geo/1/containers/11d53e204a9b45299e68d186e7405779,
                   dat='Sally',
@@ -105,11 +105,13 @@ class Client(object):
         Example:
         
         >>> points = [
-        ...           Point(coordinates=[p1x, p1y, p1z], ts=ts1, dat=dat1),
-        ...           Point(coordinates=[p2x, p2y, p2z], ts=ts2, dat=dat2),
+        ...           snowfloat.geometries.Point(
+        ...               coordinates=[p1x, p1y, p1z], ts=ts1, dat=dat1),
+        ...           snowfloat.geometries.Point(
+        ...               coordinates=[p2x, p2y, p2z], ts=ts2, dat=dat2),
         ...          ]
         >>> points = client.add_geometries(container_id, points)
-        >>> points[0]
+        >>> print points[0]
         Point(id=6bf3f0bc551f41a6b6d435d51793c850,
               uri=/geo/1/containers/11d53e204a9b45299e68d186e7405779/geometries/6bf3f0bc551f41a6b6d435d51793c850
               coordinates=[p1x, p1y, p1z],
@@ -133,7 +135,7 @@ class Client(object):
 
             ts_range (tuple): Points timestamps range.
             
-            query (str): distance_[lte|lt|gte|gt], dwithin.
+            query (str): Spatial or distance query.
             
             geometry (Geometry): Geometry object for query lookup.
             
@@ -196,7 +198,7 @@ class Client(object):
             interval (int): Check tasks status interval in seconds.
 
         Returns:
-            list: List of list of strings.
+            list: List of list of dictionaries.
 
         Example:
         
