@@ -71,6 +71,8 @@ class Container(object):
             
             distance (int): Distance in meters for some queries.
 
+            spatial_operation (str): Spatial operation to run on each object returned.
+
         Returns:
             generator. Yields Geometry objects.
         
@@ -88,8 +90,8 @@ class Container(object):
                                                   geometry=point,
                                                   distance=10000)
         """
-        for e in snowfloat.geometry.get_geometries(self.uri, type, ts_range, query,
-            geometry, **kwargs):
+        for e in snowfloat.geometry.get_geometries(self.uri, type, ts_range,
+            query, geometry, **kwargs):
             yield e
 
     def delete_geometries(self, type=None, ts_range=(0, None)):
