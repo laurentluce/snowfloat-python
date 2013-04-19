@@ -54,7 +54,9 @@ class Tests(unittest.TestCase):
                             'ts': 4,
                             'dat': 'test_dat_1',
                             'ts_created': 5,
-                            'ts_modified': 6}
+                            'ts_modified': 6,
+                            'spatial': {'type': 'Point',
+                                        'coordinates': [4, 5, 6]}}
                         },
                         {'type': 'Feature',
                          'id': 'test_polygon_1',
@@ -70,7 +72,9 @@ class Tests(unittest.TestCase):
                             'ts': 11,
                             'dat': 'test_dat_2',
                             'ts_created': 12,
-                            'ts_modified': 13}
+                            'ts_modified': 13,
+                            'spatial': {'type': 'Point',
+                                        'coordinates': [7, 8, 9]}}
                         }]}}
         r2 = {
               'next_page_uri': None,
@@ -92,6 +96,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(geometries[0].id, 'test_point_1')
         self.assertEqual(geometries[0].ts_created, 5)
         self.assertEqual(geometries[0].ts_modified, 6)
+        self.assertEqual(geometries[0].spatial.type, 'Point')
+        self.assertListEqual(geometries[0].spatial.coordinates, [4, 5, 6])
         self.assertListEqual(geometries[1].coordinates, [[[11, 12, 13],
                                                         [14, 15, 16],
                                                         [17, 18, 19],
@@ -103,15 +109,24 @@ class Tests(unittest.TestCase):
         self.assertEqual(geometries[1].id, 'test_polygon_1')
         self.assertEqual(geometries[1].ts_created, 12)
         self.assertEqual(geometries[1].ts_modified, 13)
+        self.assertEqual(geometries[1].spatial.type, 'Point')
+        self.assertListEqual(geometries[1].spatial.coordinates, [7, 8, 9])
         distance_lookup = {'type': 'Point',
                            'coordinates': [1, 2, 3],
                            'properties': {'distance': 4}}
+        spatial_geometry = {'type': 'Point',
+                            'coordinates': [4, 5, 6]}
         self.assertEqual(method_mock.call_args_list,
             [call('%s/geo/1/containers/test_container_1/geometries'
                     % (self.url_prefix,),
                   headers={'X-Session-ID': 'test_session_id'},
                   params={'ts__gte': 1, 'ts__lte': 10,
-                        'geometry__distance_lte': json.dumps(distance_lookup)},
+                          'geometry__distance_lte':
+                            json.dumps(distance_lookup),
+                          'spatial_operation': 'intersection',
+                          'spatial_geometry':
+                            json.dumps(spatial_geometry),
+                          'spatial_flag': True},
                   data={},
                   timeout=10,
                   verify=False),
@@ -486,9 +501,11 @@ class ClientTests(Tests):
     @patch.object(requests, 'get')
     def test_get_geometries(self, get_mock):
         point = snowfloat.geometry.Point(coordinates=[1, 2, 3])
+        point2 = snowfloat.geometry.Point(coordinates=[4, 5, 6])
         self.get_geometries_helper(get_mock, self.client.get_geometries,
             'test_container_1', ts_range=(1, 10), query='distance_lte',
-            geometry=point, distance=4)
+            geometry=point, distance=4, spatial_operation='intersection',
+            spatial_geometry=point2, spatial_flag=True)
 
     @patch.object(requests, 'put')
     def test_add_geometries(self, put_mock):
@@ -857,9 +874,11 @@ class ContainerTests(Tests):
     @patch.object(requests, 'get')
     def test_get_geometries(self, get_mock):
         point = snowfloat.geometry.Point(coordinates=(1, 2, 3))
+        point2 = snowfloat.geometry.Point(coordinates=[4, 5, 6])
         self.get_geometries_helper(get_mock, self.container.get_geometries,
             ts_range=(1, 10), query='distance_lte',
-            geometry=point, distance=4)
+            geometry=point, distance=4, spatial_operation='intersection',
+            spatial_geometry=point2, spatial_flag=True)
     
     @patch.object(requests, 'put')
     def test_add_geometries(self, put_mock):
