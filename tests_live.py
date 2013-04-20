@@ -163,10 +163,22 @@ class Tests(unittest.TestCase):
         # get points using a spatial lookup
         point = snowfloat.geometry.Point([45.05, 45.0, 0])
         points = [e for e in self.client.get_geometries(containers[0].id,
-            type='Point', query='distance_lte', geometry=point, distance=10000)]
+            type='Point', query='distance_lte', geometry=point,
+            distance=10000)]
         self.assertEqual(len(points), 2)
         self.assertListEqual(points[0].coordinates, [45.0, 45.0, 0])
         self.assertListEqual(points[1].coordinates, [45.1, 45.0, 0])
+        
+        # get points using a transform spatial operation
+        points = [e for e in self.client.get_geometries(containers[0].id,
+            type='Point', query='distance_lte', geometry=point,
+            distance=10000, spatial_operation='transform',
+            spatial_srid=32140)]
+        self.assertEqual(len(points), 2)
+        self.assertListEqual(points[0].coordinates,
+            [9648070.041703206, 12327847.650520932, 0])
+        self.assertListEqual(points[1].coordinates,
+            [9650799.215247609, 12335585.450028483, 0])
 
     def test_polygons(self):
 
