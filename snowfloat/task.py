@@ -20,8 +20,10 @@ class Task(object):
     ts_created = None
     ts_modified = None
 
-    def __init__(self, id, uri, operation, resource, filter, state, extras,
-            reason, ts_created, ts_modified):
+    def __init__(self, operation, resource, id=None, uri=None, filter=None,
+            extras=None, state=None, reason=None,
+            ts_created=None, ts_modified=None, container_id=None,
+            ts_range=None):
         self.id = id
         self.uri = uri
         self.operation = operation
@@ -32,6 +34,8 @@ class Task(object):
         self.reason = reason
         self.ts_created = ts_created
         self.ts_modified = ts_modified
+        self.container_id = container_id
+        self.ts_range = ts_range
 
     def _get_results(self):
         uri = '%s/results' % (self.uri)
@@ -42,15 +46,14 @@ class Task(object):
             for r in results:
                 yield r
 
-
 def parse_tasks(tasks):
-    return [Task(t['id'],
-                 t['uri'],
-                 t['operation'],
+    return [Task(t['operation'],
                  t['resource'],
+                 t['id'],
+                 t['uri'],
                  t['filter'],
-                 t['state'],
                  t['extras'],
+                 t['state'],
                  t['reason'],
                  t['ts_created'],
                  t['ts_modified']) for t in tasks]

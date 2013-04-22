@@ -5,6 +5,7 @@ import requests
 
 import snowfloat.auth
 import snowfloat.errors
+import snowfloat.geometry
 import snowfloat.settings
 
 def get(uri, params={}, headers=None):
@@ -25,13 +26,23 @@ def get(uri, params={}, headers=None):
 def put(uri, data, headers=None, format_func=None):
     s = 0
     while True:
-        d = data[s:s+snowfloat.settings.HTTP_PUT_BATCH_SIZE]
+        # we put max HTTP_PUT_BATCH_SIZE points
+        d = []
+        np = 0
+        for g in data[s:]:
+            if np >= snowfloat.settings.HTTP_PUT_BATCH_SIZE:
+                break
+            d.append(g)
+            if isinstance(g, snowfloat.geometry.Geometry):
+                np += g.num_points()
+            else:
+                np += 1
+            s += 1
         if d:
             if format_func:
                 d = format_func(d)
             r = send(requests.put, uri, data=json.dumps(d), headers=headers)
             yield r
-            s += snowfloat.settings.HTTP_PUT_BATCH_SIZE
         else:
             break
 

@@ -43,8 +43,12 @@ class Geometry(object):
         # spatial can be a geometry in the geojson format
         if isinstance(spatial, dict):
             thismodule = sys.modules[__name__]
-            self.spatial = getattr(thismodule, spatial['type'])(
-                spatial['coordinates'])
+            try:
+                self.spatial = getattr(thismodule, spatial['type'])(
+                    spatial['coordinates'])
+            except AttributeError:
+                print spatial
+                raise
         else:
             self.spatial = spatial 
     
@@ -53,6 +57,9 @@ class Geometry(object):
                 'ts_created=%d, ts_modified=%d)' \
             % (self.__class__.__name__, self.coordinates, self.dat, self.ts,
                self.id, self.uri, self.ts_created, self.ts_modified)
+
+    def num_points(self):
+        raise NotImplemented()
 
     def update(self, **kwargs):
         """Edit geometry's attributes.
@@ -121,8 +128,8 @@ def get_geometries(uri, type, ts_range, query, geometry, **kwargs):
     for r in snowfloat.request.get(u, params):
         # convert list of json geometries to Geometry objects
         geometries = parse_geometries(r['geo']['features'])
-        for p in geometries:
-            yield p
+        for g in geometries:
+            yield g
 
 def parse_geometries(geometries):
     thismodule = sys.modules[__name__]
@@ -177,6 +184,9 @@ class Point(Geometry, point_cls):
         Geometry.__init__(self, coords, dat, ts, id, uri, ts_created,
             ts_modified, spatial, container_id)
 
+    def num_points(self):
+        return 1
+
 
 class Polygon(Geometry, polygon_cls):
     
@@ -195,5 +205,8 @@ class Polygon(Geometry, polygon_cls):
             coords[0].append(coords[0][0])
         Geometry.__init__(self, coords, dat, ts, id, uri, ts_created,
             ts_modified, spatial, container_id)
+
+    def num_points(self):
+        return len(self.coordinates[0])
 
 

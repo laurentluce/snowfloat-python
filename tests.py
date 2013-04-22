@@ -12,7 +12,7 @@ import snowfloat.settings
 
 class Tests(unittest.TestCase):
    
-    url_prefix = 'https://%s' % (snowfloat.settings.HOST,)
+    url_prefix = 'http://%s' % (snowfloat.settings.HOST,)
 
     def setUp(self):
         snowfloat.settings.HTTP_RETRY_INTERVAL = 0.1
@@ -571,17 +571,11 @@ class ClientTests(Tests):
         m2.json.return_value = r2
         put_mock.side_effect = [m1, m2]
         tasks = [{'operation': 'test_operation_1',
-                  'resource': 'test_resource_1',
-                  'filter': 'test_filter_1',
-                 },
+                  'resource': 'test_resource_1'},
                  {'operation': 'test_operation_2',
-                  'resource': 'test_resource_2',
-                  'filter': 'test_filter_2',
-                 },
+                  'resource': 'test_resource_2'},
                  {'operation': 'test_operation_3',
-                  'resource': 'test_resource_3',
-                  'filter': 'test_filter_3',
-                 }]
+                  'resource': 'test_resource_3'}]
         tasks = self.client._add_tasks(tasks)
         self.assertEqual(tasks[0].operation, 'test_operation_1')
         self.assertEqual(tasks[0].resource, 'test_resource_1')
@@ -675,16 +669,16 @@ class ClientTests(Tests):
         result2 = Mock()
         result2.dat = json.dumps('test_result_2')
         _get_results_mock.side_effect = [[result1], [result2]]
-        tasks = [
-            {'operation': 'test_operation_1',
-             'resource': 'points',
-             'container_id': 'test_container_1',
-             'ts_range': (0, 10)},
-            {'operation': 'test_operation_2',
-             'resource': 'points',
-             'container_id': 'test_container_2',
-             'ts_range': (1, 11)},
-        ]
+        tasks = [snowfloat.task.Task(
+                    operation='test_operation_1',
+                    resource='points',
+                    container_id='test_container_1',
+                    ts_range=(0, 10)),
+                 snowfloat.task.Task(
+                    operation='test_operation_2',
+                    resource='points',
+                    container_id='test_container_2',
+                    ts_range=(1, 11))]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], ['test_result_2',]])
         d = [
@@ -728,16 +722,16 @@ class ClientTests(Tests):
         result2 = Mock()
         result2.dat = json.dumps('test_result_2')
         _get_results_mock.side_effect = [[result1], [result2]]
-        tasks = [
-            {'operation': 'test_operation_1',
-             'resource': 'points',
-             'container_ids': ['test_container_1', 'test_container_1b'],
-             'ts_range': (0, 10)},
-            {'operation': 'test_operation_2',
-             'resource': 'points',
-             'container_id': 'test_container_2',
-             'ts_range': (1, 11)},
-        ]
+        tasks = [snowfloat.task.Task(
+                    operation='test_operation_1',
+                    resource='points',
+                    container_id= ['test_container_1', 'test_container_1b'],
+                    ts_range=(0, 10)),
+                 snowfloat.task.Task(
+                    operation='test_operation_2',
+                    resource='points',
+                    container_id='test_container_2',
+                    ts_range=(1, 11))]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], {'error': 'test_reason'}])
         d = [
@@ -782,16 +776,16 @@ class ClientTests(Tests):
         result2 = Mock()
         result2.dat = json.dumps('test_result_2')
         _get_results_mock.side_effect = [[result1], [result2]]
-        tasks = [
-            {'operation': 'test_operation_1',
-             'resource': 'points',
-             'container_id': 'test_container_1',
-             'ts_range': (0, 10)},
-            {'operation': 'test_operation_2',
-             'resource': 'points',
-             'container_id': 'test_container_2',
-             'ts_range': (1, 11)},
-        ]
+        tasks = [snowfloat.task.Task(
+                    operation='test_operation_1',
+                    resource='points',
+                    container_id='test_container_1',
+                    ts_range=(0, 10)),
+                 snowfloat.task.Task(
+                    operation='test_operation_2',
+                    resource='points',
+                    container_id='test_container_2',
+                    ts_range=(1, 11))]
         r = self.client.execute_tasks(tasks, interval=0.1)
         self.assertListEqual(r, [['test_result_1',], ['test_result_2',]])
         d = [
@@ -817,8 +811,8 @@ class ClientTests(Tests):
     @patch.object(snowfloat.client.Client, '_get_results')
     @patch.object(snowfloat.client.Client, '_get_task')
     @patch.object(snowfloat.client.Client, '_add_tasks')
-    def test_execute_tasks_task_request_error(self, _add_tasks_mock, _get_task_mock,
-            _get_results_mock):
+    def test_execute_tasks_task_request_error(self, _add_tasks_mock,
+            _get_task_mock, _get_results_mock):
         task1 = Mock()
         task1.id = 'test_task_1'
         task2 = Mock()
@@ -833,16 +827,16 @@ class ClientTests(Tests):
         result2 = Mock()
         result2.dat = json.dumps('test_result_2')
         _get_results_mock.side_effect = [[result1], [result2]]
-        tasks = [
-            {'operation': 'test_operation_1',
-             'resource': 'points',
-             'container_id': 'test_container_1',
-             'ts_range': (0, 10)},
-            {'operation': 'test_operation_2',
-             'resource': 'points',
-             'container_id': 'test_container_2',
-             'ts_range': (1, 11)},
-        ]
+        tasks = [snowfloat.task.Task(
+                    operation='test_operation_1',
+                    resource='points',
+                    container_id='test_container_1',
+                    ts_range=(0, 10)),
+                 snowfloat.task.Task(
+                    operation='test_operation_2',
+                    resource='points',
+                    container_id='test_container_2',
+                    ts_range=(1, 11))]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], None])
         d = [
@@ -924,15 +918,17 @@ class ContainerTests(Tests):
 
 class ResultsTests(Tests):
    
-    task = snowfloat.task.Task('test_task_1',
-        '/geo/1/tasks/test_task_1',
-        'test_operation_1',
-        'test_resource_1',
-        'test_filter_1',
-        'started',
-        '{}',
-        '',
-        1, 2)
+    task = snowfloat.task.Task(
+        operation='test_operation_1',
+        resource='test_resource_1',
+        id='test_task_1',
+        uri='/geo/1/tasks/test_task_1',
+        filter='test_filter_1',
+        extras={},
+        state='started',
+        reason='',
+        ts_created=1,
+        ts_modified=2)
 
     @patch.object(requests, 'get')
     def test_get_results(self, get_mock):

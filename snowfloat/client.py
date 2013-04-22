@@ -149,17 +149,17 @@ class Client(object):
 
         Example:
         
-        >>> geometries = client.get_geometries(container_id, ts_range(ts1, ts2))
+        >>> client.get_geometries(container_id, ts_range(ts1, ts2))
 
         or:
 
         >>> point = snowfloat.geometry.Point([px, py])
-        >>> geometries = client.get_geometries(container_id, query=distance_lt,
-                                               geometry=point, distance=10000)
+        >>> client.get_geometries(container_id, query=distance_lt,
+                                  geometry=point, distance=10000)
         """
         uri = '%s/containers/%s' % (self.uri, container_id)
-        for e in snowfloat.geometry.get_geometries(uri, type, ts_range, query,
-            geometry, **kwargs):
+        for e in snowfloat.geometry.get_geometries(uri, type, ts_range,
+            query, geometry, **kwargs):
             yield e
 
     def delete_geometries(self, container_id, type=None, ts_range=(0, None)):
@@ -203,15 +203,16 @@ class Client(object):
         Example:
         
         >>> tasks = [
-        ...    {'operation': snowfloat.task.Operations.stats,
-        ...     'resource': 'points',
-        ...     'container_id': container_1.id,
-        ...     'ts_range': (t1, t2)},
-        ...    {'operation': snowfloat.task.Operations.stats,
-        ...     'resource': 'points',
-        ...     'container_id': container_2.id,
-        ...     'ts_range': (t1, t2)}
-        ...   ]
+        ...     snowfloat.task.Task(
+        ...         operation=snowfloat.task.Operations.stats,
+        ...         resource='points',
+        ...         container_id=container1.id,
+        ...         ts_range=(t1, t2)),
+        ...     snowfloat.task.Task(
+        ...         operation=snowfloat.task.Operations.stats,
+        ...         resource='points',
+        ...         container_id=container2.id,
+        ...         ts_range=(t1, t2))]
         >>> r = self.client.execute_tasks(tasks)
         >>> r
         [[{"count": 10000, "distance": 38263, "velocity": 0.21}],
@@ -221,22 +222,23 @@ class Client(object):
         tks = []
         for t in tasks:
             # add task
-            task = {'operation': t['operation'],
-                    'resource': t['resource'],
-                    'ts__gte': t['ts_range'][0],
-                    'ts__lte': t['ts_range'][1]}
+            task = {'operation': t.operation,
+                    'resource': t.resource,
+                    'ts__gte': t.ts_range[0],
+                    'ts__lte': t.ts_range[1]}
 
-            type = self._convert_resource_to_type(t['resource'])
+            type = self._convert_resource_to_type(t.resource)
             if type:
                 task['type__exact'] = type
 
-            if 'container_id' in t:
-                 task['container__sid'] = t['container_id']
-            elif 'container_ids' in t:
-                 task['container__sid__in'] = t['container_ids']
+            if t.container_id:
+                if isinstance(t.container_id, list):
+                    task['container__sid__in'] = t.container_id
+                else:
+                    task['container__sid'] = t.container_id
 
-            if 'extras' in t:
-                task['extras'] = t['extras']
+            if t.extras:
+                task['extras'] = t.extras
 
             tks.append(task)
         tks = self._add_tasks(tks)
