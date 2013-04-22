@@ -232,7 +232,8 @@ class Client(object):
                 task['type__exact'] = type
 
             if t.container_id:
-                if isinstance(t.container_id, list):
+                if (isinstance(t.container_id, list) or
+                    isinstance(t.container_id, tuple)):
                     task['container__sid__in'] = t.container_id
                 else:
                     task['container__sid'] = t.container_id
