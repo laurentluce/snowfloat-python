@@ -233,11 +233,11 @@ class Tests(unittest.TestCase):
         for i in range(10000):
             for j in range(4):
                 self.assertAlmostEqual(polygons[i].coordinates[0][j][0],
-                    pgs[i].coordinates[0][j][0], 4)
+                    pgs[i].coordinates[0][j][0], 10)
                 self.assertAlmostEqual(polygons[i].coordinates[0][j][1],
-                    pgs[i].coordinates[0][j][1], 4)
+                    pgs[i].coordinates[0][j][1], 10)
                 self.assertAlmostEqual(polygons[i].coordinates[0][j][2],
-                    pgs[i].coordinates[0][j][2], 3)
+                    pgs[i].coordinates[0][j][2], 10)
             self.assertEqual(polygons[i].type, 'Polygon')
             self.assertAlmostEqual(polygons[i].ts, pgs[i].ts, 2)
             self.assertEqual(polygons[i].dat, pgs[i].dat)
@@ -359,7 +359,7 @@ class Tests(unittest.TestCase):
         tasks = [snowfloat.task.Task(
                     operation=snowfloat.task.Operations.map,
                     resource='points',
-                    container_id=(containers[0].id, container[1].id),
+                    container_id=(containers[0].id, containers[1].id),
                     extras={'llcrnrlat': -75,
                             'llcrnrlon': -165,
                             'urcrnrlat': 75,
