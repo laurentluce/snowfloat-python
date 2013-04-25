@@ -56,12 +56,12 @@ class Client(object):
         """
         uri = self.uri + '/containers'
         i = 0
-        for r in snowfloat.request.put(uri, containers,
-                format_func=snowfloat.container.format_containers):
-            # convert list of json geometries to Geometry objects
-            for c in r:
-                snowfloat.container.update_container(c, containers[i])
-                i += 1
+        r = snowfloat.request.post(uri, containers,
+            format_func=snowfloat.container.format_containers)
+        # convert list of json geometries to Geometry objects
+        for c in r:
+            snowfloat.container.update_container(c, containers[i])
+            i += 1
         
         return containers
 
@@ -273,11 +273,8 @@ class Client(object):
 
     def _add_tasks(self, data):
         uri = '%s/tasks' % (self.uri)
-        r_tasks = []
-        for r in snowfloat.request.put(uri, data):
-            r_tasks.extend(snowfloat.task.parse_tasks(r))
-
-        return r_tasks
+        r = snowfloat.request.post(uri, data)
+        return snowfloat.task.parse_tasks(r)
 
     def _get_task(self, task_id):
         uri = '%s/tasks/%s' % (self.uri, task_id)

@@ -140,7 +140,7 @@ class Container(object):
         """
         for k, v in kwargs.items():
             setattr(self, k, v)
-        snowfloat.request.post(self.uri,
+        snowfloat.request.put(self.uri,
             data=snowfloat.container.format_container(self))
         self.ts_modified = int(time.time())
 

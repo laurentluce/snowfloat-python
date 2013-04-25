@@ -16,7 +16,6 @@ class Tests(unittest.TestCase):
 
     def setUp(self):
         snowfloat.settings.HTTP_RETRY_INTERVAL = 0.1
-        snowfloat.settings.HTTP_PUT_BATCH_SIZE = 2
         snowfloat.auth.session_id = 'test_session_id'
         self.client = snowfloat.client.Client()
 
@@ -29,11 +28,7 @@ class Tests(unittest.TestCase):
                                 [14, 15, 16],
                                 [17, 18, 19],
                                 [11, 12, 13]]],
-                  ts=11, dat='test_dat_2'),
-            snowfloat.geometry.Point(
-                  coordinates=[21, 22, 23],
-                  ts=21, dat='test_dat_3')
-        ]
+                  ts=11, dat='test_dat_2')]
 
     def get_geometries_helper(self, method_mock, method, *args, **kwargs):
         r1 = {
@@ -140,58 +135,40 @@ class Tests(unittest.TestCase):
                   verify=False)])
 
     def add_geometries_helper(self, method_mock, method, *args, **kwargs):
-        r1 = {
-              'type': 'FeatureCollection',
-              'features': [
-                {'type': 'Feature',
-                 'id': 'test_point_1',
-                 'geometry': {'type': 'Point', 'coordinates': [1, 2, 3]},
-                 'properties': {
-                    'uri': '/geo/1/containers/test_container_1/'\
-                           'geometries/test_point_1',
-                    'ts': 4,
-                    'dat': 'test_dat_1',
-                    'ts_created': 5,
-                    'ts_modified': 6}
-                },
-                {'type': 'Feature',
-                 'id': 'test_polygon_1',
-                 'geometry': {'type': 'Polygon',
-                              'coordinates': [[[11, 12, 13],
-                                               [14, 15, 16],
-                                               [17, 18, 19],
-                                               [11, 12, 13],
-                                             ]]},
-                 'properties': {
-                    'uri': '/geo/1/containers/test_container_1/'\
-                           'geometries/test_polygon_1',
-                    'ts': 11,
-                    'dat': 'test_dat_2',
-                    'ts_created': 12,
-                    'ts_modified': 13}
-                }]}
-        r2 = {
-              'type': 'FeatureCollection',
-              'features': [
-                {'type': 'Feature',
-                 'id': 'test_point_2',
-                 'geometry': {'type': 'Point', 'coordinates': [21, 22, 23]},
-                 'properties': {
-                    'uri': '/geo/1/containers/test_container_1/'\
-                           'geometries/test_point_2',
-                    'ts': 21,
-                    'dat': 'test_dat_3',
-                    'ts_created': 22,
-                    'ts_modified': 23}
-                },
-                ]}
-        m1 = Mock()
-        m1.status_code = 200
-        m1.json.return_value = r1
-        m2 = Mock()
-        m2.status_code = 200
-        m2.json.return_value = r2
-        method_mock.side_effect = [m1, m2]
+        r = {
+             'type': 'FeatureCollection',
+             'features': [
+               {'type': 'Feature',
+                'id': 'test_point_1',
+                'geometry': {'type': 'Point', 'coordinates': [1, 2, 3]},
+                'properties': {
+                   'uri': '/geo/1/containers/test_container_1/'\
+                          'geometries/test_point_1',
+                   'ts': 4,
+                   'dat': 'test_dat_1',
+                   'ts_created': 5,
+                   'ts_modified': 6}
+               },
+               {'type': 'Feature',
+                'id': 'test_polygon_1',
+                'geometry': {'type': 'Polygon',
+                             'coordinates': [[[11, 12, 13],
+                                              [14, 15, 16],
+                                              [17, 18, 19],
+                                              [11, 12, 13],
+                                            ]]},
+                'properties': {
+                   'uri': '/geo/1/containers/test_container_1/'\
+                          'geometries/test_polygon_1',
+                   'ts': 11,
+                   'dat': 'test_dat_2',
+                   'ts_created': 12,
+                   'ts_modified': 13}
+               }]}
+        m = Mock()
+        m.status_code = 200
+        m.json.return_value = r
+        method_mock.return_value = m
         geometries = method(*args, **kwargs)
         self.assertListEqual(geometries[0].coordinates, [1, 2, 3])
         self.assertEqual(geometries[0].ts, 4)
@@ -210,40 +187,20 @@ class Tests(unittest.TestCase):
         self.assertEqual(geometries[1].dat, 'test_dat_2')
         self.assertEqual(geometries[1].uri,
             '/geo/1/containers/test_container_1/geometries/test_polygon_1')
-        self.assertEqual(geometries[0].container_id, 'test_container_1')
+        self.assertEqual(geometries[1].container_id, 'test_container_1')
         self.assertEqual(geometries[1].id, 'test_polygon_1')
         self.assertEqual(geometries[1].ts_created, 12)
         self.assertEqual(geometries[1].ts_modified, 13)
-        self.assertListEqual(geometries[2].coordinates, [21, 22, 23])
-        self.assertEqual(geometries[2].ts, 21)
-        self.assertEqual(geometries[2].dat, 'test_dat_3')
-        self.assertEqual(geometries[2].uri,
-            '/geo/1/containers/test_container_1/geometries/test_point_2')
-        self.assertEqual(geometries[2].id, 'test_point_2')
-        self.assertEqual(geometries[2].ts_created, 22)
-        self.assertEqual(geometries[2].ts_modified, 23)
         for i in range(2):
-            del r1['features'][i]['id']
-            del r1['features'][i]['properties']['uri']
-            del r1['features'][i]['properties']['ts_created']
-            del r1['features'][i]['properties']['ts_modified']
-        for i in range(1):
-            del r2['features'][i]['id']
-            del r2['features'][i]['properties']['uri']
-            del r2['features'][i]['properties']['ts_created']
-            del r2['features'][i]['properties']['ts_modified']
+            del r['features'][i]['id']
+            del r['features'][i]['properties']['uri']
+            del r['features'][i]['properties']['ts_created']
+            del r['features'][i]['properties']['ts_modified']
         self.assertEqual(method_mock.call_args_list,
             [call('%s/geo/1/containers/test_container_1/geometries'
                     % (self.url_prefix,),
                   headers={'X-Session-ID': 'test_session_id'},
-                  data=json.dumps(r1),
-                  params={},
-                  timeout=10,
-                  verify=False),
-             call('%s/geo/1/containers/test_container_1/geometries'
-                    % (self.url_prefix,),
-                  headers={'X-Session-ID': 'test_session_id'},
-                  data=json.dumps(r2),
+                  data=json.dumps(r),
                   params={},
                   timeout=10,
                   verify=False)])
@@ -419,36 +376,26 @@ class ClientTests(Tests):
         self.assertRaises(snowfloat.errors.RequestError,
             r = self.client.get_containers())
 
-    @patch.object(requests, 'put')
-    def test_add_containers(self, put_mock):
-        r1 = [{'dat': 'test_dat_1',
-               'uri': '/geo/1/containers/test_container_1',
-               'id': 'test_container_1',
-               'ts_created': 1,
-               'ts_modified': 2
-              },
-              {'dat': 'test_dat_2',
-               'uri': '/geo/1/containers/test_container_2',
-               'id': 'test_container_2',
-               'ts_created': 3,
-               'ts_modified': 4
-              }]
-        r2 = [{'dat': 'test_dat_3',
-               'uri': '/geo/1/containers/test_container_3',
-               'id': 'test_container_3',
-               'ts_created': 5,
-               'ts_modified': 6
-              }]
-        m1 = Mock()
-        m1.status_code = 200
-        m1.json.return_value = r1
-        m2 = Mock()
-        m2.status_code = 200
-        m2.json.return_value = r2
-        put_mock.side_effect = [m1, m2]
+    @patch.object(requests, 'post')
+    def test_add_containers(self, post_mock):
+        r = [{'dat': 'test_dat_1',
+              'uri': '/geo/1/containers/test_container_1',
+              'id': 'test_container_1',
+              'ts_created': 1,
+              'ts_modified': 2
+             },
+             {'dat': 'test_dat_2',
+              'uri': '/geo/1/containers/test_container_2',
+              'id': 'test_container_2',
+              'ts_created': 3,
+              'ts_modified': 4
+             }]
+        m = Mock()
+        m.status_code = 200
+        m.json.return_value = r
+        post_mock.return_value = m
         containers = [snowfloat.container.Container(dat='test_dat_1'),
-                      snowfloat.container.Container(dat='test_dat_2'),
-                      snowfloat.container.Container(dat='test_dat_3')]
+                      snowfloat.container.Container(dat='test_dat_2')]
         containers = self.client.add_containers(containers)
         self.assertEqual(containers[0].dat, 'test_dat_1')
         self.assertEqual(containers[0].uri,
@@ -462,23 +409,11 @@ class ClientTests(Tests):
         self.assertEqual(containers[1].id, 'test_container_2')
         self.assertEqual(containers[1].ts_created, 3)
         self.assertEqual(containers[1].ts_modified, 4)
-        self.assertEqual(containers[2].dat, 'test_dat_3')
-        self.assertEqual(containers[2].uri,
-            '/geo/1/containers/test_container_3')
-        self.assertEqual(containers[2].id, 'test_container_3')
-        self.assertEqual(containers[2].ts_created, 5)
-        self.assertEqual(containers[2].ts_modified, 6)
-        self.assertEqual(put_mock.call_args_list,
+        self.assertEqual(post_mock.call_args_list,
             [call('%s/geo/1/containers' % (self.url_prefix,),
                   headers={'X-Session-ID': 'test_session_id'},
                   data=json.dumps([{'dat': 'test_dat_1'},
                                    {'dat': 'test_dat_2'}]),
-                  params={},
-                  timeout=10,
-                  verify=False),
-             call('%s/geo/1/containers' % (self.url_prefix,),
-                  headers={'X-Session-ID': 'test_session_id'},
-                  data=json.dumps([{'dat': 'test_dat_3'}]),
                   params={},
                   timeout=10,
                   verify=False)])
@@ -507,9 +442,9 @@ class ClientTests(Tests):
             geometry=point, distance=4, spatial_operation='intersection',
             spatial_geometry=point2, spatial_flag=True)
 
-    @patch.object(requests, 'put')
-    def test_add_geometries(self, put_mock):
-        self.add_geometries_helper(put_mock, self.client.add_geometries,
+    @patch.object(requests, 'post')
+    def test_add_geometries(self, post_mock):
+        self.add_geometries_helper(post_mock, self.client.add_geometries,
             'test_container_1', self.geometries)
 
     @patch.object(requests, 'delete')
@@ -528,54 +463,38 @@ class ClientTests(Tests):
         self.client.login('test_key')
         self.assertEqual(snowfloat.auth.session_id, 'test_session_2')
 
-    @patch.object(requests, 'put')
-    def test_add_tasks(self, put_mock):
-        r1 = [{'operation': 'test_operation_1',
-               'resource': 'test_resource_1',
-               'filter': 'test_filter_1',
-               'uri': '/geo/1/tasks/test_task_1',
-               'id': 'test_task_1',
-               'state': 'started',
-               'extras': {'extra': 'test_extra_1'},
-               'reason': 'test_reason_1',
-               'ts_created': 1,
-               'ts_modified': 2
-              },
-              {'operation': 'test_operation_2',
-               'resource': 'test_resource_2',
-               'filter': 'test_filter_2',
-               'uri': '/geo/1/tasks/test_task_2',
-               'id': 'test_task_2',
-               'state': 'started',
-               'extras': {'extra': 'test_extra_2'},
-               'reason': 'test_reason_2',
-               'ts_created': 3,
-               'ts_modified': 4
-              }]
-        r2 = [{'operation': 'test_operation_3',
-               'resource': 'test_resource_3',
-               'filter': 'test_filter_3',
-               'uri': '/geo/1/tasks/test_task_3',
-               'id': 'test_task_3',
-               'state': 'started',
-               'extras': {'extra': 'test_extra_3'},
-               'reason': 'test_reason_3',
-               'ts_created': 5,
-               'ts_modified': 6
-              }]
-        m1 = Mock()
-        m1.status_code = 200
-        m1.json.return_value = r1
-        m2 = Mock()
-        m2.status_code = 200
-        m2.json.return_value = r2
-        put_mock.side_effect = [m1, m2]
+    @patch.object(requests, 'post')
+    def test_add_tasks(self, post_mock):
+        r = [{'operation': 'test_operation_1',
+              'resource': 'test_resource_1',
+              'filter': 'test_filter_1',
+              'uri': '/geo/1/tasks/test_task_1',
+              'id': 'test_task_1',
+              'state': 'started',
+              'extras': {'extra': 'test_extra_1'},
+              'reason': 'test_reason_1',
+              'ts_created': 1,
+              'ts_modified': 2
+             },
+             {'operation': 'test_operation_2',
+              'resource': 'test_resource_2',
+              'filter': 'test_filter_2',
+              'uri': '/geo/1/tasks/test_task_2',
+              'id': 'test_task_2',
+              'state': 'started',
+              'extras': {'extra': 'test_extra_2'},
+              'reason': 'test_reason_2',
+              'ts_created': 3,
+              'ts_modified': 4
+             }]
+        m = Mock()
+        m.status_code = 200
+        m.json.return_value = r
+        post_mock.return_value = m
         tasks = [{'operation': 'test_operation_1',
                   'resource': 'test_resource_1'},
                  {'operation': 'test_operation_2',
-                  'resource': 'test_resource_2'},
-                 {'operation': 'test_operation_3',
-                  'resource': 'test_resource_3'}]
+                  'resource': 'test_resource_2'}]
         tasks = self.client._add_tasks(tasks)
         self.assertEqual(tasks[0].operation, 'test_operation_1')
         self.assertEqual(tasks[0].resource, 'test_resource_1')
@@ -597,16 +516,6 @@ class ClientTests(Tests):
         self.assertEqual(tasks[1].uri, '/geo/1/tasks/test_task_2')
         self.assertEqual(tasks[1].ts_created, 3)
         self.assertEqual(tasks[1].ts_modified, 4)
-        self.assertEqual(tasks[2].operation, 'test_operation_3')
-        self.assertEqual(tasks[2].resource, 'test_resource_3')
-        self.assertEqual(tasks[2].filter, 'test_filter_3')
-        self.assertEqual(tasks[2].id, 'test_task_3')
-        self.assertEqual(tasks[2].state, 'started')
-        self.assertDictEqual(tasks[2].extras, {'extra': 'test_extra_3'})
-        self.assertEqual(tasks[2].reason, 'test_reason_3')
-        self.assertEqual(tasks[2].uri, '/geo/1/tasks/test_task_3')
-        self.assertEqual(tasks[2].ts_created, 5)
-        self.assertEqual(tasks[2].ts_modified, 6)
 
     @patch.object(requests, 'get')
     def test_get_task(self, get_mock):
@@ -874,9 +783,9 @@ class ContainerTests(Tests):
             geometry=point, distance=4, spatial_operation='intersection',
             spatial_geometry=point2, spatial_flag=True)
     
-    @patch.object(requests, 'put')
-    def test_add_geometries(self, put_mock):
-        self.add_geometries_helper(put_mock, self.container.add_geometries,
+    @patch.object(requests, 'post')
+    def test_add_geometries(self, post_mock):
+        self.add_geometries_helper(post_mock, self.container.add_geometries,
             self.geometries)
 
     @patch.object(requests, 'delete')
@@ -884,14 +793,14 @@ class ContainerTests(Tests):
         self.delete_geometries_helper(delete_mock,
             self.container.delete_geometries, ts_range=(1, 10))
 
-    @patch.object(requests, 'post')
-    def test_update(self, post_mock):
+    @patch.object(requests, 'put')
+    def test_update(self, put_mock):
         m = Mock()
         m.status_code = 200
         m.json.return_value = {}
-        post_mock.return_value = m
+        put_mock.return_value = m
         self.container.update(dat='test_dat')
-        post_mock.assert_called_with(
+        put_mock.assert_called_with(
             '%s/geo/1/containers/test_container_1' % (self.url_prefix),
             headers={'X-Session-ID': 'test_session_id'},
             data=json.dumps({'dat': 'test_dat'}),
@@ -941,12 +850,12 @@ class GeometriesTests(Tests):
         uri='/geo/1/containers/test_container_1/geometries/test_geometry_1',
         ts=1, dat='test_dat')
 
-    @patch.object(requests, 'post')
-    def test_update(self, post_mock):
+    @patch.object(requests, 'put')
+    def test_update(self, put_mock):
         m = Mock()
         m.status_code = 200
         m.json.return_value = {}
-        post_mock.return_value = m
+        put_mock.return_value = m
         self.point.update(coordinates=[4, 5, 6], ts=2, dat='test_dat_1')
         d = {'type': 'Feature',
              'geometry': {'type': 'Point',
@@ -955,7 +864,7 @@ class GeometriesTests(Tests):
                   'ts': 2,
                   'dat': 'test_dat_1',
               }}
-        post_mock.assert_called_with(
+        put_mock.assert_called_with(
             '%s/geo/1/containers/test_container_1/'\
                 'geometries/test_geometry_1' % (self.url_prefix),
             headers={'X-Session-ID': 'test_session_id'},

@@ -69,7 +69,7 @@ class Geometry(object):
         """
         for k, v in kwargs.items():
             setattr(self, k, v)
-        snowfloat.request.post(self.uri,
+        snowfloat.request.put(self.uri,
             data=snowfloat.geometry.format_geometry(self))
         self.ts_modified = int(time.time())
 
@@ -83,13 +83,13 @@ class Geometry(object):
 
 
 def add_geometries(uri, geometries):
+    r = snowfloat.request.post(uri, geometries,
+        format_func=format_geometries)
+    # convert list of json geometries to Geometry objects
     i = 0
-    for r in snowfloat.request.put(uri, geometries,
-            format_func=format_geometries):
-        # convert list of json geometries to Geometry objects
-        for f in r['features']:
-            update_geometry(geometries[i], f)
-            i += 1
+    for f in r['features']:
+        update_geometry(geometries[i], f)
+        i += 1
 
     return geometries
 

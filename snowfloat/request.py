@@ -23,31 +23,14 @@ def get(uri, params={}, headers=None):
                 continue
         break
 
-def put(uri, data, headers=None, format_func=None):
-    s = 0
-    while True:
-        # we put max HTTP_PUT_BATCH_SIZE points
-        d = []
-        np = 0
-        for g in data[s:]:
-            if np >= snowfloat.settings.HTTP_PUT_BATCH_SIZE:
-                break
-            d.append(g)
-            if isinstance(g, snowfloat.geometry.Geometry):
-                np += g.num_points()
-            else:
-                np += 1
-            s += 1
-        if d:
-            if format_func:
-                d = format_func(d)
-            r = send(requests.put, uri, data=json.dumps(d), headers=headers)
-            yield r
-        else:
-            break
+def post(uri, data, headers=None, format_func=None):
+    d = data
+    if format_func:
+        d = format_func(d)
+    return send(requests.post, uri, data=json.dumps(d), headers=headers)
 
-def post(uri, data, headers=None):
-    r = send(requests.post, uri, data=json.dumps(data), headers=headers)
+def put(uri, data, headers=None):
+    r = send(requests.put, uri, data=json.dumps(data), headers=headers)
     return r
 
 def delete(uri, params={}, headers=None):

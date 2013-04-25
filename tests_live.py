@@ -86,12 +86,12 @@ class Tests(unittest.TestCase):
                                                      random.random() * -90,
                                                      random.random() * 1000],
                                         dat='test_dat_%d' % (i+1),
-                                        ts=random.random() * 10000)
-            for i in range(10000)]
+                                        ts=random.random() * 1000)
+            for i in range(1000)]
         t = time.time()
         points = self.client.add_geometries(containers[0].id, pts)
         print 'add points: %.2f' % (time.time() - t)
-        for i in range(10000):
+        for i in range(1000):
             self.assertAlmostEqual(points[i].coordinates[0],
                 pts[i].coordinates[0], 10)
             self.assertAlmostEqual(points[i].coordinates[1],
@@ -107,8 +107,8 @@ class Tests(unittest.TestCase):
         points = [e for e in self.client.get_geometries(containers[0].id,
             type='Point')]
         print 'get points: %.2f' % (time.time() - t)
-        self.assertEqual(len(points), 10000)
-        for i in range(10000):
+        self.assertEqual(len(points), 1000)
+        for i in range(1000):
             self.assertAlmostEqual(points[i].coordinates[0],
                 pts[i].coordinates[0], 10)
             self.assertAlmostEqual(points[i].coordinates[1],
@@ -136,7 +136,7 @@ class Tests(unittest.TestCase):
         # get points
         points = [e for e in self.client.get_geometries(containers[0].id,
             type='Point')]
-        self.assertEqual(len(points), 9999)
+        self.assertEqual(len(points), 999)
         
         # delete points
         t = time.time()
@@ -207,12 +207,12 @@ class Tests(unittest.TestCase):
                                                         0]
                                                       ]],
                                     dat='test_dat_%d' % (i+1),
-                                    ts=random.random() * 10000)
-            for i in range(10000)]
+                                    ts=random.random() * 1000)
+            for i in range(1000)]
         t = time.time()
         polygons = self.client.add_geometries(containers[0].id, pgs)
         print 'add polygons: %.2f' % (time.time() - t)
-        for i in range(10000):
+        for i in range(1000):
             for j in range(4):
                 self.assertAlmostEqual(polygons[i].coordinates[0][j][0],
                     pgs[i].coordinates[0][j][0], 10)
@@ -229,8 +229,8 @@ class Tests(unittest.TestCase):
         polygons = [e for e in self.client.get_geometries(containers[0].id,
             type='Polygon')]
         print 'get polygons: %.2f' % (time.time() - t)
-        self.assertEqual(len(polygons), 10000)
-        for i in range(10000):
+        self.assertEqual(len(polygons), 1000)
+        for i in range(1000):
             for j in range(4):
                 self.assertAlmostEqual(polygons[i].coordinates[0][j][0],
                     pgs[i].coordinates[0][j][0], 10)
@@ -313,7 +313,7 @@ class Tests(unittest.TestCase):
                  random.random() * 1000],
                 dat='test_dat_%d' % (j+1),
                 ts=time.time())
-                for j in range(10000)]
+                for j in range(1000)]
             points = self.client.add_geometries(containers[i].id, pts)
 
         tasks = [snowfloat.task.Task(
@@ -329,10 +329,10 @@ class Tests(unittest.TestCase):
         t = time.time()
         r = self.client.execute_tasks(tasks)
         print 'stats: %.2f' % (time.time() - t)
-        self.assertEqual(r[0][0]['count'], 10000)
+        self.assertEqual(r[0][0]['count'], 1000)
         self.assertGreater(r[0][0]['distance'], 0)
         self.assertGreater(r[0][0]['velocity'], 0.)
-        self.assertEqual(r[1][0]['count'], 10000)
+        self.assertEqual(r[1][0]['count'], 1000)
         self.assertGreater(r[1][0]['distance'], 0)
         self.assertGreater(r[1][0]['velocity'], 0.)
 
@@ -422,9 +422,9 @@ class Tests(unittest.TestCase):
             type='Point', query='contained', geometry=poly_west)]
         self.assertEqual(len(pts), 2)
         self.assertListEqual(pts[0].coordinates,
-            [-122.41941550000001, 37.7749295, 0])
+            [-122.4194155, 37.7749295, 0])
         self.assertListEqual(pts[1].coordinates,
-            [-104.98471790000002, 39.737567, 0])
+            [-104.9847179, 39.737567, 0])
 
         # look for points using distance_lt
         pl = snowfloat.geometry.Point(coordinates=[2.45, 48.85, 0])
@@ -432,7 +432,7 @@ class Tests(unittest.TestCase):
             type='Point', query='distance_lt', geometry=pl, distance=20000)]
         self.assertEqual(len(pts), 1)
         self.assertListEqual(pts[0].coordinates,
-            [2.3522219000000177, 48.856614, 0])
+            [2.35222190000002, 48.856614, 0])
 
         # spatial operation distance
         pl = snowfloat.geometry.Point(coordinates=[2.45, 48.85, 0])
@@ -441,7 +441,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(pts), 4)
         self.assertListEqual([p.spatial for p in pts],
             [8958661.49177521, 7866626.32482402, 5538314.71584491,
-             7191.65275350205])
+             7191.65275350187])
 
         # task stats
         tasks = [snowfloat.task.Task(
@@ -451,8 +451,8 @@ class Tests(unittest.TestCase):
                     ts_range=(0, time.time()))]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r,
-            [[{u'count': 4, u'distance': 9722488.930599332,
-               u'velocity': 3240829.6435331106}]])
+            [[{u'count': 4, u'distance': 9722488.93059933,
+               u'velocity': 3240829.64353311}]])
 
         # task map
         tasks = [snowfloat.task.Task(
