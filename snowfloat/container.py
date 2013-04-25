@@ -28,7 +28,7 @@ class Container(object):
         """Add list of geometries to this container.
 
         Args:
-            geometries (list): List of geometries to add. Each geometry object is derived from the Geometry class. i.e Point, Polygon...
+            geometries (list): List of geometries to add. Each geometry object is derived from the Geometry class. i.e Point, Polygon... Maximum 1000 items.
 
         Returns:
             list. List of Geometry objects.

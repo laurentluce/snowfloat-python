@@ -34,7 +34,7 @@ class Client(object):
         """Add list of containers.
 
         Args:
-            containers (list): List of Container objects to add.
+            containers (list): List of Container objects to add. Maximum 1000 items.
 
         Returns:
             list. List of Container objects.
@@ -94,7 +94,7 @@ class Client(object):
         """Add list of geometries to a container.
 
         Args:
-            geometries (list): List of geometries to add. Each geometry object is derived from the Geometry class. i.e Point, Polygon...
+            geometries (list): List of geometries to add. Each geometry object is derived from the Geometry class. i.e Point, Polygon... Maximum 1000 items.
 
         Returns:
             list. List of Geometry objects.
@@ -192,7 +192,7 @@ class Client(object):
         """Execute a list tasks.
 
         Args:
-            tasks (list): List of tasks to execute.
+            tasks (list): List of tasks to execute. Maximum 1000 items.
         
         Kwargs:
             interval (int): Check tasks status interval in seconds.
