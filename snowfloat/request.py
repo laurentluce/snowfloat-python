@@ -23,11 +23,13 @@ def get(uri, params={}, headers=None):
                 continue
         break
 
-def post(uri, data, headers=None, format_func=None):
+def post(uri, data, headers=None, format_func=None, serialize=True):
     d = data
     if format_func:
         d = format_func(d)
-    return send(requests.post, uri, data=json.dumps(d), headers=headers)
+    if serialize:
+        d = json.dumps(d)
+    return send(requests.post, uri, data=d, headers=headers)
 
 def put(uri, data, headers=None):
     r = send(requests.put, uri, data=json.dumps(data), headers=headers)

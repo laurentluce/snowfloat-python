@@ -370,6 +370,14 @@ class Tests(unittest.TestCase):
         print 'map: %.2f' % (time.time() - t)
         self.assertTrue('url' in r[0][0])
 
+    def test_execute_tasks_import_data_source(self):
+
+        dat_fields = ['dbl', 'int', 'str']
+        path = 'tests/test_point.zip'
+        r = self.client.import_data_source(path, dat_fields)
+        self.assertDictEqual(r,
+            {'containers_count': 1, 'geometries_count': 5})
+
     def test_usa(self):
 
         # add container

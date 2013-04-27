@@ -1,4 +1,6 @@
 import json
+import os
+import tempfile
 import unittest
 
 from mock import Mock, patch, call
@@ -9,6 +11,7 @@ import snowfloat.client
 import snowfloat.errors
 import snowfloat.geometry
 import snowfloat.settings
+import snowfloat.task
 
 class Tests(unittest.TestCase):
    
@@ -896,6 +899,51 @@ class PolygonsTests(Tests):
             [[[0, 0, 0], [1, 1, 0], [1, 0, 0]]])
         self.assertListEqual(polygon.coordinates,
             [[[0, 0, 0], [1, 1, 0], [1, 0, 0], [0, 0, 0]]])
+
+
+class ImportDataSourceTests(Tests):
+   
+    @patch.object(requests, 'delete')
+    @patch.object(snowfloat.client.Client, 'execute_tasks')
+    @patch.object(requests, 'post')
+    def test_import_data_source(self, post_mock, execute_tasks_mock,
+            delete_mock):
+        r = {'id': 'test_blob_id'}
+        m1 = Mock()
+        m1.status_code = 200
+        m1.json.return_value = r
+        post_mock.return_value = m1
+        m2 = Mock()
+        m2.status_code = 200
+        m2.json.return_value = {}
+        delete_mock.return_value = m2
+        tf = tempfile.NamedTemporaryFile(delete=False)
+        tf.close()
+        dat_fields = ['test_df',]
+        r = self.client.import_data_source(tf.name, dat_fields)
+        ca = post_mock.call_args
+        self.assertEqual(ca[0][0], '%s/geo/1/blobs' % (self.url_prefix,))
+        self.assertDictEqual(ca[1]['headers'],
+            {'X-Session-ID': 'test_session_id'})
+        self.assertDictEqual(ca[1]['params'], {})
+        self.assertEqual(ca[1]['timeout'], 10)
+        self.assertEqual(ca[1]['verify'], False)
+        ca = execute_tasks_mock.call_args
+        task = ca[0][0][0]
+        self.assertEqual(task.operation,
+            snowfloat.task.Operations.import_data_source)
+        self.assertEqual(task.resource, 'geometries')
+        self.assertDictEqual(task.extras,
+            {'dat_fields': ['test_df'],
+             'blob_id': 'test_blob_id'})
+        delete_mock.assert_called_with(
+        '%s/geo/1/blobs/test_blob_id' % (self.url_prefix),
+        headers={'X-Session-ID': 'test_session_id'},
+        data={},
+        params={},
+        timeout=10,
+        verify=False)
+        os.remove(tf.name)
 
 
 if __name__ == "__main__":

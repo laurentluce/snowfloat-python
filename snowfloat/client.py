@@ -223,9 +223,10 @@ class Client(object):
         for t in tasks:
             # add task
             task = {'operation': t.operation,
-                    'resource': t.resource,
-                    'ts__gte': t.ts_range[0],
-                    'ts__lte': t.ts_range[1]}
+                    'resource': t.resource}
+            if t.ts_range:
+                task['ts__gte'] = t.ts_range[0]
+                task['ts__lte'] = t.ts_range[1]
 
             type = self._convert_resource_to_type(t.resource)
             if type:
@@ -270,6 +271,27 @@ class Client(object):
             pass
 
         return [results[t.id] for t in tks]
+
+    def import_data_source(self, path, dat_fields=[]):
+        # add blob with the data source content
+        uri = '%s/blobs' % (self.uri)
+        with open(path) as f:
+            r = snowfloat.request.post(uri, f, serialize=False)
+        blob_id = r['id']
+        
+        # execute import data source task
+        tasks = [snowfloat.task.Task(
+                    operation=snowfloat.task.Operations.import_data_source,
+                    resource='geometries',
+                    extras={'blob_id': blob_id,
+                            'dat_fields': dat_fields})]
+        r = self.execute_tasks(tasks)
+
+        # delete blob
+        uri = '%s/blobs/%s' % (self.uri, blob_id)
+        snowfloat.request.delete(uri)
+
+        return r[0][0]
 
     def _add_tasks(self, data):
         uri = '%s/tasks' % (self.uri)
