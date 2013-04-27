@@ -3,11 +3,6 @@ import time
 import snowfloat.request
 import snowfloat.result
 
-class Operations(object):
-    stats = 1
-    map = 2
-    import_data_source = 3
-
 class Task(object):
 
     id = None

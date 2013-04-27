@@ -930,8 +930,7 @@ class ImportDataSourceTests(Tests):
         self.assertEqual(ca[1]['verify'], False)
         ca = execute_tasks_mock.call_args
         task = ca[0][0][0]
-        self.assertEqual(task.operation,
-            snowfloat.task.Operations.import_data_source)
+        self.assertEqual(task.operation, 'import_data_source')
         self.assertEqual(task.resource, 'geometries')
         self.assertDictEqual(task.extras,
             {'dat_fields': ['test_df'],

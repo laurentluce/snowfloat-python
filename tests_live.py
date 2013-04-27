@@ -317,12 +317,12 @@ class Tests(unittest.TestCase):
             points = self.client.add_geometries(containers[i].id, pts)
 
         tasks = [snowfloat.task.Task(
-                    operation=snowfloat.task.Operations.stats,
+                    operation='stats',
                     resource='points',
                     container_id=containers[0].id,
                     ts_range=(0, time.time())),
                  snowfloat.task.Task(
-                    operation=snowfloat.task.Operations.stats,
+                    operation='stats',
                     resource='points',
                     container_id=containers[1].id,
                     ts_range=(0, time.time()))]
@@ -357,7 +357,7 @@ class Tests(unittest.TestCase):
             points = self.client.add_geometries(containers[i].id, pts)
         
         tasks = [snowfloat.task.Task(
-                    operation=snowfloat.task.Operations.map,
+                    operation='map',
                     resource='points',
                     container_id=(containers[0].id, containers[1].id),
                     extras={'llcrnrlat': -75,
@@ -453,7 +453,7 @@ class Tests(unittest.TestCase):
 
         # task stats
         tasks = [snowfloat.task.Task(
-                    operation=snowfloat.task.Operations.stats,
+                    operation='stats',
                     resource='points',
                     container_id=containers[0].id,
                     ts_range=(0, time.time()))]
@@ -464,7 +464,7 @@ class Tests(unittest.TestCase):
 
         # task map
         tasks = [snowfloat.task.Task(
-                    operation=snowfloat.task.Operations.map,
+                    operation='map',
                     resource='points',
                     container_id=containers[0].id,
                     extras={'llcrnrlat': -75,

@@ -192,7 +192,7 @@ class Client(object):
         """Execute a list tasks.
 
         Args:
-            tasks (list): List of tasks to execute. Maximum 1000 items.
+            tasks (list): List of tasks to execute. Maximum 10 items.
         
         Kwargs:
             interval (int): Check tasks status interval in seconds.
@@ -204,12 +204,12 @@ class Client(object):
         
         >>> tasks = [
         ...     snowfloat.task.Task(
-        ...         operation=snowfloat.task.Operations.stats,
+        ...         operation='stats',
         ...         resource='points',
         ...         container_id=container1.id,
         ...         ts_range=(t1, t2)),
         ...     snowfloat.task.Task(
-        ...         operation=snowfloat.task.Operations.stats,
+        ...         operation='stats',
         ...         resource='points',
         ...         container_id=container2.id,
         ...         ts_range=(t1, t2))]
@@ -281,7 +281,7 @@ class Client(object):
         
         # execute import data source task
         tasks = [snowfloat.task.Task(
-                    operation=snowfloat.task.Operations.import_data_source,
+                    operation='import_data_source',
                     resource='geometries',
                     extras={'blob_id': blob_id,
                             'dat_fields': dat_fields})]
