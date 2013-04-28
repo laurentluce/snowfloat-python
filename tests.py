@@ -463,7 +463,7 @@ class ClientTests(Tests):
         m.status_code = 200
         m.json.return_value = r
         post_mock.return_value = m
-        self.client.login('test_key')
+        self.client.login('test_user', 'test_key')
         self.assertEqual(snowfloat.auth.session_id, 'test_session_2')
 
     @patch.object(requests, 'post')

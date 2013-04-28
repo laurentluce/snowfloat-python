@@ -17,17 +17,19 @@ class Client(object):
     def __init__(self):
         pass
 
-    def login(self, key):
+    def login(self, username, key):
         """Login to the server and store a session ID locally.
 
         Args:
+            username (str): Username to use to login.
+
             key (str): API key to use to login.
 
         Raises:
             snowfloat.errors.RequestError
         """
         r = snowfloat.request.post(self.uri + '/login',
-            {'key': key})
+            {'username': username, 'key': key})
         snowfloat.auth.session_id = r['more'] 
 
     def add_containers(self, containers):
