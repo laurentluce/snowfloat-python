@@ -906,7 +906,7 @@ class ImportDataSourceTests(Tests):
     @patch.object(requests, 'delete')
     @patch.object(snowfloat.client.Client, 'execute_tasks')
     @patch.object(requests, 'post')
-    def test_import_data_source(self, post_mock, execute_tasks_mock,
+    def test_import_geospatial_data(self, post_mock, execute_tasks_mock,
             delete_mock):
         r = {'id': 'test_blob_id'}
         m1 = Mock()
@@ -920,7 +920,7 @@ class ImportDataSourceTests(Tests):
         tf = tempfile.NamedTemporaryFile(delete=False)
         tf.close()
         dat_fields = ['test_df',]
-        r = self.client.import_data_source(tf.name, dat_fields)
+        r = self.client.import_geospatial_data(tf.name, dat_fields)
         ca = post_mock.call_args
         self.assertEqual(ca[0][0], '%s/geo/1/blobs' % (self.url_prefix,))
         self.assertDictEqual(ca[1]['headers'],
@@ -930,7 +930,7 @@ class ImportDataSourceTests(Tests):
         self.assertEqual(ca[1]['verify'], False)
         ca = execute_tasks_mock.call_args
         task = ca[0][0][0]
-        self.assertEqual(task.operation, 'import_data_source')
+        self.assertEqual(task.operation, 'import_geospatial_data')
         self.assertEqual(task.resource, 'geometries')
         self.assertDictEqual(task.extras,
             {'dat_fields': ['test_df'],

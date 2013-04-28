@@ -93,11 +93,11 @@ class Tests(unittest.TestCase):
         print 'add points: %.2f' % (time.time() - t)
         for i in range(1000):
             self.assertAlmostEqual(points[i].coordinates[0],
-                pts[i].coordinates[0], 10)
+                pts[i].coordinates[0], 8)
             self.assertAlmostEqual(points[i].coordinates[1],
-                pts[i].coordinates[1], 10)
+                pts[i].coordinates[1], 8)
             self.assertAlmostEqual(points[i].coordinates[2],
-                pts[i].coordinates[2], 10)
+                pts[i].coordinates[2], 8)
             self.assertEqual(points[i].type, 'Point')
             self.assertAlmostEqual(points[i].ts, pts[i].ts, 2)
             self.assertEqual(points[i].dat, pts[i].dat)
@@ -110,11 +110,11 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(points), 1000)
         for i in range(1000):
             self.assertAlmostEqual(points[i].coordinates[0],
-                pts[i].coordinates[0], 10)
+                pts[i].coordinates[0], 8)
             self.assertAlmostEqual(points[i].coordinates[1],
-                pts[i].coordinates[1], 10)
+                pts[i].coordinates[1], 8)
             self.assertAlmostEqual(points[i].coordinates[2],
-                pts[i].coordinates[2], 10)
+                pts[i].coordinates[2], 8)
             self.assertEqual(points[i].type, 'Point')
             self.assertAlmostEqual(points[i].ts, pts[i].ts, 2)
             self.assertEqual(points[i].dat, pts[i].dat)
@@ -215,11 +215,11 @@ class Tests(unittest.TestCase):
         for i in range(1000):
             for j in range(4):
                 self.assertAlmostEqual(polygons[i].coordinates[0][j][0],
-                    pgs[i].coordinates[0][j][0], 10)
+                    pgs[i].coordinates[0][j][0], 8)
                 self.assertAlmostEqual(polygons[i].coordinates[0][j][1],
-                    pgs[i].coordinates[0][j][1], 10)
+                    pgs[i].coordinates[0][j][1], 8)
                 self.assertAlmostEqual(polygons[i].coordinates[0][j][2],
-                    pgs[i].coordinates[0][j][2], 10)
+                    pgs[i].coordinates[0][j][2], 8)
             self.assertEqual(polygons[i].type, 'Polygon')
             self.assertAlmostEqual(polygons[i].ts, pgs[i].ts, 2)
             self.assertEqual(polygons[i].dat, pgs[i].dat)
@@ -233,11 +233,11 @@ class Tests(unittest.TestCase):
         for i in range(1000):
             for j in range(4):
                 self.assertAlmostEqual(polygons[i].coordinates[0][j][0],
-                    pgs[i].coordinates[0][j][0], 10)
+                    pgs[i].coordinates[0][j][0], 8)
                 self.assertAlmostEqual(polygons[i].coordinates[0][j][1],
-                    pgs[i].coordinates[0][j][1], 10)
+                    pgs[i].coordinates[0][j][1], 8)
                 self.assertAlmostEqual(polygons[i].coordinates[0][j][2],
-                    pgs[i].coordinates[0][j][2], 10)
+                    pgs[i].coordinates[0][j][2], 8)
             self.assertEqual(polygons[i].type, 'Polygon')
             self.assertAlmostEqual(polygons[i].ts, pgs[i].ts, 2)
             self.assertEqual(polygons[i].dat, pgs[i].dat)
@@ -296,7 +296,7 @@ class Tests(unittest.TestCase):
                                                         [45.05, 45.05, 0]
                                                       ]])
 
-    def test_execute_tasks_stats(self):
+    def test_execute_tasks_distance(self):
 
         # add containers and points to compute on
         containers = [snowfloat.container.Container(dat='test_dat_1'),
@@ -317,18 +317,18 @@ class Tests(unittest.TestCase):
             points = self.client.add_geometries(containers[i].id, pts)
 
         tasks = [snowfloat.task.Task(
-                    operation='stats',
+                    operation='distance',
                     resource='points',
                     container_id=containers[0].id,
                     ts_range=(0, time.time())),
                  snowfloat.task.Task(
-                    operation='stats',
+                    operation='distance',
                     resource='points',
                     container_id=containers[1].id,
                     ts_range=(0, time.time()))]
         t = time.time()
         r = self.client.execute_tasks(tasks)
-        print 'stats: %.2f' % (time.time() - t)
+        print 'distance: %.2f' % (time.time() - t)
         self.assertEqual(r[0][0]['count'], 1000)
         self.assertGreater(r[0][0]['distance'], 0)
         self.assertGreater(r[0][0]['velocity'], 0.)
@@ -370,11 +370,11 @@ class Tests(unittest.TestCase):
         print 'map: %.2f' % (time.time() - t)
         self.assertTrue('url' in r[0][0])
 
-    def test_execute_tasks_import_data_source(self):
+    def test_execute_tasks_import_geospatial_data(self):
 
         dat_fields = ['dbl', 'int', 'str']
         path = 'tests/test_point.zip'
-        r = self.client.import_data_source(path, dat_fields)
+        r = self.client.import_geospatial_data(path, dat_fields)
         self.assertDictEqual(r,
             {'containers_count': 1, 'geometries_count': 5})
 
@@ -440,7 +440,7 @@ class Tests(unittest.TestCase):
             type='Point', query='distance_lt', geometry=pl, distance=20000)]
         self.assertEqual(len(pts), 1)
         self.assertListEqual(pts[0].coordinates,
-            [2.35222190000002, 48.856614, 0])
+            [2.3522219, 48.856614, 0.0])
 
         # spatial operation distance
         pl = snowfloat.geometry.Point(coordinates=[2.45, 48.85, 0])
@@ -449,11 +449,11 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(pts), 4)
         self.assertListEqual([p.spatial for p in pts],
             [8958661.49177521, 7866626.32482402, 5538314.71584491,
-             7191.65275350187])
+             7191.65275350335])
 
-        # task stats
+        # task distance
         tasks = [snowfloat.task.Task(
-                    operation='stats',
+                    operation='distance',
                     resource='points',
                     container_id=containers[0].id,
                     ts_range=(0, time.time()))]

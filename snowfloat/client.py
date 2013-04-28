@@ -204,12 +204,12 @@ class Client(object):
         
         >>> tasks = [
         ...     snowfloat.task.Task(
-        ...         operation='stats',
+        ...         operation='distance',
         ...         resource='points',
         ...         container_id=container1.id,
         ...         ts_range=(t1, t2)),
         ...     snowfloat.task.Task(
-        ...         operation='stats',
+        ...         operation='distance',
         ...         resource='points',
         ...         container_id=container2.id,
         ...         ts_range=(t1, t2))]
@@ -272,7 +272,7 @@ class Client(object):
 
         return [results[t.id] for t in tks]
 
-    def import_data_source(self, path, dat_fields=[]):
+    def import_geospatial_data(self, path, dat_fields=[]):
         # add blob with the data source content
         uri = '%s/blobs' % (self.uri)
         with open(path) as f:
@@ -281,7 +281,7 @@ class Client(object):
         
         # execute import data source task
         tasks = [snowfloat.task.Task(
-                    operation='import_data_source',
+                    operation='import_geospatial_data',
                     resource='geometries',
                     extras={'blob_id': blob_id,
                             'dat_fields': dat_fields})]
