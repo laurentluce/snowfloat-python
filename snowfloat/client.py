@@ -274,7 +274,20 @@ class Client(object):
 
         return [results[t.id] for t in tks]
 
-    def import_geospatial_data(self, path, dat_fields=[]):
+    def import_geospatial_data(self, path, dat_fields=()):
+        """Execute a list tasks.
+
+        Args:
+            paths (str): OGR data archive path.
+        
+        Kwargs:
+            dat_fields (tuple): List of fields to store in the attribute "dat".
+
+        Returns:
+            dict: Dictionary containing the number of containers and geometries added.
+
+        Example:
+        """
         # add blob with the data source content
         uri = '%s/blobs' % (self.uri)
         with open(path) as f:
