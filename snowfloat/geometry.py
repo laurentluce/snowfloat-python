@@ -20,7 +20,7 @@ class Geometry(object):
     Attributes:
         coordinates (list): List of coordinates.
 
-        dat (str): dat.
+        tag (str): Details about geometry. Maximum length: 256.
 
         uuid (str): UUID.
 
@@ -40,7 +40,7 @@ class Geometry(object):
     """
 
     coordinates = None
-    dat = None
+    tag = None
     uuid = None
     uri = None
     geometry_ts = None
@@ -66,10 +66,10 @@ class Geometry(object):
                 raise
     
     def __str__(self):
-        return '%s(coordinates=%s, dat=%s, ts=%s, uuid=%s, uri=%s, ' \
+        return '%s(coordinates=%s, tag=%s, ts=%s, uuid=%s, uri=%s, ' \
                 'ts_created=%d, ts_modified=%d, geometry_type=%s, ' \
                 'container_uuid=%s, spatial=%s' \
-            % (self.__class__.__name__, self.coordinates, self.dat,
+            % (self.__class__.__name__, self.coordinates, self.tag,
                self.geometry_ts,
                self.uuid, self.uri, self.ts_created, self.ts_modified,
                self.geometry_type, self.container_uuid, self.spatial)
@@ -188,7 +188,7 @@ def parse_geometries(geometries):
     thismodule = sys.modules[__name__]
     return [getattr(thismodule, g['geometry']['type'])(
                 g['geometry']['coordinates'],
-                dat=g['properties']['dat'],
+                tag=g['properties']['tag'],
                 geometry_ts=g['properties']['geometry_ts'],
                 uuid=g['id'],
                 uri=g['properties']['uri'],
@@ -222,7 +222,7 @@ def format_geometry(geometry):
                          'coordinates': geometry.coordinates},
             'properties': {
                'geometry_ts': geometry.geometry_ts,
-               'dat': geometry.dat}
+               'tag': geometry.tag}
            }
 
 def update_geometry(destination, source):
@@ -236,7 +236,7 @@ def update_geometry(destination, source):
     destination.uuid = source['id']
     destination.uri = source['properties']['uri']
     destination.container_uuid = destination.uri.split('/')[4]
-    destination.dat = source['properties']['dat']
+    destination.tag = source['properties']['tag']
     destination.geometry_ts = source['properties']['geometry_ts']
     destination.ts_created = source['properties']['ts_created']
     destination.ts_modified = source['properties']['ts_modified']

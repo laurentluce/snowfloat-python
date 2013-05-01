@@ -8,7 +8,7 @@ class Result(object):
 
         uri (str): URI.
 
-        dat: Tag data.
+        tag: Tag data.
 
         ts_created: Creation timestamp.
 
@@ -16,7 +16,7 @@ class Result(object):
     """
     uuid = None
     uri = None
-    dat = None
+    tag = None
     ts_created = None
     ts_modified = None
 
@@ -35,6 +35,6 @@ def parse_results(results):
     """
     return [Result(uuid=r['uuid'],
                    uri=r['uri'],
-                   dat=r['dat'],
+                   tag=r['tag'],
                    ts_created=r['ts_created'],
                    ts_modified=r['ts_modified']) for r in results]

@@ -28,14 +28,14 @@ class Tests(unittest.TestCase):
         self.assertListEqual(containers, [])
 
         # add containers
-        containers = [snowfloat.container.Container(dat='test_dat_%d' % (i+1,))
+        containers = [snowfloat.container.Container(tag='test_tag_%d' % (i+1,))
             for i in range(10)]
         t = time.time()
         containers = self.client.add_containers(containers)
         print 'add containers: %.2f' % (time.time() - t)
         self.assertEqual(len(containers), 10)
         for i in range(10):
-            self.assertEqual(containers[i].dat, 'test_dat_%d' % (i+1,))
+            self.assertEqual(containers[i].tag, 'test_tag_%d' % (i+1,))
         
         # list containers
         t = time.time()
@@ -43,14 +43,14 @@ class Tests(unittest.TestCase):
         print 'get containers: %.2f' % (time.time() - t)
         self.assertEqual(len(containers), 10)
         for i in range(10):
-            self.assertEqual(containers[i].dat, 'test_dat_%d' % (i+1,))
+            self.assertEqual(containers[i].tag, 'test_tag_%d' % (i+1,))
 
         # update container
         t = time.time()
-        containers[0].update(dat='test_dat')
+        containers[0].update(tag='test_tag')
         print 'update container: %.2f' % (time.time() - t)
         containers = [e for e in self.client.get_containers()]
-        self.assertEqual(containers[0].dat, 'test_dat')
+        self.assertEqual(containers[0].tag, 'test_tag')
 
         # delete a container
         t = time.time()
@@ -61,7 +61,7 @@ class Tests(unittest.TestCase):
         containers = [e for e in self.client.get_containers()]
         self.assertEqual(len(containers), 9)
         for i in range(9):
-            self.assertEqual(containers[i].dat, 'test_dat_%d' % (i+2,))
+            self.assertEqual(containers[i].tag, 'test_tag_%d' % (i+2,))
 
         # delete containers
         self.client.delete_containers()
@@ -73,9 +73,9 @@ class Tests(unittest.TestCase):
     def test_points(self):
 
         # add container
-        containers = [snowfloat.container.Container(dat='test_dat_1')]
+        containers = [snowfloat.container.Container(tag='test_tag_1')]
         containers = self.client.add_containers(containers)
-        self.assertEqual(containers[0].dat, 'test_dat_1')
+        self.assertEqual(containers[0].tag, 'test_tag_1')
 
         # get points
         points = [e for e in self.client.get_geometries(
@@ -86,7 +86,7 @@ class Tests(unittest.TestCase):
         pts = [snowfloat.geometry.Point(coordinates=[random.random() * 90,
                                                      random.random() * -90,
                                                      random.random() * 1000],
-                                        dat='test_dat_%d' % (i+1),
+                                        tag='test_tag_%d' % (i+1),
                                         geometry_ts=random.random() * 1000)
             for i in range(1000)]
         t = time.time()
@@ -101,7 +101,7 @@ class Tests(unittest.TestCase):
                 pts[i].coordinates[2], 8)
             self.assertEqual(points[i].geometry_type, 'Point')
             self.assertAlmostEqual(points[i].geometry_ts, pts[i].geometry_ts, 2)
-            self.assertEqual(points[i].dat, pts[i].dat)
+            self.assertEqual(points[i].tag, pts[i].tag)
 
         # get points
         t = time.time()
@@ -118,17 +118,17 @@ class Tests(unittest.TestCase):
                 pts[i].coordinates[2], 8)
             self.assertEqual(points[i].geometry_type, 'Point')
             self.assertAlmostEqual(points[i].geometry_ts, pts[i].geometry_ts, 2)
-            self.assertEqual(points[i].dat, pts[i].dat)
+            self.assertEqual(points[i].tag, pts[i].tag)
      
         # update a point
         t = time.time()
-        points[0].update(coordinates=[1, 2, 3], dat='test_dat', geometry_ts=10)
+        points[0].update(coordinates=[1, 2, 3], tag='test_tag', geometry_ts=10)
         print 'update point: %.2f' % (time.time() - t)
         points = [e for e in self.client.get_geometries(containers[0].uuid,
             geometry_type='Point')]
         self.assertListEqual(points[0].coordinates, [1, 2, 3])
         self.assertEqual(points[0].geometry_type, 'Point')
-        self.assertEqual(points[0].dat, 'test_dat')
+        self.assertEqual(points[0].tag, 'test_tag')
         self.assertEqual(points[0].geometry_ts, 10)
 
         # delete a point
@@ -151,13 +151,13 @@ class Tests(unittest.TestCase):
   
         # add points
         pts = [snowfloat.geometry.Point(coordinates=[45.0, 45.0, 0],
-                                        dat='test_dat_1',
+                                        tag='test_tag_1',
                                         geometry_ts=1),
                snowfloat.geometry.Point(coordinates=[45.1, 45.0, 0],
-                                        dat='test_dat_2',
+                                        tag='test_tag_2',
                                         geometry_ts=2),
                snowfloat.geometry.Point(coordinates=[55.0, 55.0, 0],
-                                        dat='test_dat_3',
+                                        tag='test_tag_3',
                                         geometry_ts=3)]
         points = self.client.add_geometries(containers[0].uuid, pts)
  
@@ -184,9 +184,9 @@ class Tests(unittest.TestCase):
     def test_polygons(self):
 
         # add container
-        containers = [snowfloat.container.Container(dat='test_dat_1')]
+        containers = [snowfloat.container.Container(tag='test_tag_1')]
         containers = self.client.add_containers(containers)
-        self.assertEqual(containers[0].dat, 'test_dat_1')
+        self.assertEqual(containers[0].tag, 'test_tag_1')
 
         # get polygons
         polygons = [e for e in self.client.get_geometries(
@@ -207,7 +207,7 @@ class Tests(unittest.TestCase):
                                                         0,
                                                         0]
                                                       ]],
-                                    dat='test_dat_%d' % (i+1),
+                                    tag='test_tag_%d' % (i+1),
                                     geometry_ts=random.random() * 1000)
             for i in range(1000)]
         t = time.time()
@@ -223,7 +223,7 @@ class Tests(unittest.TestCase):
                     pgs[i].coordinates[0][j][2], 8)
             self.assertEqual(polygons[i].geometry_type, 'Polygon')
             self.assertAlmostEqual(polygons[i].geometry_ts, pgs[i].geometry_ts, 2)
-            self.assertEqual(polygons[i].dat, pgs[i].dat)
+            self.assertEqual(polygons[i].tag, pgs[i].tag)
 
         # get polygons
         t = time.time()
@@ -241,7 +241,7 @@ class Tests(unittest.TestCase):
                     pgs[i].coordinates[0][j][2], 8)
             self.assertEqual(polygons[i].geometry_type, 'Polygon')
             self.assertAlmostEqual(polygons[i].geometry_ts, pgs[i].geometry_ts, 2)
-            self.assertEqual(polygons[i].dat, pgs[i].dat)
+            self.assertEqual(polygons[i].tag, pgs[i].tag)
        
         # delete polygons
         t = time.time()
@@ -260,21 +260,21 @@ class Tests(unittest.TestCase):
                                                         [45.1, 45.1, 0],
                                                         [45.0, 45.0, 0]
                                                       ]],
-                                          dat='test_dat_1',
+                                          tag='test_tag_1',
                                           geometry_ts=1),
                snowfloat.geometry.Polygon(coordinates=[[[45.05, 45.05, 0],
                                                         [45.06, 45.0, 0],
                                                         [45.06, 45.06, 0],
                                                         [45.05, 45.05, 0]
                                                        ]],
-                                          dat='test_dat_2',
+                                          tag='test_tag_2',
                                           geometry_ts=2),
                snowfloat.geometry.Polygon(coordinates=[[[55.0, 55.0, 0],
                                                         [55.1, 55.0, 0],
                                                         [55.1, 55.1, 0],
                                                         [55.0, 55.0, 0]
                                                        ]],
-                                          dat='test_dat_3',
+                                          tag='test_tag_3',
                                           geometry_ts=3)]
         polygons = self.client.add_geometries(containers[0].uuid, pgs)
  
@@ -301,8 +301,8 @@ class Tests(unittest.TestCase):
     def test_execute_tasks_distance(self):
 
         # add containers and points to compute on
-        containers = [snowfloat.container.Container(dat='test_dat_1'),
-                      snowfloat.container.Container(dat='test_dat_2')]
+        containers = [snowfloat.container.Container(tag='test_tag_1'),
+                      snowfloat.container.Container(tag='test_tag_2')]
         containers = self.client.add_containers(containers)
 
         # add points
@@ -313,7 +313,7 @@ class Tests(unittest.TestCase):
                  random.random() * 90,
                  random.random() * -90,
                  random.random() * 1000],
-                dat='test_dat_%d' % (j+1),
+                tag='test_tag_%d' % (j+1),
                 geometry_ts=time.time())
                 for j in range(1000)]
             points = self.client.add_geometries(containers[i].uuid, pts)
@@ -341,8 +341,8 @@ class Tests(unittest.TestCase):
     def test_execute_tasks_map(self):
 
         # add containers and points to draw on the map
-        containers = [snowfloat.container.Container(dat='test_dat_1'),
-                      snowfloat.container.Container(dat='test_dat_2')]
+        containers = [snowfloat.container.Container(tag='test_tag_1'),
+                      snowfloat.container.Container(tag='test_tag_2')]
         containers = self.client.add_containers(containers)
 
         # add points
@@ -353,7 +353,7 @@ class Tests(unittest.TestCase):
                  random.random() * 90,
                  random.random() * -90,
                  random.random() * 1000],
-                dat='test_dat_%d' % (j+1),
+                tag='test_tag_%d' % (j+1),
                 geometry_ts=time.time())
                 for j in range(100)]
             points = self.client.add_geometries(containers[i].uuid, pts)
@@ -374,38 +374,38 @@ class Tests(unittest.TestCase):
 
     def test_execute_tasks_import_geospatial_data(self):
 
-        dat_fields = ['dbl', 'int', 'str']
+        tag_fields = ['dbl', 'int', 'str']
         path = 'tests/test_point.zip'
-        r = self.client.import_geospatial_data(path, dat_fields)
+        r = self.client.import_geospatial_data(path, tag_fields)
         self.assertDictEqual(r,
             {'containers_count': 1, 'geometries_count': 5})
 
     def test_usa(self):
 
         # add container
-        containers = [snowfloat.container.Container(dat='World')]
+        containers = [snowfloat.container.Container(tag='World')]
         containers = self.client.add_containers(containers)
 
         # add cities
         points = [snowfloat.geometry.Point(coordinates=[-122.41941550000001,
                                                         37.7749295,
                                                         0],
-                                           dat='San Francisco',
+                                           tag='San Francisco',
                                            geometry_ts=1),
                   snowfloat.geometry.Point(coordinates=[-104.98471790000002,
                                                         39.737567,
                                                         0],
-                                           dat='Denver',
+                                           tag='Denver',
                                            geometry_ts=2),
                   snowfloat.geometry.Point(coordinates=[-71.0597732,
                                                         42.3584308,
                                                         0],
-                                           dat='Boston',
+                                           tag='Boston',
                                            geometry_ts=3),
                   snowfloat.geometry.Point(coordinates=[2.3522219000000177,
                                                         48.856614,
                                                         0],
-                                           dat='Paris',
+                                           tag='Paris',
                                            geometry_ts=4),
                  ]
         points = self.client.add_geometries(containers[0].uuid, points)
@@ -416,13 +416,13 @@ class Tests(unittest.TestCase):
                                       [-125, 30, 0],
                                       [-100, 30, 0],
                                       [-100, 40, 0],
-                                      [-125, 40, 0]]], dat='West')
+                                      [-125, 40, 0]]], tag='West')
         poly_east = snowfloat.geometry.Polygon(
                         coordinates=[[[-75, 45, 0],
                                       [-75, 35, 0],
                                       [-65, 35, 0],
                                       [-65, 45, 0],
-                                      [-75, 45, 0]]], dat='East')
+                                      [-75, 45, 0]]], tag='East')
         
         polygons = self.client.add_geometries(containers[0].uuid,
             [poly_west, poly_east])

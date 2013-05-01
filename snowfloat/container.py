@@ -10,7 +10,7 @@ class Container(object):
     """Container of geometries.
 
     Attributes:
-        dat (str): Generic data. Maximum length: 256.
+        tag (str): Details about the container. Maximum length: 256.
 
         uuid (str): UUID.
 
@@ -20,7 +20,7 @@ class Container(object):
         
         ts_modified (int): Modification timestamp.
     """
-    dat = ''
+    tag = ''
     uuid = None
     uri = None
     ts_created = None
@@ -31,9 +31,9 @@ class Container(object):
             setattr(self, key, val)
     
     def __str__(self):
-        return 'Container(dat=%s, uuid=%s, ts_created=%d, ts_modified=%d, '\
+        return 'Container(tag=%s, uuid=%s, ts_created=%d, ts_modified=%d, '\
                'uri=%s)'\
-            % (self.dat, self.uuid, self.ts_created, self.ts_modified, self.uri)
+            % (self.tag, self.uuid, self.ts_created, self.ts_modified, self.uri)
 
     def add_geometries(self, geometries):
         """Add list of geometries to this container.
@@ -51,16 +51,16 @@ class Container(object):
         
         >>> points = [
         ...           snowfloat.geometries.Point(
-        ...               coordinates=[p1x, p1y, p1z], ts=ts1, dat=dat1),
+        ...               coordinates=[p1x, p1y, p1z], ts=ts1, tag=tag1),
         ...           snowfloat.geometries.Point(
-        ...               coordinates=[p2x, p2y, p2z], ts=ts2, dat=dat2)]
+        ...               coordinates=[p2x, p2y, p2z], ts=ts2, tag=tag2)]
         >>> points = container.add_geometries(points)
         >>> print points[0]
         Point(uuid=6bf3f0bc551f41a6b6d435d51793c850,
               uri=/geo/1/containers/11d53e204a9b45299e68d186e7405779/geometries/6bf3f0bc551f41a6b6d435d51793c850
               coordinates=[p1x, p1y, p1z],
               ts=ts1,
-              dat=dat1,
+              tag=tag1,
               ts_created=1358010636,
               ts_modified=1358010636)
         """
@@ -179,7 +179,7 @@ def format_container(container):
     Returns:
         dict: Container dictionary to be sent to the server.
     """
-    return {'dat': container.dat}
+    return {'tag': container.tag}
 
 def parse_containers(containers):
     """Convert container dictionaries.
@@ -191,7 +191,7 @@ def parse_containers(containers):
         list: List of Container objects.
     """
     return [Container(
-                dat=c['dat'],
+                tag=c['tag'],
                 uuid=c['uuid'],
                 ts_created=c['ts_created'],
                 ts_modified=c['ts_modified'],
@@ -207,7 +207,7 @@ def update_container(container_source, container_destination):
     """
     container_destination.uuid = container_source['uuid']
     container_destination.uri = container_source['uri']
-    container_destination.dat = container_source['dat']
+    container_destination.tag = container_source['tag']
     container_destination.ts_created = container_source['ts_created']
     container_destination.ts_modified = container_source['ts_modified']
  

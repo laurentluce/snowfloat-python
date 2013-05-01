@@ -53,13 +53,13 @@ class Client(object):
 
         Example:
     
-        >>> containers = [snowfloat.container.Container(dat='Sally'),
-                          snowfloat.container.Container(dat='Bob')]
+        >>> containers = [snowfloat.container.Container(tag='Sally'),
+                          snowfloat.container.Container(tag='Bob')]
         >>> containers = client.add_containers(containers)
         >>> print containers[0]
         Container(uuid=11d53e204a9b45299e68d186e7405779,
                   uri=/geo/1/containers/11d53e204a9b45299e68d186e7405779,
-                  dat='Sally',
+                  tag='Sally',
                   ts_created=1358100636,
                   ts_modified=1358100636)
         """
@@ -115,9 +115,9 @@ class Client(object):
         
         >>> points = [
         ...           snowfloat.geometries.Point(
-        ...               coordinates=[p1x, p1y, p1z], ts=ts1, dat=dat1),
+        ...               coordinates=[p1x, p1y, p1z], ts=ts1, tag=tag1),
         ...           snowfloat.geometries.Point(
-        ...               coordinates=[p2x, p2y, p2z], ts=ts2, dat=dat2),
+        ...               coordinates=[p2x, p2y, p2z], ts=ts2, tag=tag2),
         ...          ]
         >>> points = client.add_geometries(container_uuid, points)
         >>> print points[0]
@@ -125,7 +125,7 @@ class Client(object):
               uri=/geo/1/containers/11d53e204a9b45299e68d186e7405779/geometries/6bf3f0bc551f41a6b6d435d51793c850
               coordinates=[p1x, p1y, p1z],
               ts=ts1,
-              dat=dat1,
+              tag=tag1,
               ts_created=1358010636,
               ts_modified=1358010636)
         """
@@ -242,7 +242,7 @@ class Client(object):
                     task = self._get_task(task_uuid)
                     if task.state == 'success':
                         # get results
-                        results[task_uuid] = [json.loads(res.dat) 
+                        results[task_uuid] = [json.loads(res.tag) 
                             for res in self._get_results(task_uuid)]
                         task_done_uuids.append(task_uuid)
                     elif task.state == 'failure':
@@ -258,14 +258,14 @@ class Client(object):
 
         return [results[task.uuid] for task in tasks_to_process]
 
-    def import_geospatial_data(self, path, dat_fields=()):
+    def import_geospatial_data(self, path, tag_fields=()):
         """Execute a list tasks.
 
         Args:
             path (str): OGR data archive path.
         
         Kwargs:
-            dat_fields (tuple): List of fields to store in the attribute "dat".
+            tag_fields (tuple): List of fields to store in the attribute "tag".
 
         Returns:
             dict: Dictionary containing the number of containers and geometries added.
@@ -283,7 +283,7 @@ class Client(object):
                     operation='import_geospatial_data',
                     resource='geometries',
                     extras={'blob_uuid': blob_uuid,
-                            'dat_fields': dat_fields})]
+                            'tag_fields': tag_fields})]
         res = self.execute_tasks(tasks)
 
         # delete blob
