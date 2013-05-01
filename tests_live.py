@@ -375,8 +375,10 @@ class Tests(unittest.TestCase):
     def test_execute_tasks_import_geospatial_data(self):
 
         tag_fields = ['dbl', 'int', 'str']
+        geometry_ts_field = 'int'
         path = 'tests/test_point.zip'
-        r = self.client.import_geospatial_data(path, tag_fields)
+        r = self.client.import_geospatial_data(path, tag_fields,
+            geometry_ts_field)
         self.assertDictEqual(r,
             {'containers_count': 1, 'geometries_count': 5})
 
