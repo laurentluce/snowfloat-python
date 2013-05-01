@@ -67,7 +67,7 @@ class Geometry(object):
                 raise
     
     def __str__(self):
-        return '%s(coordinates=%s, tag=%s, ts=%s, uuid=%s, uri=%s, ' \
+        return '%s(coordinates=%s, tag=%s, geometry_ts=%s, uuid=%s, uri=%s, ' \
                 'ts_created=%d, ts_modified=%d, geometry_type=%s, ' \
                 'container_uuid=%s, spatial=%s' \
             % (self.__class__.__name__, self.coordinates, self.tag,
