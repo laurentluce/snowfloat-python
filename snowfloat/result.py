@@ -22,6 +22,7 @@ class Result(object):
 
     def __init__(self, **kwargs):
         for key, val in kwargs.items():
+            getattr(self, key)
             setattr(self, key, val)
 
 def parse_results(results):

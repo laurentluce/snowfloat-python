@@ -43,6 +43,7 @@ class Task(object):
 
     def __init__(self, **kwargs):
         for key, val in kwargs.items():
+            getattr(self, key)
             setattr(self, key, val)
 
     def get_results(self):

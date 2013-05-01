@@ -50,18 +50,6 @@ class Client(object):
 
         Raises:
             snowfloat.errors.RequestError
-
-        Example:
-    
-        >>> containers = [snowfloat.container.Container(tag='Sally'),
-                          snowfloat.container.Container(tag='Bob')]
-        >>> containers = client.add_containers(containers)
-        >>> print containers[0]
-        Container(uuid=11d53e204a9b45299e68d186e7405779,
-                  uri=/geo/1/containers/11d53e204a9b45299e68d186e7405779,
-                  tag='Sally',
-                  ts_created=1358100636,
-                  ts_modified=1358100636)
         """
         uri = self.uri + '/containers'
         i = 0
@@ -110,24 +98,6 @@ class Client(object):
 
         Raises:
             snowfloat.errors.RequestError
-
-        Example:
-        
-        >>> points = [
-        ...           snowfloat.geometries.Point(
-        ...               coordinates=[p1x, p1y, p1z], ts=ts1, tag=tag1),
-        ...           snowfloat.geometries.Point(
-        ...               coordinates=[p2x, p2y, p2z], ts=ts2, tag=tag2),
-        ...          ]
-        >>> points = client.add_geometries(container_uuid, points)
-        >>> print points[0]
-        Point(uuid=6bf3f0bc551f41a6b6d435d51793c850,
-              uri=/geo/1/containers/11d53e204a9b45299e68d186e7405779/geometries/6bf3f0bc551f41a6b6d435d51793c850
-              coordinates=[p1x, p1y, p1z],
-              ts=ts1,
-              tag=tag1,
-              ts_created=1358010636,
-              ts_modified=1358010636)
         """
         uri = '%s/containers/%s/geometries' % (self.uri, container_uuid)
         return snowfloat.geometry.add_geometries(uri, geometries)
@@ -150,21 +120,14 @@ class Client(object):
             distance (int): Distance in meters for some queries.
 
             spatial_operation (str): Spatial operation to run on each object returned.
+            
+            spatial_geometry (Geometry): Geometry object for spatial operation.
+
         Returns:
             generator. Yields Geometry objects.
         
         Raises:
             snowfloat.errors.RequestError
-
-        Example:
-        
-        >>> client.get_geometries(container_uuid, ts_range=(ts1, ts2))
-
-        or:
-
-        >>> point = snowfloat.geometry.Point([px, py])
-        >>> client.get_geometries(container_uuid, query=distance_lt,
-                                  geometry=point, distance=10000)
         """
         uri = '%s/containers/%s' % (self.uri, container_uuid)
         for geometry in snowfloat.geometry.get_geometries(uri, **kwargs):
@@ -209,24 +172,6 @@ class Client(object):
         Returns:
             list: List of list of dictionaries.
 
-        Example:
-        
-        >>> tasks = [
-        ...     snowfloat.task.Task(
-        ...         operation='distance',
-        ...         resource='points',
-        ...         container_uuid=container1.uuid,
-        ...         ts_range=(t1, t2)),
-        ...     snowfloat.task.Task(
-        ...         operation='distance',
-        ...         resource='points',
-        ...         container_uuid=container2.uuid,
-        ...         ts_range=(t1, t2))]
-        >>> r = self.client.execute_tasks(tasks)
-        >>> r
-        [[{"count": 10000, "distance": 38263, "velocity": 0.21}],
-         [{"count": 10000, "distance": 14231, "velocity": 0.06}]]
- 
         """
         tasks_to_process = _prepare_tasks(tasks)
         tasks_to_process = self._add_tasks(tasks_to_process)
@@ -269,8 +214,6 @@ class Client(object):
 
         Returns:
             dict: Dictionary containing the number of containers and geometries added.
-
-        Example:
         """
         # add blob with the data source content
         uri = '%s/blobs' % (self.uri)

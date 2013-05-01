@@ -28,7 +28,9 @@ class Container(object):
 
     def __init__(self, **kwargs):
         for key, val in kwargs.items():
+            getattr(self, key)
             setattr(self, key, val)
+
     
     def __str__(self):
         return 'Container(tag=%s, uuid=%s, ts_created=%d, ts_modified=%d, '\
@@ -46,23 +48,6 @@ class Container(object):
 
         Raises:
             snowfloat.errors.RequestError
-
-        Example:
-        
-        >>> points = [
-        ...           snowfloat.geometries.Point(
-        ...               coordinates=[p1x, p1y, p1z], ts=ts1, tag=tag1),
-        ...           snowfloat.geometries.Point(
-        ...               coordinates=[p2x, p2y, p2z], ts=ts2, tag=tag2)]
-        >>> points = container.add_geometries(points)
-        >>> print points[0]
-        Point(uuid=6bf3f0bc551f41a6b6d435d51793c850,
-              uri=/geo/1/containers/11d53e204a9b45299e68d186e7405779/geometries/6bf3f0bc551f41a6b6d435d51793c850
-              coordinates=[p1x, p1y, p1z],
-              ts=ts1,
-              tag=tag1,
-              ts_created=1358010636,
-              ts_modified=1358010636)
         """
         uri = '%s/geometries' % (self.uri,)
         return snowfloat.geometry.add_geometries(uri, geometries)
@@ -83,22 +68,13 @@ class Container(object):
 
             spatial_operation (str): Spatial operation to run on each object returned.
 
+            spatial_geometry (Geometry): Geometry object for spatial operation.
+
         Returns:
             generator. Yields Geometry objects.
         
         Raises:
             snowfloat.errors.RequestError
-
-        Example:
-        
-        >>> container.get_geometries(ts_range(ts1, ts2))
-
-        or:
-
-        >>> point = snowfloat.geometry.Point(px, py)
-        >>> container.get_geometries(query=distance_lt,
-                                     geometry=point,
-                                     distance=10000)
         """
         for res in snowfloat.geometry.get_geometries(self.uri, **kwargs):
             yield res

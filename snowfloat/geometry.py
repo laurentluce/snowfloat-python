@@ -52,6 +52,7 @@ class Geometry(object):
 
     def __init__(self, coordinates, **kwargs):
         for key, val in kwargs.items():
+            getattr(self, key)
             setattr(self, key, val)
         self.coordinates = coordinates
         if not self.geometry_ts:
@@ -133,6 +134,8 @@ def get_geometries(uri, **kwargs):
         distance (int): Distance in meters for some queries.
 
         spatial_operation (str): Spatial operation to run on each object returned.
+
+        spatial_geometry (Geometry): Geometry object for spatial operation.
 
     Returns:
         generator. Yield Geometry objects.
