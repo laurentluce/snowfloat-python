@@ -925,7 +925,9 @@ class ImportDataSourceTests(Tests):
         tf = tempfile.NamedTemporaryFile(delete=False)
         tf.close()
         tag_fields = ['test_df',]
-        r = self.client.import_geospatial_data(tf.name, tag_fields)
+        geometry_ts_field = 'test_gtf'
+        r = self.client.import_geospatial_data(tf.name, tag_fields,
+            geometry_ts_field)
         ca = post_mock.call_args
         self.assertEqual(ca[0][0], '%s/geo/1/blobs' % (self.url_prefix,))
         self.assertDictEqual(ca[1]['headers'],
@@ -939,6 +941,7 @@ class ImportDataSourceTests(Tests):
         self.assertEqual(task.resource, 'geometries')
         self.assertDictEqual(task.extras,
             {'tag_fields': ['test_df'],
+             'geometry_ts_field': 'test_gtf',
              'blob_uuid': 'test_blob_uuid'})
         delete_mock.assert_called_with(
         '%s/geo/1/blobs/test_blob_uuid' % (self.url_prefix),

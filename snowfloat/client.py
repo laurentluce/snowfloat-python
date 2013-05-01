@@ -203,7 +203,8 @@ class Client(object):
 
         return [results[task.uuid] for task in tasks_to_process]
 
-    def import_geospatial_data(self, path, tag_fields=()):
+    def import_geospatial_data(self, path, tag_fields=(),
+            geometry_ts_field=None):
         """Execute a list tasks.
 
         Args:
@@ -211,6 +212,8 @@ class Client(object):
         
         Kwargs:
             tag_fields (tuple): List of fields to store in the attribute "tag".
+
+            geometry_ts_field (str): Field to store in the attribute "geometry_ts". Field has to be of type "Integer", "Real" or "DateTime".
 
         Returns:
             dict: Dictionary containing the number of containers and geometries added.
@@ -226,7 +229,8 @@ class Client(object):
                     operation='import_geospatial_data',
                     resource='geometries',
                     extras={'blob_uuid': blob_uuid,
-                            'tag_fields': tag_fields})]
+                            'tag_fields': tag_fields,
+                            'geometry_ts_field': geometry_ts_field})]
         res = self.execute_tasks(tasks)
 
         # delete blob
