@@ -1,74 +1,93 @@
+"""Geometries objects: Points, Polygons."""
+
 import json
 import sys
 import time
 
 try:
     import shapely.geometry
-    point_cls = shapely.geometry.Point
-    polygon_cls = shapely.geometry.Polygon
+    POINT_CLS = shapely.geometry.Point
+    POLYGON_CLS = shapely.geometry.Polygon
 except ImportError:
-    point_cls = object
-    polygon_cls = object
-
+    POINT_CLS = object
+    POLYGON_CLS = object
 
 import snowfloat.request
 
-
 class Geometry(object):
+    """Parent class of all geometries.
+
+    Attributes:
+        coordinates (list): List of coordinates.
+
+        dat (str): dat.
+
+        uuid (str): UUID.
+
+        uri (str): URI.
+
+        geometry_ts: Timestamp.
+
+        ts_created: Creation timestamp.
+
+        ts_modified: Modification timestamp.
+
+        geometry_type: Point or Polygon.
+
+        container_uuid: Container's UUID.
+
+        spatial: Attribute to store spatial operation result.
+    """
 
     coordinates = None
     dat = None
-    id = None
+    uuid = None
     uri = None
-    ts = None
+    geometry_ts = None
     ts_created = None
     ts_modified = None
-    type = None
-    container_id = None
+    geometry_type = None
+    container_uuid = None
     spatial = None
 
-    def __init__(self, coordinates, dat=None, ts=None, id=None, uri=None,
-            ts_created=None, ts_modified=None, spatial=None,
-            container_id=None):
+    def __init__(self, coordinates, **kwargs):
+        for key, val in kwargs.items():
+            setattr(self, key, val)
         self.coordinates = coordinates
-        self.dat = dat
-        self.id = id
-        self.uri = uri
-        if not ts:
-            self.ts = time.time()
-        else:
-            self.ts = ts
-        self.ts_created = ts_created
-        self.ts_modified = ts_modified
+        if not self.geometry_ts:
+            self.geometry_ts = time.time()
         # spatial can be a geometry in the geojson format
-        if isinstance(spatial, dict):
+        if self.spatial and isinstance(self.spatial, dict):
             thismodule = sys.modules[__name__]
             try:
-                self.spatial = getattr(thismodule, spatial['type'])(
-                    spatial['coordinates'])
+                self.spatial = getattr(thismodule, self.spatial['type'])(
+                    self.spatial['coordinates'])
             except AttributeError:
-                print spatial
                 raise
-        else:
-            self.spatial = spatial 
     
     def __str__(self):
-        return '%s(coordinates=%s, dat=%s, ts=%s, id=%s, uri=%s, ' \
-                'ts_created=%d, ts_modified=%d)' \
-            % (self.__class__.__name__, self.coordinates, self.dat, self.ts,
-               self.id, self.uri, self.ts_created, self.ts_modified)
+        return '%s(coordinates=%s, dat=%s, ts=%s, uuid=%s, uri=%s, ' \
+                'ts_created=%d, ts_modified=%d, geometry_type=%s, ' \
+                'container_uuid=%s, spatial=%s' \
+            % (self.__class__.__name__, self.coordinates, self.dat,
+               self.geometry_ts,
+               self.uuid, self.uri, self.ts_created, self.ts_modified,
+               self.geometry_type, self.container_uuid, self.spatial)
 
     def num_points(self):
-        raise NotImplemented()
+        """Returns the geometry number of points."""
+        raise NotImplementedError()
 
     def update(self, **kwargs):
-        """Edit geometry's attributes.
+        """Update geometry's attributes.
 
         Raises:
             snowfloat.errors.RequestError
         """
-        for k, v in kwargs.items():
-            setattr(self, k, v)
+        for key, value in kwargs.items():
+            if key == 'type':
+                key = 'geometry_type'
+            setattr(self, key, value)
         snowfloat.request.put(self.uri,
             data=snowfloat.geometry.format_geometry(self))
         self.ts_modified = int(time.time())
@@ -83,130 +102,185 @@ class Geometry(object):
 
 
 def add_geometries(uri, geometries):
-    r = snowfloat.request.post(uri, geometries,
+    """POST geometries to the server.
+
+    Args:
+        geometries (list): List of Geometry objects.
+
+    Returns:
+        list: List of Geometry objects stored.
+    """
+    res = snowfloat.request.post(uri, geometries,
         format_func=format_geometries)
     # convert list of json geometries to Geometry objects
-    i = 0
-    for f in r['features']:
-        update_geometry(geometries[i], f)
-        i += 1
+    for i, feature in enumerate(res['features']):
+        update_geometry(geometries[i], feature)
 
     return geometries
 
-def get_geometries(uri, type, ts_range, query, geometry, **kwargs):
-    if not ts_range[1]:
-        end_time = time.time()
-    else:
-        end_time = ts_range[1]
-    u = '%s/geometries' % (uri,)
-    params = {'ts__gte': ts_range[0],
-              'ts__lte': end_time}
-    if type:
-        params['type__exact'] = type
+def get_geometries(uri, **kwargs):
+    """GET geometries from the server.
 
-    if query:
+    Kwargs:
+        geometry_type (str): Geometries type.
+        
+        ts_range (tuple): Geometries timestamps range.
+        
+        query (str): Distance or spatial query.
+        
+        geometry (Geometry): Geometry object for query lookup.
+
+        distance (int): Distance in meters for some queries.
+
+        spatial_operation (str): Spatial operation to run on each object returned.
+
+    Returns:
+        generator. Yield Geometry objects.
+    """
+    try:
+        start_time, end_time = kwargs['ts_range']
+    except KeyError:
+        start_time = 0
+        end_time = time.time()
+    get_uri = '%s/geometries' % (uri,)
+    params = {'geometry_ts__gte': start_time,
+              'geometry_ts__lte': end_time}
+    if 'geometry_type' in kwargs:
+        params['geometry_type__exact'] = kwargs['geometry_type']
+
+    if 'query' in kwargs:
         try:
             distance = kwargs['distance']
         except KeyError:
             distance = None
-        e = {'type': geometry.type,
-             'coordinates': geometry.coordinates,
-             'properties': {
-                'distance': distance}
+        geojson = {'type': kwargs['geometry'].geometry_type,
+                   'coordinates': kwargs['geometry'].coordinates,
+                   'properties': {
+                       'distance': distance}
             }
-        params['geometry__%s' % (query,)] = json.dumps(e)
+        params['geometry__%s' % (kwargs['query'],)] = json.dumps(geojson)
 
     if 'spatial_operation' in kwargs:
-        for k, v in kwargs.iteritems():
-            if k.startswith('spatial_'):
-                if k == 'spatial_geometry':
-                    e = {'type': v.type, 'coordinates': v.coordinates}
-                    params[k] = json.dumps(e)
+        for key, value in kwargs.iteritems():
+            if key.startswith('spatial_'):
+                if key == 'spatial_geometry':
+                    geojson = {'type': value.geometry_type,
+                               'coordinates': value.coordinates}
+                    params[key] = json.dumps(geojson)
                 else:
-                    params[k] = v
+                    params[key] = value
 
-    for r in snowfloat.request.get(u, params):
+    for res in snowfloat.request.get(get_uri, params):
         # convert list of json geometries to Geometry objects
-        geometries = parse_geometries(r['geo']['features'])
-        for g in geometries:
-            yield g
+        geometries = parse_geometries(res['geo']['features'])
+        for geometry in geometries:
+            yield geometry
 
 def parse_geometries(geometries):
+    """Convert geometry dictionaries to Geometry objects.
+
+    Args:
+        geometries (list): Dictionaries.
+
+    Returns:
+        list: List of Point or Polygon objects.
+    """
     thismodule = sys.modules[__name__]
     return [getattr(thismodule, g['geometry']['type'])(
                 g['geometry']['coordinates'],
-                g['properties']['dat'],
-                g['properties']['ts'],
-                g['id'],
-                g['properties']['uri'],
-                g['properties']['ts_created'],
-                g['properties']['ts_modified'],
-                g['properties']['spatial']) for g in geometries]
+                dat=g['properties']['dat'],
+                geometry_ts=g['properties']['geometry_ts'],
+                uuid=g['id'],
+                uri=g['properties']['uri'],
+                ts_created=g['properties']['ts_created'],
+                ts_modified=g['properties']['ts_modified'],
+                spatial=g['properties']['spatial']) for g in geometries]
 
 def format_geometries(geometries):
-    d = {'type': 'FeatureCollection',
-         'features': [format_geometry(g) for g in geometries]}
-    
-    return d
+    """Format geojson dictionary using Geometry objects.
 
-def format_geometry(g):
+    Args:
+        geometries (list): Geometry objects.
+
+    Returns:
+        str: geojson dictionary.
+    """
+    return {'type': 'FeatureCollection',
+            'features': [format_geometry(g) for g in geometries]}
+    
+def format_geometry(geometry):
+    """Format geojson dictionary using a Geometry object.
+
+    Args:
+        geometry (Geometry): Geometry object.
+
+    Returns:
+        str: geojson dictionary.
+    """
     return {'type': 'Feature',
-            'geometry': {'type': g.type, 'coordinates': g.coordinates},
+            'geometry': {'type': geometry.geometry_type,
+                         'coordinates': geometry.coordinates},
             'properties': {
-               'ts': g.ts,
-               'dat': g.dat}
+               'geometry_ts': geometry.geometry_ts,
+               'dat': geometry.dat}
            }
 
-def update_geometry(g, f):
-    g.id = f['id']
-    g.uri = f['properties']['uri']
-    g.container_id = g.uri.split('/')[4]
-    g.dat = f['properties']['dat']
-    g.ts = f['properties']['ts']
-    g.ts_created = f['properties']['ts_created']
-    g.ts_modified = f['properties']['ts_modified']
+def update_geometry(destination, source):
+    """Update Geometry object from geojson.
+
+    Args:
+        destination: Geometry object to update.
+
+        source: geojson source.
+    """
+    destination.uuid = source['id']
+    destination.uri = source['properties']['uri']
+    destination.container_uuid = destination.uri.split('/')[4]
+    destination.dat = source['properties']['dat']
+    destination.geometry_ts = source['properties']['geometry_ts']
+    destination.ts_created = source['properties']['ts_created']
+    destination.ts_modified = source['properties']['ts_modified']
 
 
-class Point(Geometry, point_cls):
-    
-    type = 'Point'
+class Point(Geometry, POINT_CLS):
+    """Geometry Point.
+    """
 
-    def __init__(self, coordinates, dat=None, ts=None, id=None, uri=None,
-            ts_created=None, ts_modified=None, spatial=None,
-            container_id=None):
-        if point_cls != object:
-            shapely.geometry.Point.__init__(self, *coordinates)
+    geometry_type = 'Point'
+
+    def __init__(self, coordinates, **kwargs):
         coords = coordinates
+        if POINT_CLS != object:
+            shapely.geometry.Point.__init__(self, coords)
         if len(coords) == 2:
             coords.append(0)
         if coords[2] == None:
             coords[2] = 0
-        Geometry.__init__(self, coords, dat, ts, id, uri, ts_created,
-            ts_modified, spatial, container_id)
-
+        Geometry.__init__(self, coords, **kwargs)
+    
     def num_points(self):
+        """Geometry Point has one point."""
         return 1
 
 
-class Polygon(Geometry, polygon_cls):
-    
-    type = 'Polygon'
+class Polygon(Geometry, POLYGON_CLS):
+    """Geometry Polygon."""
 
-    def __init__(self, coordinates, dat=None, ts=None, id=None, uri=None,
-            ts_created=None, ts_modified=None, spatial=None,
-            container_id=None):
-        if polygon_cls != object:
-            shapely.geometry.Polygon.__init__(self, coordinates[0])
+    geometry_type = 'Polygon'
+
+    def __init__(self, coordinates, **kwargs):
         coords = coordinates
-        for c in coords[0]:
-            if len(c) == 3 and c[2] == None:
-                c[2] = 0
+        if POLYGON_CLS != object:
+            shapely.geometry.Polygon.__init__(self, coords[0])
+        for coordinates in coords[0]:
+            if len(coordinates) == 3 and coordinates[2] == None:
+                coordinates[2] = 0
         if coords[0][0] != coords[0][-1]:
             coords[0].append(coords[0][0])
-        Geometry.__init__(self, coords, dat, ts, id, uri, ts_created,
-            ts_modified, spatial, container_id)
+        Geometry.__init__(self, coords, **kwargs)
 
     def num_points(self):
+        """Returns the number of points defining this polygon."""
         return len(self.coordinates[0])
 
 

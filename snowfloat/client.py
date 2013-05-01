@@ -1,7 +1,10 @@
+"""Snowfloat Client.
+
+This is the first object to instantiate to interact with the API.
+"""
+
 import json
 import time
-
-import requests
 
 import snowfloat.container
 import snowfloat.auth
@@ -11,7 +14,11 @@ import snowfloat.result
 import snowfloat.task
 
 class Client(object):
+    """API client.
 
+    Attributes:
+        uri (str): URI prefix to use for requests.
+    """
     uri = '/geo/1'
 
     def __init__(self):
@@ -28,9 +35,9 @@ class Client(object):
         Raises:
             snowfloat.errors.RequestError
         """
-        r = snowfloat.request.post(self.uri + '/login',
+        res = snowfloat.request.post(self.uri + '/login',
             {'username': username, 'key': key})
-        snowfloat.auth.session_id = r['more'] 
+        snowfloat.auth.session_uuid = res['more'] 
 
     def add_containers(self, containers):
         """Add list of containers.
@@ -50,7 +57,7 @@ class Client(object):
                           snowfloat.container.Container(dat='Bob')]
         >>> containers = client.add_containers(containers)
         >>> print containers[0]
-        Container(id=11d53e204a9b45299e68d186e7405779,
+        Container(uuid=11d53e204a9b45299e68d186e7405779,
                   uri=/geo/1/containers/11d53e204a9b45299e68d186e7405779,
                   dat='Sally',
                   ts_created=1358100636,
@@ -58,11 +65,11 @@ class Client(object):
         """
         uri = self.uri + '/containers'
         i = 0
-        r = snowfloat.request.post(uri, containers,
+        res = snowfloat.request.post(uri, containers,
             format_func=snowfloat.container.format_containers)
         # convert list of json geometries to Geometry objects
-        for c in r:
-            snowfloat.container.update_container(c, containers[i])
+        for container in res:
+            snowfloat.container.update_container(container, containers[i])
             i += 1
         
         return containers
@@ -77,11 +84,11 @@ class Client(object):
             snowfloat.errors.RequestError
         """
         uri = self.uri + '/containers'
-        for r in snowfloat.request.get(uri):
+        for res in snowfloat.request.get(uri):
             # convert list of json containers to Container objects
-            containers = snowfloat.container.parse_containers(r['containers'])
-            for c in containers:
-                yield c
+            containers = snowfloat.container.parse_containers(res['containers'])
+            for container in containers:
+                yield container
 
     def delete_containers(self):
         """Deletes all containers.
@@ -92,7 +99,7 @@ class Client(object):
         uri = '%s/containers' % (self.uri,)
         snowfloat.request.delete(uri)
 
-    def add_geometries(self, container_id, geometries):
+    def add_geometries(self, container_uuid, geometries):
         """Add list of geometries to a container.
 
         Args:
@@ -112,9 +119,9 @@ class Client(object):
         ...           snowfloat.geometries.Point(
         ...               coordinates=[p2x, p2y, p2z], ts=ts2, dat=dat2),
         ...          ]
-        >>> points = client.add_geometries(container_id, points)
+        >>> points = client.add_geometries(container_uuid, points)
         >>> print points[0]
-        Point(id=6bf3f0bc551f41a6b6d435d51793c850,
+        Point(uuid=6bf3f0bc551f41a6b6d435d51793c850,
               uri=/geo/1/containers/11d53e204a9b45299e68d186e7405779/geometries/6bf3f0bc551f41a6b6d435d51793c850
               coordinates=[p1x, p1y, p1z],
               ts=ts1,
@@ -122,18 +129,17 @@ class Client(object):
               ts_created=1358010636,
               ts_modified=1358010636)
         """
-        uri = '%s/containers/%s/geometries' % (self.uri, container_id)
+        uri = '%s/containers/%s/geometries' % (self.uri, container_uuid)
         return snowfloat.geometry.add_geometries(uri, geometries)
 
-    def get_geometries(self, container_id, type=None, ts_range=(0, None),
-            query=None, geometry=None, **kwargs):
+    def get_geometries(self, container_uuid, **kwargs):
         """Returns container's geometries.
 
         Args:
-            container_id (str): Container's ID.
+            container_uuid (str): Container's ID.
 
         Kwargs:
-            type (str): Geometries type.
+            geometry_type (str): Geometries type.
 
             ts_range (tuple): Points timestamps range.
             
@@ -143,6 +149,7 @@ class Client(object):
             
             distance (int): Distance in meters for some queries.
 
+            spatial_operation (str): Spatial operation to run on each object returned.
         Returns:
             generator. Yields Geometry objects.
         
@@ -151,24 +158,24 @@ class Client(object):
 
         Example:
         
-        >>> client.get_geometries(container_id, ts_range(ts1, ts2))
+        >>> client.get_geometries(container_uuid, ts_range=(ts1, ts2))
 
         or:
 
         >>> point = snowfloat.geometry.Point([px, py])
-        >>> client.get_geometries(container_id, query=distance_lt,
+        >>> client.get_geometries(container_uuid, query=distance_lt,
                                   geometry=point, distance=10000)
         """
-        uri = '%s/containers/%s' % (self.uri, container_id)
-        for e in snowfloat.geometry.get_geometries(uri, type, ts_range,
-            query, geometry, **kwargs):
-            yield e
+        uri = '%s/containers/%s' % (self.uri, container_uuid)
+        for geometry in snowfloat.geometry.get_geometries(uri, **kwargs):
+            yield geometry
 
-    def delete_geometries(self, container_id, type=None, ts_range=(0, None)):
+    def delete_geometries(self, container_uuid, geometry_type=None,
+            ts_range=(0, None)):
         """Deletes container's geometries.
 
         Args:
-            container_id (str): Container's ID.
+            container_uuid (str): Container's ID.
 
         Kwargs:
             type (str): Geometries type
@@ -182,12 +189,12 @@ class Client(object):
             end_time = time.time()
         else:
             end_time = ts_range[1]
-        uri = '%s/containers/%s/geometries' % (self.uri, container_id)
-        params = {'ts__gte': ts_range[0],
-                  'ts__lte': end_time,
+        uri = '%s/containers/%s/geometries' % (self.uri, container_uuid)
+        params = {'geometry_ts__gte': ts_range[0],
+                  'geometry_ts__lte': end_time,
                  }
-        if type:
-            params['type__exact'] = type
+        if geometry_type:
+            params['geometry_type__exact'] = geometry_type
         snowfloat.request.delete(uri, params)
 
     def execute_tasks(self, tasks, interval=5):
@@ -208,12 +215,12 @@ class Client(object):
         ...     snowfloat.task.Task(
         ...         operation='distance',
         ...         resource='points',
-        ...         container_id=container1.id,
+        ...         container_uuid=container1.uuid,
         ...         ts_range=(t1, t2)),
         ...     snowfloat.task.Task(
         ...         operation='distance',
         ...         resource='points',
-        ...         container_id=container2.id,
+        ...         container_uuid=container2.uuid,
         ...         ts_range=(t1, t2))]
         >>> r = self.client.execute_tasks(tasks)
         >>> r
@@ -221,64 +228,41 @@ class Client(object):
          [{"count": 10000, "distance": 14231, "velocity": 0.06}]]
  
         """
-        tks = []
-        for t in tasks:
-            # add task
-            task = {'operation': t.operation,
-                    'resource': t.resource}
-            if t.ts_range:
-                task['ts__gte'] = t.ts_range[0]
-                task['ts__lte'] = t.ts_range[1]
-
-            type = self._convert_resource_to_type(t.resource)
-            if type:
-                task['type__exact'] = type
-
-            if t.container_id:
-                if (isinstance(t.container_id, list) or
-                    isinstance(t.container_id, tuple)):
-                    task['container__sid__in'] = t.container_id
-                else:
-                    task['container__sid'] = t.container_id
-
-            if t.extras:
-                task['extras'] = t.extras
-
-            tks.append(task)
-        tks = self._add_tasks(tks)
+        tasks_to_process = _prepare_tasks(tasks)
+        tasks_to_process = self._add_tasks(tasks_to_process)
         # poll tasks state until they are done
-        task_ids = [t.id for t in tks]
+        task_uuids = [task.uuid for task in tasks_to_process]
         results = {}
-        for tid in task_ids:
-            results[tid] = None
+        for task_uuid in task_uuids:
+            results[task_uuid] = None
         try:
-            while task_ids:
-                task_done_ids = []
-                for tid in task_ids:
-                    t = self._get_task(tid)
-                    if t.state == 'success':
+            while task_uuids:
+                task_done_uuids = []
+                for task_uuid in task_uuids:
+                    task = self._get_task(task_uuid)
+                    if task.state == 'success':
                         # get results
-                        results[tid] = [json.loads(r.dat) 
-                            for r in self._get_results(tid)]
-                        task_done_ids.append(tid)
-                    elif t.state == 'failure':
-                        results[tid] = {'error': t.reason}
-                        task_done_ids.append(tid)
+                        results[task_uuid] = [json.loads(res.dat) 
+                            for res in self._get_results(task_uuid)]
+                        task_done_uuids.append(task_uuid)
+                    elif task.state == 'failure':
+                        results[task_uuid] = {'error': task.reason}
+                        task_done_uuids.append(task_uuid)
                
-                for e in task_done_ids:
-                    task_ids.remove(e)
-                if task_ids:
+                for task_uuid in task_done_uuids:
+                    task_uuids.remove(task_uuid)
+                if task_uuids:
                     time.sleep(interval)
         except snowfloat.errors.RequestError:
             pass
 
-        return [results[t.id] for t in tks]
+        return [results[task.uuid] for task in tasks_to_process]
 
     def import_geospatial_data(self, path, dat_fields=()):
         """Execute a list tasks.
 
         Args:
-            paths (str): OGR data archive path.
+            path (str): OGR data archive path.
         
         Kwargs:
             dat_fields (tuple): List of fields to store in the attribute "dat".
@@ -290,45 +274,109 @@ class Client(object):
         """
         # add blob with the data source content
         uri = '%s/blobs' % (self.uri)
-        with open(path) as f:
-            r = snowfloat.request.post(uri, f, serialize=False)
-        blob_id = r['id']
+        with open(path) as archive:
+            res = snowfloat.request.post(uri, archive, serialize=False)
+        blob_uuid = res['uuid']
         
         # execute import data source task
         tasks = [snowfloat.task.Task(
                     operation='import_geospatial_data',
                     resource='geometries',
-                    extras={'blob_id': blob_id,
+                    extras={'blob_uuid': blob_uuid,
                             'dat_fields': dat_fields})]
-        r = self.execute_tasks(tasks)
+        res = self.execute_tasks(tasks)
 
         # delete blob
-        uri = '%s/blobs/%s' % (self.uri, blob_id)
+        uri = '%s/blobs/%s' % (self.uri, blob_uuid)
         snowfloat.request.delete(uri)
 
-        return r[0][0]
+        return res[0][0]
 
-    def _add_tasks(self, data):
+    def _add_tasks(self, tasks):
+        """Send tasks to the server.
+
+        Args:
+            tasks (list): List of task dictionaries to send to the server.
+        """
         uri = '%s/tasks' % (self.uri)
-        r = snowfloat.request.post(uri, data)
-        return snowfloat.task.parse_tasks(r)
+        res = snowfloat.request.post(uri, tasks)
+        return snowfloat.task.parse_tasks(res)
 
-    def _get_task(self, task_id):
-        uri = '%s/tasks/%s' % (self.uri, task_id)
-        r = [e for e in snowfloat.request.get(uri)]
-        task = snowfloat.task.parse_tasks(r)[0]
+    def _get_task(self, task_uuid):
+        """Get task from server.
+
+        Args:
+            task_uuid (str): Task UUID.
+        """
+        uri = '%s/tasks/%s' % (self.uri, task_uuid)
+        res = [e for e in snowfloat.request.get(uri)]
+        task = snowfloat.task.parse_tasks(res)[0]
         return task
 
-    def _get_results(self, task_id):
-        uri = '%s/tasks/%s/results' % (self.uri, task_id)
-        for r in snowfloat.request.get(uri):
-            # convert list of json results to Result objects
-            results = snowfloat.result.parse_results(r['results'])
-            for r in results:
-                yield r
+    def _get_results(self, task_uuid):
+        """Get task results from server.
 
-    def _convert_resource_to_type(self, resource):
-        if resource == 'geometries':
-            return None
-        else:
-            return resource[:-1].capitalize() 
+        Args:
+            task_uuid (str): Task UUID.
+
+        Returns:
+            generator: Yields Result objects.
+        """
+        uri = '%s/tasks/%s/results' % (self.uri, task_uuid)
+        for res in snowfloat.request.get(uri):
+            # convert list of json results to Result objects
+            results = snowfloat.result.parse_results(res['results'])
+            for res in results:
+                yield res
+
+
+def _prepare_tasks(tasks):
+    """Prepare list of tasks to send to the server based on Task objects passed.
+
+    Args:
+        tasks (list): List of Task objects to parse.
+
+    Returns:
+        list: List of task dictionaries to send to the server.
+    """
+    tasks_to_process = []
+    for task in tasks:
+        # add task
+        task_to_add = {'operation': task.operation,
+                       'resource': task.resource}
+        if task.ts_range:
+            task_to_add['geometry_ts__gte'] = task.ts_range[0]
+            task_to_add['geometry_ts__lte'] = task.ts_range[1]
+
+        geometry_type = _convert_resource_to_type(task.resource)
+        if geometry_type:
+            task_to_add['geometry_type__exact'] = geometry_type
+
+        if task.container_uuid:
+            if (isinstance(task.container_uuid, list) or
+                isinstance(task.container_uuid, tuple)):
+                task_to_add['container__sid__in'] = task.container_uuid
+            else:
+                task_to_add['container__sid'] = task.container_uuid
+
+        if task.extras:
+            task_to_add['extras'] = task.extras
+
+        tasks_to_process.append(task_to_add)
+
+    return tasks_to_process
+
+
+def _convert_resource_to_type(resource):
+    """Convert task resource string to geometry type string.
+
+    Args:
+        resource (str): Task resource.
+
+    Returns:
+        str: Geometry type.
+    """
+    if resource == 'geometries':
+        return None
+    else:
+        return resource[:-1].capitalize() 

@@ -1,4 +1,5 @@
-import json
+"""Container of geometries."""
+
 import time
 
 import snowfloat.geometry
@@ -6,23 +7,33 @@ import snowfloat.request
 
 class Container(object):
 
-    dat = None
-    id = None
+    """Container of geometries.
+
+    Attributes:
+        dat (str): Generic data. Maximum length: 256.
+
+        uuid (str): UUID.
+
+        uri (str): URI.
+        
+        ts_created (int): Creation timestamp.
+        
+        ts_modified (int): Modification timestamp.
+    """
+    dat = ''
+    uuid = None
+    uri = None
     ts_created = None
     ts_modified = None
-    uri = None
 
-    def __init__(self, dat='', id=None, ts_created=None, ts_modified=None,
-            uri=None):
-        self.dat = dat
-        self.id = id
-        self.ts_created = ts_created
-        self.ts_modified = ts_modified
-        self.uri = uri
+    def __init__(self, **kwargs):
+        for key, val in kwargs.items():
+            setattr(self, key, val)
     
     def __str__(self):
-        return 'Container(dat=%s, id=%s, ts_created=%d, ts_modified=%d, uri=%s)'\
-            % (self.dat, self.id, self.ts_created, self.ts_modified, self.uri)
+        return 'Container(dat=%s, uuid=%s, ts_created=%d, ts_modified=%d, '\
+               'uri=%s)'\
+            % (self.dat, self.uuid, self.ts_created, self.ts_modified, self.uri)
 
     def add_geometries(self, geometries):
         """Add list of geometries to this container.
@@ -45,7 +56,7 @@ class Container(object):
         ...               coordinates=[p2x, p2y, p2z], ts=ts2, dat=dat2)]
         >>> points = container.add_geometries(points)
         >>> print points[0]
-        Point(id=6bf3f0bc551f41a6b6d435d51793c850,
+        Point(uuid=6bf3f0bc551f41a6b6d435d51793c850,
               uri=/geo/1/containers/11d53e204a9b45299e68d186e7405779/geometries/6bf3f0bc551f41a6b6d435d51793c850
               coordinates=[p1x, p1y, p1z],
               ts=ts1,
@@ -56,12 +67,11 @@ class Container(object):
         uri = '%s/geometries' % (self.uri,)
         return snowfloat.geometry.add_geometries(uri, geometries)
 
-    def get_geometries(self, type=None, ts_range=(0, None), query=None,
-            geometry=None, **kwargs):
+    def get_geometries(self, **kwargs):
         """Returns container's geometries.
 
         Kwargs:
-            type (str): Geometries type.
+            geometry_type (str): Geometries type.
             
             ts_range (tuple): Geometries timestamps range.
             
@@ -90,18 +100,14 @@ class Container(object):
                                      geometry=point,
                                      distance=10000)
         """
-        for e in snowfloat.geometry.get_geometries(self.uri, type,
-            ts_range, query, geometry, **kwargs):
-            yield e
+        for res in snowfloat.geometry.get_geometries(self.uri, **kwargs):
+            yield res
 
-    def delete_geometries(self, type=None, ts_range=(0, None)):
+    def delete_geometries(self, geometry_type=None, ts_range=(0, None)):
         """Deletes container's geometries.
 
-        Args:
-            container_id (str): Container's ID.
-
         Kwargs:
-            type (str): Geometries type.
+            geometry_type (str): Geometries type.
             
             ts_range (tuple): Geometries timestamps range.
 
@@ -113,33 +119,33 @@ class Container(object):
         else:
             end_time = ts_range[1]
         uri = '%s/geometries' % (self.uri)
-        params = {'ts__gte': ts_range[0],
-                  'ts__lte': end_time,
+        params = {'geometry_ts__gte': ts_range[0],
+                  'geometry_ts__lte': end_time,
                  }
-        if type:
-            params['type__exact'] = type
+        if geometry_type:
+            params['geometry_type__exact'] = geometry_type
         snowfloat.request.delete(uri, params)
 
-    def delete_geometry(self, geometry_id):
+    def delete_geometry(self, uuid):
         """Deletes a geometry.
 
         Args:
-            geometry_id (str): Geometry's ID.
+            uuid (str): Geometry's uuid.
 
         Raises:
             snowfloat.errors.RequestError
         """
-        uri = '%s/geometries/%s' % (self.uri, geometry_id)
+        uri = '%s/geometries/%s' % (self.uri, uuid)
         snowfloat.request.delete(uri)
 
     def update(self, **kwargs):
-        """Edit container's attributes.
+        """Update container's attributes.
 
         Raises:
             snowfloat.errors.RequestError
         """
-        for k, v in kwargs.items():
-            setattr(self, k, v)
+        for key, value in kwargs.items():
+            setattr(self, key, value)
         snowfloat.request.put(self.uri,
             data=snowfloat.container.format_container(self))
         self.ts_modified = int(time.time())
@@ -154,21 +160,54 @@ class Container(object):
 
 
 def format_containers(containers):
-    d = [format_container(c) for c in containers]
-    
-    return d
+    """Format containers to be sent to the server.
 
-def format_container(c):
-    return {'dat': c.dat}
+    Args:
+        containers (list): List of Container objects.
+
+    Returns:
+        list: List of container dictionaries to be sent to the server.
+    """
+    return [format_container(c) for c in containers]
+    
+def format_container(container):
+    """Format container to be sent to the server.
+
+    Args:
+        container (Container): Container object.
+
+    Returns:
+        dict: Container dictionary to be sent to the server.
+    """
+    return {'dat': container.dat}
 
 def parse_containers(containers):
-    return [Container(c['dat'], c['id'], c['ts_created'],
-                  c['ts_modified'], c['uri']) for c in containers]
+    """Convert container dictionaries.
 
-def update_container(cs, cd):
-    cd.id = cs['id']
-    cd.uri = cs['uri']
-    cd.dat = cs['dat']
-    cd.ts_created = cs['ts_created']
-    cd.ts_modified = cs['ts_modified']
+    Args:
+        containers (list): List of container dictionaries.
+
+    Returns:
+        list: List of Container objects.
+    """
+    return [Container(
+                dat=c['dat'],
+                uuid=c['uuid'],
+                ts_created=c['ts_created'],
+                ts_modified=c['ts_modified'],
+                uri=c['uri']) for c in containers]
+
+def update_container(container_source, container_destination):
+    """Update Container object from a container dictionary.
+
+    Args:
+        container_source: Container dictionary.
+
+        container_destination: Container object.
+    """
+    container_destination.uuid = container_source['uuid']
+    container_destination.uri = container_source['uri']
+    container_destination.dat = container_source['dat']
+    container_destination.ts_created = container_source['ts_created']
+    container_destination.ts_modified = container_source['ts_modified']
  

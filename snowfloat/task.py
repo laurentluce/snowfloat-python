@@ -1,55 +1,80 @@
-import time
+"""Asynchronous tasks."""
 
 import snowfloat.request
 import snowfloat.result
 
 class Task(object):
+    """Asynchronous task sent to the server.
 
-    id = None
+    Attributes:
+
+        uuid (str): Task UUID.
+
+        uri (str): Task URI.
+
+        operation (str): Task operation: distance, map...
+
+        resource (str): Task geometries resource: points, polygons...
+
+        task_filter (dict): Query filter.
+
+        state (str): Task state: running, succeed...
+
+        extras (dict): Optional task parameters.
+
+        reason (str): Task error reason.
+
+        ts_created (int): Creation timestamp.
+
+        ts_modified (int): Modification timestamp.
+    """
+    uuid = None
     uri = None
     operation = None
     resource = None
-    filter = None
+    task_filter = None
     state = None
     extras = None
     reason = None
     ts_created = None
     ts_modified = None
+    ts_range = None
+    container_uuid = None
 
-    def __init__(self, operation, resource, id=None, uri=None, filter=None,
-            extras=None, state=None, reason=None,
-            ts_created=None, ts_modified=None, container_id=None,
-            ts_range=None):
-        self.id = id
-        self.uri = uri
-        self.operation = operation
-        self.resource = resource
-        self.filter = filter
-        self.state = state
-        self.extras = extras
-        self.reason = reason
-        self.ts_created = ts_created
-        self.ts_modified = ts_modified
-        self.container_id = container_id
-        self.ts_range = ts_range
+    def __init__(self, **kwargs):
+        for key, val in kwargs.items():
+            setattr(self, key, val)
 
-    def _get_results(self):
+    def get_results(self):
+        """Returns the task results.
+
+        Returns:
+            generator. Yields Result objects.
+        """
         uri = '%s/results' % (self.uri)
         data = {}
-        for r in snowfloat.request.get(uri, data):
+        for res in snowfloat.request.get(uri, data):
             # convert list of json results to Result objects
-            results = snowfloat.result.parse_results(r['results'])
-            for r in results:
-                yield r
+            results = snowfloat.result.parse_results(res['results'])
+            for result in results:
+                yield result
 
 def parse_tasks(tasks):
-    return [Task(t['operation'],
-                 t['resource'],
-                 t['id'],
-                 t['uri'],
-                 t['filter'],
-                 t['extras'],
-                 t['state'],
-                 t['reason'],
-                 t['ts_created'],
-                 t['ts_modified']) for t in tasks]
+    """Convert task dictionaries to Task objects.
+
+    Args:
+        tasks (list): List of task dictionaries.
+
+    Returns:
+        list: List of Task objects.
+    """
+    return [Task(operation=t['operation'],
+                 resource=t['resource'],
+                 uuid=t['uuid'],
+                 uri=t['uri'],
+                 task_filter=t['task_filter'],
+                 extras=t['extras'],
+                 state=t['state'],
+                 reason=t['reason'],
+                 ts_created=t['ts_created'],
+                 ts_modified=t['ts_modified']) for t in tasks]

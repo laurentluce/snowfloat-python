@@ -1,2 +1,1 @@
-session_id = None
-api_key = None
+session_uuid = None

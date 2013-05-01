@@ -79,7 +79,7 @@ class Tests(unittest.TestCase):
 
         # get points
         points = [e for e in self.client.get_geometries(
-            containers[0].id, type='Point')]
+            containers[0].uuid, geometry_type='Point')]
         self.assertListEqual(points, [])
 
         # add points
@@ -87,10 +87,10 @@ class Tests(unittest.TestCase):
                                                      random.random() * -90,
                                                      random.random() * 1000],
                                         dat='test_dat_%d' % (i+1),
-                                        ts=random.random() * 1000)
+                                        geometry_ts=random.random() * 1000)
             for i in range(1000)]
         t = time.time()
-        points = self.client.add_geometries(containers[0].id, pts)
+        points = self.client.add_geometries(containers[0].uuid, pts)
         print 'add points: %.2f' % (time.time() - t)
         for i in range(1000):
             self.assertAlmostEqual(points[i].coordinates[0],
@@ -99,14 +99,14 @@ class Tests(unittest.TestCase):
                 pts[i].coordinates[1], 8)
             self.assertAlmostEqual(points[i].coordinates[2],
                 pts[i].coordinates[2], 8)
-            self.assertEqual(points[i].type, 'Point')
-            self.assertAlmostEqual(points[i].ts, pts[i].ts, 2)
+            self.assertEqual(points[i].geometry_type, 'Point')
+            self.assertAlmostEqual(points[i].geometry_ts, pts[i].geometry_ts, 2)
             self.assertEqual(points[i].dat, pts[i].dat)
 
         # get points
         t = time.time()
-        points = [e for e in self.client.get_geometries(containers[0].id,
-            type='Point')]
+        points = [e for e in self.client.get_geometries(containers[0].uuid,
+            geometry_type='Point')]
         print 'get points: %.2f' % (time.time() - t)
         self.assertEqual(len(points), 1000)
         for i in range(1000):
@@ -116,63 +116,63 @@ class Tests(unittest.TestCase):
                 pts[i].coordinates[1], 8)
             self.assertAlmostEqual(points[i].coordinates[2],
                 pts[i].coordinates[2], 8)
-            self.assertEqual(points[i].type, 'Point')
-            self.assertAlmostEqual(points[i].ts, pts[i].ts, 2)
+            self.assertEqual(points[i].geometry_type, 'Point')
+            self.assertAlmostEqual(points[i].geometry_ts, pts[i].geometry_ts, 2)
             self.assertEqual(points[i].dat, pts[i].dat)
      
         # update a point
         t = time.time()
-        points[0].update(coordinates=[1, 2, 3], dat='test_dat', ts=10)
+        points[0].update(coordinates=[1, 2, 3], dat='test_dat', geometry_ts=10)
         print 'update point: %.2f' % (time.time() - t)
-        points = [e for e in self.client.get_geometries(containers[0].id,
-            type='Point')]
+        points = [e for e in self.client.get_geometries(containers[0].uuid,
+            geometry_type='Point')]
         self.assertListEqual(points[0].coordinates, [1, 2, 3])
-        self.assertEqual(points[0].type, 'Point')
+        self.assertEqual(points[0].geometry_type, 'Point')
         self.assertEqual(points[0].dat, 'test_dat')
-        self.assertEqual(points[0].ts, 10)
+        self.assertEqual(points[0].geometry_ts, 10)
 
         # delete a point
         points[0].delete()
 
         # get points
-        points = [e for e in self.client.get_geometries(containers[0].id,
-            type='Point')]
+        points = [e for e in self.client.get_geometries(containers[0].uuid,
+            geometry_type='Point')]
         self.assertEqual(len(points), 999)
         
         # delete points
         t = time.time()
-        self.client.delete_geometries(containers[0].id, type='Point')
+        self.client.delete_geometries(containers[0].uuid, geometry_type='Point')
         print 'delete points: %.2f' % (time.time() - t)
         
         # get points
-        points = [e for e in self.client.get_geometries(containers[0].id,
-            type='Point')]
+        points = [e for e in self.client.get_geometries(containers[0].uuid,
+            geometry_type='Point')]
         self.assertListEqual(points, [])
   
         # add points
         pts = [snowfloat.geometry.Point(coordinates=[45.0, 45.0, 0],
                                         dat='test_dat_1',
-                                        ts=1),
+                                        geometry_ts=1),
                snowfloat.geometry.Point(coordinates=[45.1, 45.0, 0],
                                         dat='test_dat_2',
-                                        ts=2),
+                                        geometry_ts=2),
                snowfloat.geometry.Point(coordinates=[55.0, 55.0, 0],
                                         dat='test_dat_3',
-                                        ts=3)]
-        points = self.client.add_geometries(containers[0].id, pts)
+                                        geometry_ts=3)]
+        points = self.client.add_geometries(containers[0].uuid, pts)
  
         # get points using a spatial lookup
         point = snowfloat.geometry.Point([45.05, 45.0, 0])
-        points = [e for e in self.client.get_geometries(containers[0].id,
-            type='Point', query='distance_lte', geometry=point,
+        points = [e for e in self.client.get_geometries(containers[0].uuid,
+            geometry_type='Point', query='distance_lte', geometry=point,
             distance=10000)]
         self.assertEqual(len(points), 2)
         self.assertListEqual(points[0].coordinates, [45.0, 45.0, 0])
         self.assertListEqual(points[1].coordinates, [45.1, 45.0, 0])
         
         # get points using a transform spatial operation
-        points = [e for e in self.client.get_geometries(containers[0].id,
-            type='Point', query='distance_lte', geometry=point,
+        points = [e for e in self.client.get_geometries(containers[0].uuid,
+            geometry_type='Point', query='distance_lte', geometry=point,
             distance=10000, spatial_operation='transform',
             spatial_srid=32140)]
         self.assertEqual(len(points), 2)
@@ -190,7 +190,7 @@ class Tests(unittest.TestCase):
 
         # get polygons
         polygons = [e for e in self.client.get_geometries(
-            containers[0].id, type='Polygon')]
+            containers[0].uuid, geometry_type='Polygon')]
         self.assertListEqual(polygons, [])
 
         # add polygons
@@ -208,10 +208,10 @@ class Tests(unittest.TestCase):
                                                         0]
                                                       ]],
                                     dat='test_dat_%d' % (i+1),
-                                    ts=random.random() * 1000)
+                                    geometry_ts=random.random() * 1000)
             for i in range(1000)]
         t = time.time()
-        polygons = self.client.add_geometries(containers[0].id, pgs)
+        polygons = self.client.add_geometries(containers[0].uuid, pgs)
         print 'add polygons: %.2f' % (time.time() - t)
         for i in range(1000):
             for j in range(4):
@@ -221,14 +221,14 @@ class Tests(unittest.TestCase):
                     pgs[i].coordinates[0][j][1], 8)
                 self.assertAlmostEqual(polygons[i].coordinates[0][j][2],
                     pgs[i].coordinates[0][j][2], 8)
-            self.assertEqual(polygons[i].type, 'Polygon')
-            self.assertAlmostEqual(polygons[i].ts, pgs[i].ts, 2)
+            self.assertEqual(polygons[i].geometry_type, 'Polygon')
+            self.assertAlmostEqual(polygons[i].geometry_ts, pgs[i].geometry_ts, 2)
             self.assertEqual(polygons[i].dat, pgs[i].dat)
 
         # get polygons
         t = time.time()
-        polygons = [e for e in self.client.get_geometries(containers[0].id,
-            type='Polygon')]
+        polygons = [e for e in self.client.get_geometries(containers[0].uuid,
+            geometry_type='Polygon')]
         print 'get polygons: %.2f' % (time.time() - t)
         self.assertEqual(len(polygons), 1000)
         for i in range(1000):
@@ -239,18 +239,19 @@ class Tests(unittest.TestCase):
                     pgs[i].coordinates[0][j][1], 8)
                 self.assertAlmostEqual(polygons[i].coordinates[0][j][2],
                     pgs[i].coordinates[0][j][2], 8)
-            self.assertEqual(polygons[i].type, 'Polygon')
-            self.assertAlmostEqual(polygons[i].ts, pgs[i].ts, 2)
+            self.assertEqual(polygons[i].geometry_type, 'Polygon')
+            self.assertAlmostEqual(polygons[i].geometry_ts, pgs[i].geometry_ts, 2)
             self.assertEqual(polygons[i].dat, pgs[i].dat)
        
         # delete polygons
         t = time.time()
-        self.client.delete_geometries(containers[0].id, type='Polygon')
+        self.client.delete_geometries(containers[0].uuid,
+            geometry_type='Polygon')
         print 'delete polygons: %.2f' % (time.time() - t)
         
         # get polygons
-        polygons = [e for e in self.client.get_geometries(containers[0].id,
-            type='Polygon')]
+        polygons = [e for e in self.client.get_geometries(containers[0].uuid,
+            geometry_type='Polygon')]
         self.assertListEqual(polygons, [])
   
         # add polygons
@@ -260,22 +261,22 @@ class Tests(unittest.TestCase):
                                                         [45.0, 45.0, 0]
                                                       ]],
                                           dat='test_dat_1',
-                                          ts=1),
+                                          geometry_ts=1),
                snowfloat.geometry.Polygon(coordinates=[[[45.05, 45.05, 0],
                                                         [45.06, 45.0, 0],
                                                         [45.06, 45.06, 0],
                                                         [45.05, 45.05, 0]
                                                        ]],
                                           dat='test_dat_2',
-                                          ts=2),
+                                          geometry_ts=2),
                snowfloat.geometry.Polygon(coordinates=[[[55.0, 55.0, 0],
                                                         [55.1, 55.0, 0],
                                                         [55.1, 55.1, 0],
                                                         [55.0, 55.0, 0]
                                                        ]],
                                           dat='test_dat_3',
-                                          ts=3)]
-        polygons = self.client.add_geometries(containers[0].id, pgs)
+                                          geometry_ts=3)]
+        polygons = self.client.add_geometries(containers[0].uuid, pgs)
  
         # get polygons using a spatial lookup
         polygon = snowfloat.geometry.Polygon([[[45.0, 45.0, 0],
@@ -283,8 +284,8 @@ class Tests(unittest.TestCase):
                                          [45.2, 45.2, 0],
                                          [45.0, 45.0, 0]
                                        ]])
-        polygons = [e for e in self.client.get_geometries(containers[0].id,
-            type='Polygon', query='contained', geometry=polygon)]
+        polygons = [e for e in self.client.get_geometries(containers[0].uuid,
+            geometry_type='Polygon', query='contained', geometry=polygon)]
         self.assertEqual(len(polygons), 2)
         self.assertListEqual(polygons[0].coordinates, [[[45.0, 45.0, 0],
                                                         [45.1, 45.0, 0],
@@ -313,19 +314,19 @@ class Tests(unittest.TestCase):
                  random.random() * -90,
                  random.random() * 1000],
                 dat='test_dat_%d' % (j+1),
-                ts=time.time())
+                geometry_ts=time.time())
                 for j in range(1000)]
-            points = self.client.add_geometries(containers[i].id, pts)
+            points = self.client.add_geometries(containers[i].uuid, pts)
 
         tasks = [snowfloat.task.Task(
                     operation='distance',
                     resource='points',
-                    container_id=containers[0].id,
+                    container_uuid=containers[0].uuid,
                     ts_range=(0, time.time())),
                  snowfloat.task.Task(
                     operation='distance',
                     resource='points',
-                    container_id=containers[1].id,
+                    container_uuid=containers[1].uuid,
                     ts_range=(0, time.time()))]
         t = time.time()
         r = self.client.execute_tasks(tasks)
@@ -353,14 +354,14 @@ class Tests(unittest.TestCase):
                  random.random() * -90,
                  random.random() * 1000],
                 dat='test_dat_%d' % (j+1),
-                ts=time.time())
+                geometry_ts=time.time())
                 for j in range(100)]
-            points = self.client.add_geometries(containers[i].id, pts)
+            points = self.client.add_geometries(containers[i].uuid, pts)
         
         tasks = [snowfloat.task.Task(
                     operation='map',
                     resource='points',
-                    container_id=(containers[0].id, containers[1].id),
+                    container_uuid=(containers[0].uuid, containers[1].uuid),
                     extras={'llcrnrlat': -75,
                             'llcrnrlon': -165,
                             'urcrnrlat': 75,
@@ -390,24 +391,24 @@ class Tests(unittest.TestCase):
                                                         37.7749295,
                                                         0],
                                            dat='San Francisco',
-                                           ts=1),
+                                           geometry_ts=1),
                   snowfloat.geometry.Point(coordinates=[-104.98471790000002,
                                                         39.737567,
                                                         0],
                                            dat='Denver',
-                                           ts=2),
+                                           geometry_ts=2),
                   snowfloat.geometry.Point(coordinates=[-71.0597732,
                                                         42.3584308,
                                                         0],
                                            dat='Boston',
-                                           ts=3),
+                                           geometry_ts=3),
                   snowfloat.geometry.Point(coordinates=[2.3522219000000177,
                                                         48.856614,
                                                         0],
                                            dat='Paris',
-                                           ts=4),
+                                           geometry_ts=4),
                  ]
-        points = self.client.add_geometries(containers[0].id, points)
+        points = self.client.add_geometries(containers[0].uuid, points)
 
         # add two polygons: west and east
         poly_west = snowfloat.geometry.Polygon(
@@ -423,12 +424,12 @@ class Tests(unittest.TestCase):
                                       [-65, 45, 0],
                                       [-75, 45, 0]]], dat='East')
         
-        polygons = self.client.add_geometries(containers[0].id,
+        polygons = self.client.add_geometries(containers[0].uuid,
             [poly_west, poly_east])
 
         # look for points contained by the west polygon
-        pts = [e for e in self.client.get_geometries(containers[0].id,
-            type='Point', query='contained', geometry=poly_west)]
+        pts = [e for e in self.client.get_geometries(containers[0].uuid,
+            geometry_type='Point', query='contained', geometry=poly_west)]
         self.assertEqual(len(pts), 2)
         self.assertListEqual(pts[0].coordinates,
             [-122.4194155, 37.7749295, 0])
@@ -437,16 +438,16 @@ class Tests(unittest.TestCase):
 
         # look for points using distance_lt
         pl = snowfloat.geometry.Point(coordinates=[2.45, 48.85, 0])
-        pts = [e for e in self.client.get_geometries(containers[0].id,
-            type='Point', query='distance_lt', geometry=pl, distance=20000)]
+        pts = [e for e in self.client.get_geometries(containers[0].uuid,
+            geometry_type='Point', query='distance_lt', geometry=pl, distance=20000)]
         self.assertEqual(len(pts), 1)
         self.assertListEqual(pts[0].coordinates,
             [2.3522219, 48.856614, 0.0])
 
         # spatial operation distance
         pl = snowfloat.geometry.Point(coordinates=[2.45, 48.85, 0])
-        pts = [e for e in self.client.get_geometries(containers[0].id,
-            type='Point', spatial_operation='distance', spatial_geometry=pl)]
+        pts = [e for e in self.client.get_geometries(containers[0].uuid,
+            geometry_type='Point', spatial_operation='distance', spatial_geometry=pl)]
         self.assertEqual(len(pts), 4)
         self.assertListEqual([p.spatial for p in pts],
             [8958661.49177521, 7866626.32482402, 5538314.71584491,
@@ -456,7 +457,7 @@ class Tests(unittest.TestCase):
         tasks = [snowfloat.task.Task(
                     operation='distance',
                     resource='points',
-                    container_id=containers[0].id,
+                    container_uuid=containers[0].uuid,
                     ts_range=(0, time.time()))]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r,
@@ -467,7 +468,7 @@ class Tests(unittest.TestCase):
         tasks = [snowfloat.task.Task(
                     operation='map',
                     resource='points',
-                    container_id=containers[0].id,
+                    container_uuid=containers[0].uuid,
                     extras={'llcrnrlat': -75,
                             'llcrnrlon': -165,
                             'urcrnrlat': 75,
