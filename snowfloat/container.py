@@ -2,7 +2,7 @@
 
 import time
 
-import snowfloat.geometry
+import snowfloat.feature
 import snowfloat.request
 
 class Container(object):
@@ -37,8 +37,8 @@ class Container(object):
                'uri=%s)'\
             % (self.tag, self.uuid, self.ts_created, self.ts_modified, self.uri)
 
-    def add_geometries(self, geometries):
-        """Add list of geometries to this container.
+    def add_features(self, features):
+        """Add list of features to this container.
 
         Args:
             geometries (list): List of geometries to add. Each geometry object is derived from the Geometry class. i.e Point, Polygon... Maximum 1000 items.
