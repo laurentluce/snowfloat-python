@@ -39,7 +39,7 @@ class Tests(unittest.TestCase):
     def get_features_helper(self, method_mock, method, *args, **kwargs):
         r1 = {
                 'next_page_uri':
-                    '/geo/1/containers/test_container_1/features?page=1'\
+                    '/geo/1/layers/test_layer_1/features?page=1'\
                     '&page_size=2',
                 'total': 2,
                 'geo': {
@@ -50,7 +50,7 @@ class Tests(unittest.TestCase):
                          'geometry': {'type': 'Point',
                                       'coordinates': [1, 2, 3]},
                          'properties': {
-                            'uri': '/geo/1/containers/test_container_1/'\
+                            'uri': '/geo/1/layers/test_layer_1/'\
                                 'features/test_point_1',
                             'field_ts': 4,
                             'field_tag': 'test_tag_1',
@@ -68,7 +68,7 @@ class Tests(unittest.TestCase):
                                                        [11, 12, 13],
                                                      ]]},
                          'properties': {
-                            'uri': '/geo/1/containers/test_container_1/'\
+                            'uri': '/geo/1/layers/test_layer_1/'\
                                 'features/test_polygon_1',
                             'field_ts': 11,
                             'field_tag': 'test_tag_2',
@@ -94,7 +94,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.fields['ts'], 4)
         self.assertEqual(feature.fields['tag'], 'test_tag_1')
         self.assertEqual(feature.uri,
-            '/geo/1/containers/test_container_1/features/test_point_1')
+            '/geo/1/layers/test_layer_1/features/test_point_1')
         self.assertEqual(feature.uuid, 'test_point_1')
         self.assertEqual(feature.ts_created, 5)
         self.assertEqual(feature.ts_modified, 6)
@@ -108,7 +108,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.fields['ts'], 11)
         self.assertEqual(feature.fields['tag'], 'test_tag_2')
         self.assertEqual(feature.uri,
-            '/geo/1/containers/test_container_1/features/test_polygon_1')
+            '/geo/1/layers/test_layer_1/features/test_polygon_1')
         self.assertEqual(feature.uuid, 'test_polygon_1')
         self.assertEqual(feature.ts_created, 12)
         self.assertEqual(feature.ts_modified, 13)
@@ -120,7 +120,7 @@ class Tests(unittest.TestCase):
         spatial_geometry = {'type': 'Point',
                             'coordinates': [4, 5, 6]}
         self.assertEqual(method_mock.call_args_list,
-            [call('%s/geo/1/containers/test_container_1/features'
+            [call('%s/geo/1/layers/test_layer_1/features'
                     % (self.url_prefix,),
                   headers={'X-Session-ID': 'test_session_uuid'},
                   params={'field__ts__gte': 1,
@@ -134,7 +134,7 @@ class Tests(unittest.TestCase):
                   data={},
                   timeout=10,
                   verify=False),
-             call('%s/geo/1/containers/test_container_1/features?page=1'\
+             call('%s/geo/1/layers/test_layer_1/features?page=1'\
                     '&page_size=2'
                   % (self.url_prefix,),
                   headers={'X-Session-ID': 'test_session_uuid'},
@@ -151,7 +151,7 @@ class Tests(unittest.TestCase):
                 'id': 'test_point_1',
                 'geometry': {'type': 'Point', 'coordinates': [1, 2, 3]},
                 'properties': {
-                   'uri': '/geo/1/containers/test_container_1/'\
+                   'uri': '/geo/1/layers/test_layer_1/'\
                           'features/test_point_1',
                    'field_tag': 'test_tag_1',
                    'field_ts': 4,
@@ -167,7 +167,7 @@ class Tests(unittest.TestCase):
                                               [11, 12, 13],
                                             ]]},
                 'properties': {
-                   'uri': '/geo/1/containers/test_container_1/'\
+                   'uri': '/geo/1/layers/test_layer_1/'\
                           'features/test_polygon_1',
                    'field_tag': 'test_tag_2',
                    'field_ts': 11,
@@ -184,8 +184,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.fields['ts'], 4)
         self.assertEqual(feature.fields['tag'], 'test_tag_1')
         self.assertEqual(feature.uri,
-            '/geo/1/containers/test_container_1/features/test_point_1')
-        self.assertEqual(feature.container_uuid, 'test_container_1')
+            '/geo/1/layers/test_layer_1/features/test_point_1')
+        self.assertEqual(feature.layer_uuid, 'test_layer_1')
         self.assertEqual(feature.uuid, 'test_point_1')
         self.assertEqual(feature.ts_created, 5)
         self.assertEqual(feature.ts_modified, 6)
@@ -197,8 +197,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.fields['ts'], 11)
         self.assertEqual(feature.fields['tag'], 'test_tag_2')
         self.assertEqual(feature.uri,
-            '/geo/1/containers/test_container_1/features/test_polygon_1')
-        self.assertEqual(feature.container_uuid, 'test_container_1')
+            '/geo/1/layers/test_layer_1/features/test_polygon_1')
+        self.assertEqual(feature.layer_uuid, 'test_layer_1')
         self.assertEqual(feature.uuid, 'test_polygon_1')
         self.assertEqual(feature.ts_created, 12)
         self.assertEqual(feature.ts_modified, 13)
@@ -208,7 +208,7 @@ class Tests(unittest.TestCase):
             del r['features'][i]['properties']['ts_created']
             del r['features'][i]['properties']['ts_modified']
         self.assertEqual(method_mock.call_args_list,
-            [call('%s/geo/1/containers/test_container_1/features'
+            [call('%s/geo/1/layers/test_layer_1/features'
                     % (self.url_prefix,),
                   headers={'X-Session-ID': 'test_session_uuid'},
                   data=json.dumps(r),
@@ -223,7 +223,7 @@ class Tests(unittest.TestCase):
         method_mock.return_value = m
         method(*args, **kwargs)
         method_mock.assert_called_with(
-            '%s/geo/1/containers/test_container_1/features' % (self.url_prefix),
+            '%s/geo/1/layers/test_layer_1/features' % (self.url_prefix),
             headers={'X-Session-ID': 'test_session_uuid'},
             params={'field__ts__gte': 1, 'field__ts__lte': 10},
             data={},
@@ -237,7 +237,7 @@ class Tests(unittest.TestCase):
         method_mock.return_value = m
         method(*args, **kwargs)
         method_mock.assert_called_with(
-            '%s/geo/1/containers/test_container_1/'\
+            '%s/geo/1/layers/test_layer_1/'\
                 'features/test_feature_1' % (self.url_prefix),
             headers={'X-Session-ID': 'test_session_uuid'},
             params={},
@@ -310,19 +310,19 @@ class Tests(unittest.TestCase):
 class ClientTests(Tests):
    
     @patch.object(requests, 'get')
-    def test_get_containers(self, get_mock):
+    def test_get_layers(self, get_mock):
         r1 = {
-                'next_page_uri': '/geo/1/containers?page=1&page_size=2',
+                'next_page_uri': '/geo/1/layers?page=1&page_size=2',
                 'total': 2,
-                'containers': [{'tag': 'test_tag_1',
-                            'uri': '/geo/1/containers/test_container_1',
-                            'uuid': 'test_container_1',
+                'layers': [{'name': 'test_tag_1',
+                            'uri': '/geo/1/layers/test_layer_1',
+                            'uuid': 'test_layer_1',
                             'ts_created': 1,
                             'ts_modified': 2
                            },
-                           {'tag': 'test_tag_2',
-                            'uri': '/geo/1/containers/test_container_2',
-                            'uuid': 'test_container_2',
+                           {'name': 'test_tag_2',
+                            'uri': '/geo/1/layers/test_layer_2',
+                            'uuid': 'test_layer_2',
                             'ts_created': 3,
                             'ts_modified': 4
                            }],
@@ -330,7 +330,7 @@ class ClientTests(Tests):
         r2 = {
                 'next_page_uri': None,
                 'total': 0,
-                'containers': [],
+                'layers': [],
             }
         m1 = Mock()
         m1.status_code = 200
@@ -339,27 +339,27 @@ class ClientTests(Tests):
         m2.status_code = 200
         m2.json.return_value = r2
         get_mock.side_effect = [m1, m2]
-        containers = [e for e in self.client.get_containers()]
-        self.assertEqual(containers[0].tag, 'test_tag_1')
-        self.assertEqual(containers[0].uri,
-            '/geo/1/containers/test_container_1')
-        self.assertEqual(containers[0].uuid, 'test_container_1')
-        self.assertEqual(containers[0].ts_created, 1)
-        self.assertEqual(containers[0].ts_modified, 2)
-        self.assertEqual(containers[1].tag, 'test_tag_2')
-        self.assertEqual(containers[1].uri,
-            '/geo/1/containers/test_container_2')
-        self.assertEqual(containers[1].uuid, 'test_container_2')
-        self.assertEqual(containers[1].ts_created, 3)
-        self.assertEqual(containers[1].ts_modified, 4)
+        layers = [e for e in self.client.get_layers()]
+        self.assertEqual(layers[0].name, 'test_tag_1')
+        self.assertEqual(layers[0].uri,
+            '/geo/1/layers/test_layer_1')
+        self.assertEqual(layers[0].uuid, 'test_layer_1')
+        self.assertEqual(layers[0].ts_created, 1)
+        self.assertEqual(layers[0].ts_modified, 2)
+        self.assertEqual(layers[1].name, 'test_tag_2')
+        self.assertEqual(layers[1].uri,
+            '/geo/1/layers/test_layer_2')
+        self.assertEqual(layers[1].uuid, 'test_layer_2')
+        self.assertEqual(layers[1].ts_created, 3)
+        self.assertEqual(layers[1].ts_modified, 4)
         self.assertEqual(get_mock.call_args_list,
-            [call('%s/geo/1/containers' % (self.url_prefix,),
+            [call('%s/geo/1/layers' % (self.url_prefix,),
                   headers={'X-Session-ID': 'test_session_uuid'},
                   data={},
                   params={},
                   timeout=10,
                   verify=False),
-             call('%s/geo/1/containers?page=1&page_size=2' % (self.url_prefix,),
+             call('%s/geo/1/layers?page=1&page_size=2' % (self.url_prefix,),
                   headers={'X-Session-ID': 'test_session_uuid'},
                   data={},
                   params={},
@@ -368,7 +368,7 @@ class ClientTests(Tests):
 
 
     @patch.object(requests, 'get')
-    def test_get_containers_requests_get_error(self, get_mock):
+    def test_get_layers_requests_get_error(self, get_mock):
         r = {'status': 400,
              'code': 1,
              'message': 'test_message',
@@ -379,25 +379,25 @@ class ClientTests(Tests):
         m.json.return_value = r
         get_mock.return_value = m
         self.assertRaises(snowfloat.errors.RequestError,
-            r = self.client.get_containers())
+            r = self.client.get_layers())
 
     @patch.object(requests, 'get')
-    def test_get_containers_status_400(self, get_mock):
+    def test_get_layers_status_400(self, get_mock):
         get_mock.side_effect = Exception('error')
         self.assertRaises(snowfloat.errors.RequestError,
-            r = self.client.get_containers())
+            r = self.client.get_layers())
 
     @patch.object(requests, 'post')
-    def test_add_containers(self, post_mock):
-        r = [{'tag': 'test_tag_1',
-              'uri': '/geo/1/containers/test_container_1',
-              'uuid': 'test_container_1',
+    def test_add_layers(self, post_mock):
+        r = [{'name': 'test_tag_1',
+              'uri': '/geo/1/layers/test_layer_1',
+              'uuid': 'test_layer_1',
               'ts_created': 1,
               'ts_modified': 2
              },
-             {'tag': 'test_tag_2',
-              'uri': '/geo/1/containers/test_container_2',
-              'uuid': 'test_container_2',
+             {'name': 'test_tag_2',
+              'uri': '/geo/1/layers/test_layer_2',
+              'uuid': 'test_layer_2',
               'ts_created': 3,
               'ts_modified': 4
              }]
@@ -405,39 +405,39 @@ class ClientTests(Tests):
         m.status_code = 200
         m.json.return_value = r
         post_mock.return_value = m
-        containers = [snowfloat.container.Container(tag='test_tag_1'),
-                      snowfloat.container.Container(tag='test_tag_2')]
-        containers = self.client.add_containers(containers)
-        self.assertEqual(containers[0].tag, 'test_tag_1')
-        self.assertEqual(containers[0].uri,
-            '/geo/1/containers/test_container_1')
-        self.assertEqual(containers[0].uuid, 'test_container_1')
-        self.assertEqual(containers[0].ts_created, 1)
-        self.assertEqual(containers[0].ts_modified, 2)
-        self.assertEqual(containers[1].tag, 'test_tag_2')
-        self.assertEqual(containers[1].uri,
-            '/geo/1/containers/test_container_2')
-        self.assertEqual(containers[1].uuid, 'test_container_2')
-        self.assertEqual(containers[1].ts_created, 3)
-        self.assertEqual(containers[1].ts_modified, 4)
+        layers = [snowfloat.layer.Layer(name='test_tag_1'),
+                      snowfloat.layer.Layer(name='test_tag_2')]
+        layers = self.client.add_layers(layers)
+        self.assertEqual(layers[0].name, 'test_tag_1')
+        self.assertEqual(layers[0].uri,
+            '/geo/1/layers/test_layer_1')
+        self.assertEqual(layers[0].uuid, 'test_layer_1')
+        self.assertEqual(layers[0].ts_created, 1)
+        self.assertEqual(layers[0].ts_modified, 2)
+        self.assertEqual(layers[1].name, 'test_tag_2')
+        self.assertEqual(layers[1].uri,
+            '/geo/1/layers/test_layer_2')
+        self.assertEqual(layers[1].uuid, 'test_layer_2')
+        self.assertEqual(layers[1].ts_created, 3)
+        self.assertEqual(layers[1].ts_modified, 4)
         self.assertEqual(post_mock.call_args_list,
-            [call('%s/geo/1/containers' % (self.url_prefix,),
+            [call('%s/geo/1/layers' % (self.url_prefix,),
                   headers={'X-Session-ID': 'test_session_uuid'},
-                  data=json.dumps([{'tag': 'test_tag_1'},
-                                   {'tag': 'test_tag_2'}]),
+                  data=json.dumps([{'name': 'test_tag_1'},
+                                   {'name': 'test_tag_2'}]),
                   params={},
                   timeout=10,
                   verify=False)])
 
     @patch.object(requests, 'delete')
-    def test_delete_containers(self, delete_mock):
+    def test_delete_layers(self, delete_mock):
         m = Mock()
         m.status_code = 200
         m.json.return_value = {}
         delete_mock.return_value = m
-        self.client.delete_containers()
+        self.client.delete_layers()
         delete_mock.assert_called_with(
-            '%s/geo/1/containers' % (self.url_prefix),
+            '%s/geo/1/layers' % (self.url_prefix),
             headers={'X-Session-ID': 'test_session_uuid'},
             data={},
             params={},
@@ -449,7 +449,7 @@ class ClientTests(Tests):
         point = snowfloat.geometry.Point(coordinates=[1, 2, 3])
         point2 = snowfloat.geometry.Point(coordinates=[4, 5, 6])
         self.get_features_helper(get_mock, self.client.get_features,
-            'test_container_1', field_ts_gte=1, field_ts_lte=10,
+            'test_layer_1', field_ts_gte=1, field_ts_lte=10,
             query='distance_lte',
             geometry=point, distance=4, spatial_operation='intersection',
             spatial_geometry=point2, spatial_flag=True)
@@ -457,13 +457,13 @@ class ClientTests(Tests):
     @patch.object(requests, 'post')
     def test_add_features(self, post_mock):
         self.add_features_helper(post_mock, self.client.add_features,
-            'test_container_1', self.features)
+            'test_layer_1', self.features)
 
     @patch.object(requests, 'delete')
     def test_delete_features(self, delete_mock):
         self.delete_features_helper(delete_mock,
             self.client.delete_features,
-            'test_container_1', field_ts_gte=1, field_ts_lte=10)
+            'test_layer_1', field_ts_gte=1, field_ts_lte=10)
 
     @patch.object(requests, 'post')
     def test_login(self, post_mock):
@@ -593,22 +593,22 @@ class ClientTests(Tests):
         tasks = [snowfloat.task.Task(
                     operation='test_operation_1',
                     resource='points',
-                    container_uuid='test_container_1'),
+                    layer_uuid='test_layer_1'),
                  snowfloat.task.Task(
                     operation='test_operation_2',
                     resource='points',
-                    container_uuid='test_container_2')]
+                    layer_uuid='test_layer_2')]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], ['test_result_2',]])
         d = [
             {'operation': 'test_operation_1',
              'resource': 'points',
              'geometry_type__exact': 'Point',
-             'container__uuid': 'test_container_1'},
+             'layer__uuid': 'test_layer_1'},
             {'operation': 'test_operation_2',
              'resource': 'points',
              'geometry_type__exact': 'Point',
-             'container__uuid': 'test_container_2'}
+             'layer__uuid': 'test_layer_2'}
         ]
         _add_tasks_mock.assert_called_with(d)
         self.assertEqual(_get_task_mock.call_args_list,
@@ -640,22 +640,22 @@ class ClientTests(Tests):
         tasks = [snowfloat.task.Task(
                     operation='test_operation_1',
                     resource='points',
-                    container_uuid= ['test_container_1', 'test_container_1b']),
+                    layer_uuid= ['test_layer_1', 'test_layer_1b']),
                  snowfloat.task.Task(
                     operation='test_operation_2',
                     resource='points',
-                    container_uuid='test_container_2')]
+                    layer_uuid='test_layer_2')]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], {'error': 'test_reason'}])
         d = [
             {'operation': 'test_operation_1',
              'resource': 'points',
              'geometry_type__exact': 'Point',
-             'container__uuid__in': ['test_container_1', 'test_container_1b']},
+             'layer__uuid__in': ['test_layer_1', 'test_layer_1b']},
             {'operation': 'test_operation_2',
              'resource': 'points',
              'geometry_type__exact': 'Point',
-             'container__uuid': 'test_container_2'}
+             'layer__uuid': 'test_layer_2'}
         ]
         _add_tasks_mock.assert_called_with(d)
         self.assertEqual(_get_task_mock.call_args_list,
@@ -688,22 +688,22 @@ class ClientTests(Tests):
         tasks = [snowfloat.task.Task(
                     operation='test_operation_1',
                     resource='points',
-                    container_uuid='test_container_1'),
+                    layer_uuid='test_layer_1'),
                  snowfloat.task.Task(
                     operation='test_operation_2',
                     resource='points',
-                    container_uuid='test_container_2')]
+                    layer_uuid='test_layer_2')]
         r = self.client.execute_tasks(tasks, interval=0.1)
         self.assertListEqual(r, [['test_result_1',], ['test_result_2',]])
         d = [
             {'operation': 'test_operation_1',
              'resource': 'points',
              'geometry_type__exact': 'Point',
-             'container__uuid': 'test_container_1'},
+             'layer__uuid': 'test_layer_1'},
             {'operation': 'test_operation_2',
              'resource': 'points',
              'geometry_type__exact': 'Point',
-             'container__uuid': 'test_container_2'}
+             'layer__uuid': 'test_layer_2'}
         ]
         _add_tasks_mock.assert_called_with(d)
         self.assertEqual(_get_task_mock.call_args_list,
@@ -733,22 +733,22 @@ class ClientTests(Tests):
         tasks = [snowfloat.task.Task(
                     operation='test_operation_1',
                     resource='points',
-                    container_uuid='test_container_1'),
+                    layer_uuid='test_layer_1'),
                  snowfloat.task.Task(
                     operation='test_operation_2',
                     resource='points',
-                    container_uuid='test_container_2')]
+                    layer_uuid='test_layer_2')]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], None])
         d = [
             {'operation': 'test_operation_1',
              'resource': 'points',
              'geometry_type__exact': 'Point',
-             'container__uuid': 'test_container_1'},
+             'layer__uuid': 'test_layer_1'},
             {'operation': 'test_operation_2',
              'resource': 'points',
              'geometry_type__exact': 'Point',
-             'container__uuid': 'test_container_2'}
+             'layer__uuid': 'test_layer_2'}
         ]
         _add_tasks_mock.assert_called_with(d)
         self.assertEqual(_get_task_mock.call_args_list,
@@ -757,12 +757,12 @@ class ClientTests(Tests):
             [call(task1.uuid),])
 
 
-class ContainerTests(Tests):
+class LayerTests(Tests):
    
-    container = snowfloat.container.Container(
-        tag='test_tag_1',
-        uuid='test_container_1',
-        uri='/geo/1/containers/test_container_1',
+    layer = snowfloat.layer.Layer(
+        name='test_tag_1',
+        uuid='test_layer_1',
+        uri='/geo/1/layers/test_layer_1',
         ts_created=1,
         ts_modified=2)
 
@@ -770,20 +770,20 @@ class ContainerTests(Tests):
     def test_get_features(self, get_mock):
         point = snowfloat.geometry.Point(coordinates=(1, 2, 3))
         point2 = snowfloat.geometry.Point(coordinates=[4, 5, 6])
-        self.get_features_helper(get_mock, self.container.get_features,
+        self.get_features_helper(get_mock, self.layer.get_features,
             field_ts_gte=1, field_ts_lte=10, query='distance_lte',
             geometry=point, distance=4, spatial_operation='intersection',
             spatial_geometry=point2, spatial_flag=True)
     
     @patch.object(requests, 'post')
     def test_add_features(self, post_mock):
-        self.add_features_helper(post_mock, self.container.add_features,
+        self.add_features_helper(post_mock, self.layer.add_features,
             self.features)
 
     @patch.object(requests, 'delete')
     def test_delete_features(self, delete_mock):
         self.delete_features_helper(delete_mock,
-            self.container.delete_features, field_ts_gte=1, field_ts_lte=10)
+            self.layer.delete_features, field_ts_gte=1, field_ts_lte=10)
 
     @patch.object(requests, 'put')
     def test_update(self, put_mock):
@@ -791,15 +791,15 @@ class ContainerTests(Tests):
         m.status_code = 200
         m.json.return_value = {}
         put_mock.return_value = m
-        self.container.update(tag='test_tag')
+        self.layer.update(name='test_tag')
         put_mock.assert_called_with(
-            '%s/geo/1/containers/test_container_1' % (self.url_prefix),
+            '%s/geo/1/layers/test_layer_1' % (self.url_prefix),
             headers={'X-Session-ID': 'test_session_uuid'},
-            data=json.dumps({'tag': 'test_tag'}),
+            data=json.dumps({'name': 'test_tag'}),
             params={},
             timeout=10,
             verify=False)
-        self.assertEqual(self.container.tag, 'test_tag')
+        self.assertEqual(self.layer.name, 'test_tag')
 
     @patch.object(requests, 'delete')
     def test_delete(self, delete_mock):
@@ -807,9 +807,9 @@ class ContainerTests(Tests):
         m.status_code = 200
         m.json.return_value = {}
         delete_mock.return_value = m
-        self.container.delete()
+        self.layer.delete()
         delete_mock.assert_called_with(
-            '%s/geo/1/containers/test_container_1' % (self.url_prefix),
+            '%s/geo/1/layers/test_layer_1' % (self.url_prefix),
             headers={'X-Session-ID': 'test_session_uuid'},
             data={},
             params={},
@@ -840,7 +840,7 @@ class FeaturesTests(Tests):
 
     point = snowfloat.geometry.Point(coordinates=[1, 2, 3])
     fields = {'ts': 1, 'tag': 'test_tag'}
-    uri='/geo/1/containers/test_container_1/features/test_feature_1'
+    uri='/geo/1/layers/test_layer_1/features/test_feature_1'
     feature = snowfloat.feature.Feature(point, fields=fields, uri=uri)
 
     @patch.object(requests, 'put')
@@ -860,7 +860,7 @@ class FeaturesTests(Tests):
                   'field_ts': 2,
               }}
         put_mock.assert_called_with(
-            '%s/geo/1/containers/test_container_1/'\
+            '%s/geo/1/layers/test_layer_1/'\
                 'features/test_feature_1' % (self.url_prefix),
             headers={'X-Session-ID': 'test_session_uuid'},
             data=json.dumps(d),

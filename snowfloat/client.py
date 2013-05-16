@@ -6,7 +6,7 @@ This is the first object to instantiate to interact with the API.
 import json
 import time
 
-import snowfloat.container
+import snowfloat.layer
 import snowfloat.auth
 import snowfloat.errors
 import snowfloat.request
@@ -39,56 +39,56 @@ class Client(object):
             {'username': username, 'key': key})
         snowfloat.auth.session_uuid = res['more'] 
 
-    def add_containers(self, containers):
-        """Add list of containers.
+    def add_layers(self, layers):
+        """Add list of layers.
 
         Args:
-            containers (list): List of Container objects to add. Maximum 1000 items.
+            layers (list): List of Layer objects to add. Maximum 1000 items.
 
         Returns:
-            list. List of Container objects.
+            list. List of Layer objects.
 
         Raises:
             snowfloat.errors.RequestError
         """
-        uri = self.uri + '/containers'
+        uri = self.uri + '/layers'
         i = 0
-        res = snowfloat.request.post(uri, containers,
-            format_func=snowfloat.container.format_containers)
+        res = snowfloat.request.post(uri, layers,
+            format_func=snowfloat.layer.format_layers)
         # convert list of json geometries to Geometry objects
-        for container in res:
-            snowfloat.container.update_container(container, containers[i])
+        for layer in res:
+            snowfloat.layer.update_layer(layer, layers[i])
             i += 1
         
-        return containers
+        return layers
 
-    def get_containers(self):
-        """Returns all containers.
+    def get_layers(self):
+        """Returns all layers.
 
         Returns:
-            generator. Yields Container objects.
+            generator. Yields Layer objects.
         
         Raises:
             snowfloat.errors.RequestError
         """
-        uri = self.uri + '/containers'
+        uri = self.uri + '/layers'
         for res in snowfloat.request.get(uri):
-            # convert list of json containers to Container objects
-            containers = snowfloat.container.parse_containers(res['containers'])
-            for container in containers:
-                yield container
+            # convert list of json layers to Layer objects
+            layers = snowfloat.layer.parse_layers(res['layers'])
+            for layer in layers:
+                yield layer
 
-    def delete_containers(self):
-        """Deletes all containers.
+    def delete_layers(self):
+        """Deletes all layers.
 
         Raises:
             snowfloat.errors.RequestError
         """
-        uri = '%s/containers' % (self.uri,)
+        uri = '%s/layers' % (self.uri,)
         snowfloat.request.delete(uri)
 
-    def add_features(self, container_uuid, features):
-        """Add features to a container.
+    def add_features(self, layer_uuid, features):
+        """Add features to a layer.
 
         Args:
             features (list): List of features to add. Maximum 1000 items.
@@ -99,14 +99,14 @@ class Client(object):
         Raises:
             snowfloat.errors.RequestError
         """
-        uri = '%s/containers/%s/features' % (self.uri, container_uuid)
+        uri = '%s/layers/%s/features' % (self.uri, layer_uuid)
         return snowfloat.feature.add_features(uri, features)
 
-    def get_features(self, container_uuid, **kwargs):
-        """Returns container's features.
+    def get_features(self, layer_uuid, **kwargs):
+        """Returns layer's features.
 
         Args:
-            container_uuid (str): Container's ID.
+            layer_uuid (str): Layer's ID.
 
         Kwargs:
             geometry_type (str): Geometries type.
@@ -129,16 +129,16 @@ class Client(object):
         Raises:
             snowfloat.errors.RequestError
         """
-        uri = '%s/containers/%s' % (self.uri, container_uuid)
+        uri = '%s/layers/%s' % (self.uri, layer_uuid)
         for feature in snowfloat.feature.get_features(uri, **kwargs):
             yield feature
 
-    def delete_features(self, container_uuid,
+    def delete_features(self, layer_uuid,
             **kwargs):
-        """Deletes container's features.
+        """Deletes layer's features.
 
         Args:
-            container_uuid (str): Container's ID.
+            layer_uuid (str): Layer's ID.
 
         Kwargs:
             geometry_type (str): Geometries type
@@ -159,7 +159,7 @@ class Client(object):
         if 'geometry_type' in kwargs:
             params['geometry_type__exact'] = kwargs['geometry_type']
         
-        uri = '%s/containers/%s/features' % (self.uri, container_uuid)
+        uri = '%s/layers/%s/features' % (self.uri, layer_uuid)
         snowfloat.request.delete(uri, params)
 
     def execute_tasks(self, tasks, interval=5):
@@ -212,7 +212,7 @@ class Client(object):
             path (str): OGR data archive path.
         
         Returns:
-            dict: Dictionary containing the number of containers and features added.
+            dict: Dictionary containing the number of layers and features added.
         """
         # add blob with the data source content
         uri = '%s/blobs' % (self.uri)
@@ -290,12 +290,12 @@ def _prepare_tasks(tasks):
         if geometry_type:
             task_to_add['geometry_type__exact'] = geometry_type
 
-        if task.container_uuid:
-            if (isinstance(task.container_uuid, list) or
-                isinstance(task.container_uuid, tuple)):
-                task_to_add['container__uuid__in'] = task.container_uuid
+        if task.layer_uuid:
+            if (isinstance(task.layer_uuid, list) or
+                isinstance(task.layer_uuid, tuple)):
+                task_to_add['layer__uuid__in'] = task.layer_uuid
             else:
-                task_to_add['container__uuid'] = task.container_uuid
+                task_to_add['layer__uuid'] = task.layer_uuid
 
         if task.extras:
             task_to_add['extras'] = task.extras

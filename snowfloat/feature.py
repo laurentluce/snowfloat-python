@@ -23,7 +23,7 @@ class Feature(object):
 
         fields (dict): Feature's fields.
 
-        container_uuid (str): Container's UUID.
+        layer_uuid (str): Layer's UUID.
 
         spatial: Attribute to store spatial operation result.
     """
@@ -34,7 +34,7 @@ class Feature(object):
     ts_modified = None
     geometry = None
     fields = {}
-    container_uuid = None
+    layer_uuid = None
     spatial = None
 
     def __init__(self, geometry, fields=None, **kwargs):
@@ -57,11 +57,11 @@ class Feature(object):
         return '%s(uuid=%s, uri=%s, ' \
                 'ts_created=%d, ts_modified=%d, ' \
                 'geometry=%s, fields=%s ' \
-                'container_uuid=%s, spatial=%s' \
+                'layer_uuid=%s, spatial=%s' \
             % (self.__class__.__name__,
                self.uuid, self.uri, self.ts_created, self.ts_modified,
                self.geometry, self.fields,
-               self.container_uuid, self.spatial)
+               self.layer_uuid, self.spatial)
 
     def update(self, **kwargs):
         """Update feature's attributes.
@@ -232,7 +232,7 @@ def update_feature(destination, source):
     """
     destination.uuid = source['id']
     destination.uri = source['properties']['uri']
-    destination.container_uuid = destination.uri.split('/')[4]
+    destination.layer_uuid = destination.uri.split('/')[4]
     destination.ts_created = source['properties']['ts_created']
     destination.ts_modified = source['properties']['ts_modified']
 

@@ -1,16 +1,16 @@
-"""Container of geometries."""
+"""Layer of geometries."""
 
 import time
 
 import snowfloat.feature
 import snowfloat.request
 
-class Container(object):
+class Layer(object):
 
-    """Container of geometries.
+    """Layer of geometries.
 
     Attributes:
-        tag (str): Details about the container. Maximum length: 256.
+        name (str): Name of the layer. Maximum length: 256.
 
         uuid (str): UUID.
 
@@ -20,7 +20,7 @@ class Container(object):
         
         ts_modified (int): Modification timestamp.
     """
-    tag = ''
+    name = ''
     uuid = None
     uri = None
     ts_created = None
@@ -33,12 +33,13 @@ class Container(object):
 
     
     def __str__(self):
-        return 'Container(tag=%s, uuid=%s, ts_created=%d, ts_modified=%d, '\
+        return 'Layer(name=%s, uuid=%s, ts_created=%d, ts_modified=%d, '\
                'uri=%s)'\
-            % (self.tag, self.uuid, self.ts_created, self.ts_modified, self.uri)
+            % (self.name, self.uuid, self.ts_created, self.ts_modified,
+               self.uri)
 
     def add_features(self, features):
-        """Add list of features to this container.
+        """Add list of features to this layer.
 
         Args:
             geometries (list): List of features to add. Maximum 1000 items.
@@ -53,7 +54,7 @@ class Container(object):
         return snowfloat.feature.add_features(uri, features)
 
     def get_features(self, **kwargs):
-        """Returns container's features.
+        """Returns layer's features.
 
         Kwargs:
             geometry_type (str): Geometries type.
@@ -80,7 +81,7 @@ class Container(object):
             yield res
 
     def delete_features(self, **kwargs):
-        """Deletes container's features.
+        """Deletes layer's features.
 
         Kwargs:
             geometry_type (str): Geometries type.
@@ -117,7 +118,7 @@ class Container(object):
         snowfloat.request.delete(uri)
 
     def update(self, **kwargs):
-        """Update container's attributes.
+        """Update layer's attributes.
 
         Raises:
             snowfloat.errors.RequestError
@@ -125,11 +126,11 @@ class Container(object):
         for key, value in kwargs.items():
             setattr(self, key, value)
         snowfloat.request.put(self.uri,
-            data=snowfloat.container.format_container(self))
+            data=snowfloat.layer.format_layer(self))
         self.ts_modified = int(time.time())
 
     def delete(self):
-        """Deletes this container.
+        """Deletes this layer.
 
         Raises:
             snowfloat.errors.RequestError
@@ -137,55 +138,55 @@ class Container(object):
         snowfloat.request.delete(self.uri)
 
 
-def format_containers(containers):
-    """Format containers to be sent to the server.
+def format_layers(layers):
+    """Format layers to be sent to the server.
 
     Args:
-        containers (list): List of Container objects.
+        layers (list): List of Layer objects.
 
     Returns:
-        list: List of container dictionaries to be sent to the server.
+        list: List of layer dictionaries to be sent to the server.
     """
-    return [format_container(c) for c in containers]
+    return [format_layer(layer) for layer in layers]
     
-def format_container(container):
-    """Format container to be sent to the server.
+def format_layer(layer):
+    """Format layer to be sent to the server.
 
     Args:
-        container (Container): Container object.
+        layer (Layer): Layer object.
 
     Returns:
-        dict: Container dictionary to be sent to the server.
+        dict: Layer dictionary to be sent to the server.
     """
-    return {'tag': container.tag}
+    return {'name': layer.name}
 
-def parse_containers(containers):
-    """Convert container dictionaries.
+def parse_layers(layers):
+    """Convert layer dictionaries.
 
     Args:
-        containers (list): List of container dictionaries.
+        layers (list): List of layer dictionaries.
 
     Returns:
-        list: List of Container objects.
+        list: List of Layer objects.
     """
-    return [Container(
-                tag=c['tag'],
-                uuid=c['uuid'],
-                ts_created=c['ts_created'],
-                ts_modified=c['ts_modified'],
-                uri=c['uri']) for c in containers]
+    return [Layer(
+                name=layer['name'],
+                uuid=layer['uuid'],
+                ts_created=layer['ts_created'],
+                ts_modified=layer['ts_modified'],
+                uri=layer['uri']) for layer in layers]
 
-def update_container(container_source, container_destination):
-    """Update Container object from a container dictionary.
+def update_layer(layer_source, layer_destination):
+    """Update Layer object from a layer dictionary.
 
     Args:
-        container_source: Container dictionary.
+        layer_source: Layer dictionary.
 
-        container_destination: Container object.
+        layer_destination: Layer object.
     """
-    container_destination.uuid = container_source['uuid']
-    container_destination.uri = container_source['uri']
-    container_destination.tag = container_source['tag']
-    container_destination.ts_created = container_source['ts_created']
-    container_destination.ts_modified = container_source['ts_modified']
+    layer_destination.uuid = layer_source['uuid']
+    layer_destination.uri = layer_source['uri']
+    layer_destination.name = layer_source['name']
+    layer_destination.ts_created = layer_source['ts_created']
+    layer_destination.ts_modified = layer_source['ts_modified']
  

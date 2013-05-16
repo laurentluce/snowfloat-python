@@ -32,7 +32,7 @@ class Task(object):
     uri = None
     operation = None
     resource = None
-    container_uuid = None
+    layer_uuid = None
     task_filter = None
     state = None
     extras = None
