@@ -32,14 +32,13 @@ class Task(object):
     uri = None
     operation = None
     resource = None
+    container_uuid = None
     task_filter = None
     state = None
     extras = None
     reason = None
     ts_created = None
     ts_modified = None
-    ts_range = None
-    container_uuid = None
 
     def __init__(self, **kwargs):
         for key, val in kwargs.items():

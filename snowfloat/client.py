@@ -87,23 +87,23 @@ class Client(object):
         uri = '%s/containers' % (self.uri,)
         snowfloat.request.delete(uri)
 
-    def add_geometries(self, container_uuid, geometries):
-        """Add list of geometries to a container.
+    def add_features(self, container_uuid, features):
+        """Add features to a container.
 
         Args:
-            geometries (list): List of geometries to add. Each geometry object is derived from the Geometry class. i.e Point, Polygon... Maximum 1000 items.
+            features (list): List of features to add. Maximum 1000 items.
 
         Returns:
-            list. List of Geometry objects.
+            list. List of Feature objects.
 
         Raises:
             snowfloat.errors.RequestError
         """
-        uri = '%s/containers/%s/geometries' % (self.uri, container_uuid)
-        return snowfloat.geometry.add_geometries(uri, geometries)
+        uri = '%s/containers/%s/features' % (self.uri, container_uuid)
+        return snowfloat.feature.add_features(uri, features)
 
-    def get_geometries(self, container_uuid, **kwargs):
-        """Returns container's geometries.
+    def get_features(self, container_uuid, **kwargs):
+        """Returns container's features.
 
         Args:
             container_uuid (str): Container's ID.
@@ -111,8 +111,6 @@ class Client(object):
         Kwargs:
             geometry_type (str): Geometries type.
 
-            ts_range (tuple): Points timestamps range.
-            
             query (str): Spatial or distance query.
             
             geometry (Geometry): Geometry object for query lookup.
@@ -123,41 +121,45 @@ class Client(object):
             
             spatial_geometry (Geometry): Geometry object for spatial operation.
 
+            field_...: Field value condition.
+
         Returns:
-            generator. Yields Geometry objects.
+            generator. Yields Feature objects.
         
         Raises:
             snowfloat.errors.RequestError
         """
         uri = '%s/containers/%s' % (self.uri, container_uuid)
-        for geometry in snowfloat.geometry.get_geometries(uri, **kwargs):
-            yield geometry
+        for feature in snowfloat.feature.get_features(uri, **kwargs):
+            yield feature
 
-    def delete_geometries(self, container_uuid, geometry_type=None,
-            ts_range=(0, None)):
-        """Deletes container's geometries.
+    def delete_features(self, container_uuid, geometry_type=None,
+            **kwargs):
+        """Deletes container's features.
 
         Args:
             container_uuid (str): Container's ID.
 
         Kwargs:
-            type (str): Geometries type
+            geometry_type (str): Geometries type
             
-            ts_range (tuple): Geometries timestamps range.
+            field_...: Field value condition.
 
         Raises:
             snowfloat.errors.RequestError
         """
-        if not ts_range[1]:
-            end_time = time.time()
-        else:
-            end_time = ts_range[1]
-        uri = '%s/containers/%s/geometries' % (self.uri, container_uuid)
-        params = {'geometry_ts__gte': ts_range[0],
-                  'geometry_ts__lte': end_time,
-                 }
+        params = {}
+        for key, val in kwargs.items():
+            if key.startswith('field_'):
+                s1 = key[:key.index('_')]
+                s2 = key[key.index('_')+1:key.rindex('_')]
+                s3 = key[key.rindex('_')+1:]
+                params[s1 + '__' + s2 + '__' + s3] = val
+ 
         if geometry_type:
             params['geometry_type__exact'] = geometry_type
+        
+        uri = '%s/containers/%s/features' % (self.uri, container_uuid)
         snowfloat.request.delete(uri, params)
 
     def execute_tasks(self, tasks, interval=5):
@@ -203,20 +205,14 @@ class Client(object):
 
         return [results[task.uuid] for task in tasks_to_process]
 
-    def import_geospatial_data(self, path, tag_fields=(),
-            geometry_ts_field=None):
-        """Execute a list tasks.
+    def import_geospatial_data(self, path):
+        """Import geospatial data.
 
         Args:
             path (str): OGR data archive path.
         
-        Kwargs:
-            tag_fields (tuple): List of fields to store in the attribute "tag".
-
-            geometry_ts_field (str): Field to store in the attribute "geometry_ts". Field has to be of type "Integer", "Real" or "DateTime".
-
         Returns:
-            dict: Dictionary containing the number of containers and geometries added.
+            dict: Dictionary containing the number of containers and features added.
         """
         # add blob with the data source content
         uri = '%s/blobs' % (self.uri)
@@ -228,9 +224,7 @@ class Client(object):
         tasks = [snowfloat.task.Task(
                     operation='import_geospatial_data',
                     resource='geometries',
-                    extras={'blob_uuid': blob_uuid,
-                            'tag_fields': tag_fields,
-                            'geometry_ts_field': geometry_ts_field})]
+                    extras={'blob_uuid': blob_uuid})]
         res = self.execute_tasks(tasks)
 
         # delete blob
@@ -291,9 +285,6 @@ def _prepare_tasks(tasks):
         # add task
         task_to_add = {'operation': task.operation,
                        'resource': task.resource}
-        if task.ts_range:
-            task_to_add['geometry_ts__gte'] = task.ts_range[0]
-            task_to_add['geometry_ts__lte'] = task.ts_range[1]
 
         geometry_type = _convert_resource_to_type(task.resource)
         if geometry_type:
@@ -302,9 +293,9 @@ def _prepare_tasks(tasks):
         if task.container_uuid:
             if (isinstance(task.container_uuid, list) or
                 isinstance(task.container_uuid, tuple)):
-                task_to_add['container__sid__in'] = task.container_uuid
+                task_to_add['container__uuid__in'] = task.container_uuid
             else:
-                task_to_add['container__sid'] = task.container_uuid
+                task_to_add['container__uuid'] = task.container_uuid
 
         if task.extras:
             task_to_add['extras'] = task.extras

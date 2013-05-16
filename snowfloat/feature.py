@@ -19,8 +19,6 @@ class Feature(object):
 
         ts_modified (int): Modification timestamp.
 
-        geometry_type (str): Point or Polygon.
-
         geometry (Geometry): Geometry.
 
         fields (dict): Feature's fields.
@@ -46,10 +44,10 @@ class Feature(object):
         self.geometry = geometry
         # spatial can be a geometry in the geojson format
         if self.spatial and isinstance(self.spatial, dict):
-            thismodule = sys.modules[__name__]
             try:
-                self.spatial = getattr(thismodule, self.spatial['type'])(
-                    self.spatial['coordinates'])
+                self.spatial = getattr(snowfloat.geometry,
+                    self.spatial['type'])(
+                        self.spatial['coordinates'])
             except AttributeError:
                 raise
     
@@ -123,11 +121,14 @@ def get_features(uri, **kwargs):
         generator. Yield Feature objects.
     """
     get_uri = '%s/features' % (uri,)
-    
+
+    params = {}
     for key, val in kwargs.items():
         if key.startswith('field_'):
-            params[key.replace('field_', 'featurefield_').replace(
-                '_', '__')] = val
+            s1 = key[:key.index('_')]
+            s2 = key[key.index('_')+1:key.rindex('_')]
+            s3 = key[key.rindex('_')+1:]
+            params[s1 + '__' + s2 + '__' + s3] = val
             
     if 'geometry_type' in kwargs:
         params['geometry_type__exact'] = kwargs['geometry_type']
@@ -173,16 +174,16 @@ def parse_features(features):
     res = []
     for feature in features:
         feature_to_add = Feature(
-            getattr(snowfloat.geometry, f['geometry']['type'])(
-                f['geometry']['coordinates']),
-            uuid=f['id'],
-            uri=f['properties']['uri'],
-            ts_created=f['properties']['ts_created'],
-            ts_modified=f['properties']['ts_modified'],
-            spatial=f['properties']['spatial'])
+            getattr(snowfloat.geometry, feature['geometry']['type'])(
+                feature['geometry']['coordinates']),
+            uuid=feature['id'],
+            uri=feature['properties']['uri'],
+            ts_created=feature['properties']['ts_created'],
+            ts_modified=feature['properties']['ts_modified'],
+            spatial=feature['properties']['spatial'])
 
         fields = {}
-        for key, val in f['properties'].items():
+        for key, val in feature['properties'].items():
             if key.startswith('field_'):
                 fields[key[6:]] = val
         feature_to_add.fields = fields

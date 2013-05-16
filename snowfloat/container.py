@@ -41,24 +41,22 @@ class Container(object):
         """Add list of features to this container.
 
         Args:
-            geometries (list): List of geometries to add. Each geometry object is derived from the Geometry class. i.e Point, Polygon... Maximum 1000 items.
+            geometries (list): List of features to add. Maximum 1000 items.
 
         Returns:
-            list. List of Geometry objects.
+            list. List of Feature objects.
 
         Raises:
             snowfloat.errors.RequestError
         """
-        uri = '%s/geometries' % (self.uri,)
-        return snowfloat.geometry.add_geometries(uri, geometries)
+        uri = '%s/features' % (self.uri,)
+        return snowfloat.feature.add_features(uri, features)
 
-    def get_geometries(self, **kwargs):
-        """Returns container's geometries.
+    def get_features(self, **kwargs):
+        """Returns container's features.
 
         Kwargs:
             geometry_type (str): Geometries type.
-            
-            ts_range (tuple): Geometries timestamps range.
             
             query (str): Distance or spatial query.
             
@@ -70,36 +68,40 @@ class Container(object):
 
             spatial_geometry (Geometry): Geometry object for spatial operation.
 
+            field_...: Field value condition.
+
         Returns:
-            generator. Yields Geometry objects.
+            generator. Yields Feature objects.
         
         Raises:
             snowfloat.errors.RequestError
         """
-        for res in snowfloat.geometry.get_geometries(self.uri, **kwargs):
+        for res in snowfloat.feature.get_features(self.uri, **kwargs):
             yield res
 
-    def delete_geometries(self, geometry_type=None, ts_range=(0, None)):
-        """Deletes container's geometries.
+    def delete_features(self, geometry_type=None, **kwargs):
+        """Deletes container's features.
 
         Kwargs:
             geometry_type (str): Geometries type.
-            
-            ts_range (tuple): Geometries timestamps range.
+           
+            field_...: Field value condition.
 
         Raises:
             snowfloat.errors.RequestError
         """
-        if not ts_range[1]:
-            end_time = time.time()
-        else:
-            end_time = ts_range[1]
-        uri = '%s/geometries' % (self.uri)
-        params = {'geometry_ts__gte': ts_range[0],
-                  'geometry_ts__lte': end_time,
-                 }
+        params = {}
+        for key, val in kwargs.items():
+            if key.startswith('field_'):
+                s1 = key[:key.index('_')]
+                s2 = key[key.index('_')+1:key.rindex('_')]
+                s3 = key[key.rindex('_')+1:]
+                params[s1 + '__' + s2 + '__' + s3] = val
+ 
         if geometry_type:
             params['geometry_type__exact'] = geometry_type
+        
+        uri = '%s/features' % (self.uri)
         snowfloat.request.delete(uri, params)
 
     def delete_geometry(self, uuid):
