@@ -1,3 +1,7 @@
+- review init methods to have args as usually passed arguments instead of kwargs like fields for example.
+
+- add fields conditions to tasks 
+
 - add order arg to get_
 
 - pep8
