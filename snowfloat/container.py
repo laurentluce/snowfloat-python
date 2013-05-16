@@ -79,7 +79,7 @@ class Container(object):
         for res in snowfloat.feature.get_features(self.uri, **kwargs):
             yield res
 
-    def delete_features(self, geometry_type=None, **kwargs):
+    def delete_features(self, **kwargs):
         """Deletes container's features.
 
         Kwargs:
@@ -98,8 +98,8 @@ class Container(object):
                 s3 = key[key.rindex('_')+1:]
                 params[s1 + '__' + s2 + '__' + s3] = val
  
-        if geometry_type:
-            params['geometry_type__exact'] = geometry_type
+        if 'geometry_type' in kwargs:
+            params['geometry_type__exact'] = kwargs['geometry_type']
         
         uri = '%s/features' % (self.uri)
         snowfloat.request.delete(uri, params)

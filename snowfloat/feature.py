@@ -37,11 +37,13 @@ class Feature(object):
     container_uuid = None
     spatial = None
 
-    def __init__(self, geometry, **kwargs):
+    def __init__(self, geometry, fields=None, **kwargs):
         for key, val in kwargs.items():
             getattr(self, key)
             setattr(self, key, val)
         self.geometry = geometry
+        if fields:
+            self.fields = fields
         # spatial can be a geometry in the geojson format
         if self.spatial and isinstance(self.spatial, dict):
             try:

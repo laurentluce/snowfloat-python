@@ -133,7 +133,7 @@ class Client(object):
         for feature in snowfloat.feature.get_features(uri, **kwargs):
             yield feature
 
-    def delete_features(self, container_uuid, geometry_type=None,
+    def delete_features(self, container_uuid,
             **kwargs):
         """Deletes container's features.
 
@@ -156,8 +156,8 @@ class Client(object):
                 s3 = key[key.rindex('_')+1:]
                 params[s1 + '__' + s2 + '__' + s3] = val
  
-        if geometry_type:
-            params['geometry_type__exact'] = geometry_type
+        if 'geometry_type' in kwargs:
+            params['geometry_type__exact'] = kwargs['geometry_type']
         
         uri = '%s/containers/%s/features' % (self.uri, container_uuid)
         snowfloat.request.delete(uri, params)
