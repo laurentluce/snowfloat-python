@@ -32,8 +32,8 @@ class Geometry(object):
         self.coordinates = coordinates
     
     def __str__(self):
-        return '%s(coordinates=%s, geometry_type=%s)' \
-            % (self.__class__.__name__, self.coordinates, self.geometry_type)
+        return '%s(coordinates=%s)' \
+            % (self.__class__.__name__, self.coordinates)
 
     def num_points(self):
         """Returns the geometry number of points."""
