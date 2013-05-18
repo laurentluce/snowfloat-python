@@ -55,7 +55,7 @@ class Feature(object):
     
     def __str__(self):
         return '%s(uuid=%s, uri=%s, ' \
-                'ts_created=%d, ts_modified=%d, ' \
+                'ts_created=%s, ts_modified=%s, ' \
                 'geometry=%s, fields=%s ' \
                 'layer_uuid=%s, spatial=%s' \
             % (self.__class__.__name__,
