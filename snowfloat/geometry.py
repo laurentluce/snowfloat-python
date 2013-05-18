@@ -52,7 +52,7 @@ class Point(Geometry, POINT_CLS):
             shapely.geometry.Point.__init__(self, coords)
         if len(coords) == 2:
             coords.append(0)
-        if coords[2] == None:
+        elif coords[2] == None:
             coords[2] = 0
         Geometry.__init__(self, coords, **kwargs)
     
@@ -71,7 +71,9 @@ class Polygon(Geometry, POLYGON_CLS):
         if POLYGON_CLS != object:
             shapely.geometry.Polygon.__init__(self, coords[0])
         for coordinates in coords[0]:
-            if len(coordinates) == 3 and coordinates[2] == None:
+            if len(coordinates) == 2:
+                coordinates.append(0)
+            elif len(coordinates) == 3 and coordinates[2] == None:
                 coordinates[2] = 0
         if coords[0][0] != coords[0][-1]:
             coords[0].append(coords[0][0])
