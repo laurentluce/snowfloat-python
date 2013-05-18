@@ -491,7 +491,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(features), 4)
         self.assertListEqual([f.spatial for f in features],
             [8958661.49177521, 7866626.32482402, 5538314.71584491,
-             7191.65275350335])
+             7191.65275350338])
 
         # task distance
         tasks = [snowfloat.task.Task(
