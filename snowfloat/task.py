@@ -59,6 +59,20 @@ class Task(object):
             for result in results:
                 yield result
 
+    def __str__(self):
+        return '%s(uuid=%s, uri=%s, ' \
+                'ts_created=%s, ts_modified=%s, ' \
+                'operation=%s, resource=%s ' \
+                'layer_uuid=%s, task_filter=%s ' \
+                'state=%s, extras=%s ' \
+                'reason=%s' \
+            % (self.__class__.__name__,
+               self.uuid, self.uri, self.ts_created, self.ts_modified,
+               self.geometry, self.fields,
+               self.layer_uuid, self.task_filter,
+               self.state, self.extras, self.reason)
+
+
 def parse_tasks(tasks):
     """Convert task dictionaries to Task objects.
 
