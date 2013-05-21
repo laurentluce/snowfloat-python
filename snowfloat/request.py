@@ -138,7 +138,6 @@ def send(method, uri, params=None, data=None, headers=None):
                 headers=request_headers,
                 timeout=snowfloat.settings.HTTP_TIMEOUT, verify=False)
             if res.status_code == 200:
-                print res.text
                 return res.json()
             elif res.status_code in (400, 403, 404, 413):
                 break
