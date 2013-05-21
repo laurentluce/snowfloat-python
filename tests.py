@@ -35,13 +35,25 @@ class Tests(unittest.TestCase):
         fields = {'ts': 11, 'tag': 'test_tag_2'}
         feature = snowfloat.feature.Feature(geometry, fields=fields)
         self.features.append(feature)
+        geometry = snowfloat.geometry.MultiPolygon(
+                  coordinates=[[[[11, 12, 13],
+                                 [14, 15, 16],
+                                 [17, 18, 19],
+                                 [11, 12, 13]]],
+                               [[[21, 22, 23],
+                                 [24, 25, 26],
+                                 [27, 28, 29],
+                                 [21, 22, 23]]]])
+        fields = {'ts': 21, 'tag': 'test_tag_3'}
+        feature = snowfloat.feature.Feature(geometry, fields=fields)
+        self.features.append(feature)
 
     def get_features_helper(self, method_mock, method, *args, **kwargs):
         r1 = {
                 'next_page_uri':
                     '/geo/1/layers/test_layer_1/features?page=1'\
                     '&page_size=2',
-                'total': 2,
+                'total': 3,
                 'geo': {
                       'type': 'FeatureCollection',
                       'features': [
@@ -76,6 +88,28 @@ class Tests(unittest.TestCase):
                             'ts_modified': 13,
                             'spatial': {'type': 'Point',
                                         'coordinates': [7, 8, 9]}}
+                        },
+                        {'type': 'Feature',
+                         'id': 'test_multipolygon_1',
+                         'geometry': {'type': 'MultiPolygon',
+                                      'coordinates': [[[[11, 12, 13],
+                                                        [14, 15, 16],
+                                                        [17, 18, 19],
+                                                        [11, 12, 13]]],
+                                                      [[[21, 22, 23],
+                                                        [24, 25, 26],
+                                                        [27, 28, 29],
+                                                        [21, 22, 23]]]]},
+                         'properties': {
+                            'uri': '/geo/1/layers/test_layer_1/'\
+                                'features/test_multipolygon_1',
+                            'field_ts': 21,
+                            'field_tag': 'test_tag_3',
+                            'ts_created': 22,
+                            'ts_modified': 23,
+                            'spatial': {'type': 'Point',
+                                        'coordinates': [10, 11, 12]}}
+
                         }]}}
         r2 = {
               'next_page_uri': None,
@@ -114,6 +148,24 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.ts_modified, 13)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [7, 8, 9])
+        feature = features[2]
+        self.assertListEqual(feature.geometry.coordinates, [[[[11, 12, 13],
+                                                              [14, 15, 16],
+                                                              [17, 18, 19],
+                                                              [11, 12, 13]]],
+                                                            [[[21, 22, 23],
+                                                              [24, 25, 26],
+                                                              [27, 28, 29],
+                                                              [21, 22, 23]]]])
+        self.assertEqual(feature.fields['ts'], 21)
+        self.assertEqual(feature.fields['tag'], 'test_tag_3')
+        self.assertEqual(feature.uri,
+            '/geo/1/layers/test_layer_1/features/test_multipolygon_1')
+        self.assertEqual(feature.uuid, 'test_multipolygon_1')
+        self.assertEqual(feature.ts_created, 22)
+        self.assertEqual(feature.ts_modified, 23)
+        self.assertEqual(feature.spatial.geometry_type, 'Point')
+        self.assertListEqual(feature.spatial.coordinates, [10, 11, 12])
         distance_lookup = {'type': 'Point',
                            'coordinates': [1, 2, 3],
                            'properties': {'distance': 4}}
@@ -173,7 +225,26 @@ class Tests(unittest.TestCase):
                    'field_ts': 11,
                    'ts_created': 12,
                    'ts_modified': 13}
-               }]}
+               },
+                {'type': 'Feature',
+                 'id': 'test_multipolygon_1',
+                 'geometry': {'type': 'MultiPolygon',
+                              'coordinates': [[[[11, 12, 13],
+                                                [14, 15, 16],
+                                                [17, 18, 19],
+                                                [11, 12, 13]]],
+                                              [[[21, 22, 23],
+                                                [24, 25, 26],
+                                                [27, 28, 29],
+                                                [21, 22, 23]]]]},
+                 'properties': {
+                    'uri': '/geo/1/layers/test_layer_1/'\
+                        'features/test_multipolygon_1',
+                    'field_tag': 'test_tag_3',
+                    'field_ts': 21,
+                    'ts_created': 22,
+                    'ts_modified': 23}
+                }]}
         m = Mock()
         m.status_code = 200
         m.json.return_value = r
@@ -191,9 +262,9 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.ts_modified, 6)
         feature = features[1]
         self.assertListEqual(feature.geometry.coordinates, [[[11, 12, 13],
-                                                           [14, 15, 16],
-                                                           [17, 18, 19],
-                                                           [11, 12, 13]]])
+                                                             [14, 15, 16],
+                                                             [17, 18, 19],
+                                                             [11, 12, 13]]])
         self.assertEqual(feature.fields['ts'], 11)
         self.assertEqual(feature.fields['tag'], 'test_tag_2')
         self.assertEqual(feature.uri,
@@ -202,7 +273,24 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.uuid, 'test_polygon_1')
         self.assertEqual(feature.ts_created, 12)
         self.assertEqual(feature.ts_modified, 13)
-        for i in range(2):
+        feature = features[2]
+        self.assertListEqual(feature.geometry.coordinates, [[[[11, 12, 13],
+                                                              [14, 15, 16],
+                                                              [17, 18, 19],
+                                                              [11, 12, 13]]],
+                                                            [[[21, 22, 23],
+                                                              [24, 25, 26],
+                                                              [27, 28, 29],
+                                                              [21, 22, 23]]]])
+        self.assertEqual(feature.fields['ts'], 21)
+        self.assertEqual(feature.fields['tag'], 'test_tag_3')
+        self.assertEqual(feature.uri,
+            '/geo/1/layers/test_layer_1/features/test_multipolygon_1')
+        self.assertEqual(feature.layer_uuid, 'test_layer_1')
+        self.assertEqual(feature.uuid, 'test_multipolygon_1')
+        self.assertEqual(feature.ts_created, 22)
+        self.assertEqual(feature.ts_modified, 23)
+        for i in range(3):
             del r['features'][i]['id']
             del r['features'][i]['properties']['uri']
             del r['features'][i]['properties']['ts_created']

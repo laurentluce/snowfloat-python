@@ -8,9 +8,11 @@ try:
     import shapely.geometry
     POINT_CLS = shapely.geometry.Point
     POLYGON_CLS = shapely.geometry.Polygon
+    MULTIPOLYGON_CLS = shapely.geometry.MultiPolygon
 except ImportError:
     POINT_CLS = object
     POLYGON_CLS = object
+    MULTIPOLYGON_CLS = object
 
 class Geometry(object):
     """Parent class of all geometries.
@@ -82,5 +84,24 @@ class Polygon(Geometry, POLYGON_CLS):
     def num_points(self):
         """Returns the number of points defining this polygon."""
         return len(self.coordinates[0])
+
+
+class MultiPolygon(Geometry, MULTIPOLYGON_CLS):
+    """Geometry MultiPolygon."""
+
+    geometry_type = 'MultiPolygon'
+    polygons = []
+
+    def __init__(self, coordinates, **kwargs):
+        coords = coordinates
+        for c in coords:
+            self.polygons.append(Polygon(c))
+        if MULTIPOLYGON_CLS != object:
+            shapely.geometry.MultiPolygon.__init__(self, self.polygons)
+        Geometry.__init__(self, coords, **kwargs)
+
+    def num_points(self):
+        """Returns the number of points defining this multipolygon."""
+        return sum([p.num_points() for p in self.polygons])
 
 
