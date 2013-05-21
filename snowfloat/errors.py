@@ -33,5 +33,5 @@ class RequestError(Error):
         self.more = more
 
     def __str__(self):
-        return 'RequestError(status=%d, code=%d, message=%s, more=%s)' % (
+        return 'RequestError(status=%s, code=%s, message=%s, more=%s)' % (
             self.status, self.code, self.message, self.more)
