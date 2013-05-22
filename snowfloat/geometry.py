@@ -90,12 +90,11 @@ class MultiPolygon(Geometry, MULTIPOLYGON_CLS):
     """Geometry MultiPolygon."""
 
     geometry_type = 'MultiPolygon'
-    polygons = []
+    polygons = None
 
     def __init__(self, coordinates, **kwargs):
         coords = coordinates
-        for c in coords:
-            self.polygons.append(Polygon(c))
+        self.polygons = [Polygon(c) for c in coords] 
         if MULTIPOLYGON_CLS != object:
             shapely.geometry.MultiPolygon.__init__(self, self.polygons)
         Geometry.__init__(self, coords, **kwargs)

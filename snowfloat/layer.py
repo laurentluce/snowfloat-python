@@ -32,7 +32,6 @@ class Layer(object):
         for key, val in kwargs.items():
             getattr(self, key)
             setattr(self, key, val)
-
     
     def __str__(self):
         return 'Layer(name=%s, uuid=%s, ts_created=%d, ts_modified=%d, '\
@@ -53,7 +52,14 @@ class Layer(object):
             snowfloat.errors.RequestError
         """
         uri = '%s/features' % (self.uri,)
-        return snowfloat.feature.add_features(uri, features)
+        res = snowfloat.feature.add_features(uri, features)
+        
+        self.num_features += len(features)
+        self.num_points += \
+            sum([feature.geometry.num_points() for feature in features])
+        self.ts_modified = int(time.time())
+
+        return res
 
     def get_features(self, **kwargs):
         """Returns layer's features.
@@ -105,19 +111,27 @@ class Layer(object):
             params['geometry_type__exact'] = kwargs['geometry_type']
         
         uri = '%s/features' % (self.uri)
-        snowfloat.request.delete(uri, params)
+        res = snowfloat.request.delete(uri, params)
+        
+        self.num_features -= res['num_features']
+        self.num_points -= res['num_points']
+        self.ts_modified = int(time.time())
 
-    def delete_geometry(self, uuid):
-        """Deletes a geometry.
+    def delete_feature(self, uuid):
+        """Deletes a feature.
 
         Args:
-            uuid (str): Geometry's uuid.
+            uuid (str): Feature's uuid.
 
         Raises:
             snowfloat.errors.RequestError
         """
-        uri = '%s/geometries/%s' % (self.uri, uuid)
-        snowfloat.request.delete(uri)
+        uri = '%s/features/%s' % (self.uri, uuid)
+        res = snowfloat.request.delete(uri)
+        
+        self.num_features -= 1
+        self.num_points -= res['num_points']
+        self.ts_modified = int(time.time())
 
     def update(self, **kwargs):
         """Update layer's attributes.

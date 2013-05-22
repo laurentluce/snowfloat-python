@@ -307,7 +307,7 @@ class Tests(unittest.TestCase):
     def delete_features_helper(self, method_mock, method, *args, **kwargs):
         m = Mock()
         m.status_code = 200
-        m.json.return_value = {}
+        m.json.return_value = {'num_features': 2, 'num_points': 1}
         method_mock.return_value = m
         method(*args, **kwargs)
         method_mock.assert_called_with(
@@ -321,7 +321,7 @@ class Tests(unittest.TestCase):
     def delete_feature_helper(self, method_mock, method, *args, **kwargs):
         m = Mock()
         m.status_code = 200
-        m.json.return_value = {}
+        m.json.return_value = {'num_points': 1}
         method_mock.return_value = m
         method(*args, **kwargs)
         method_mock.assert_called_with(
@@ -862,13 +862,17 @@ class ClientTests(Tests):
 
 
 class LayerTests(Tests):
-   
-    layer = snowfloat.layer.Layer(
-        name='test_tag_1',
-        uuid='test_layer_1',
-        uri='/geo/1/layers/test_layer_1',
-        ts_created=1,
-        ts_modified=2)
+
+    def setUp(self):
+        self.layer = snowfloat.layer.Layer(
+            name='test_tag_1',
+            uuid='test_layer_1',
+            uri='/geo/1/layers/test_layer_1',
+            ts_created=1,
+            ts_modified=2,
+            num_features=3,
+            num_points=6)
+        Tests.setUp(self)
 
     @patch.object(requests, 'get')
     def test_get_features(self, get_mock):
@@ -883,11 +887,20 @@ class LayerTests(Tests):
     def test_add_features(self, post_mock):
         self.add_features_helper(post_mock, self.layer.add_features,
             self.features)
+        self.assertEqual(self.layer.num_features, 6)
+        self.assertEqual(self.layer.num_points, 19)
 
     @patch.object(requests, 'delete')
     def test_delete_features(self, delete_mock):
         self.delete_features_helper(delete_mock,
             self.layer.delete_features, field_ts_gte=1, field_ts_lte=10)
+        self.assertEqual(self.layer.num_features, 1)
+        self.assertEqual(self.layer.num_points, 5)
+    
+    @patch.object(requests, 'delete')
+    def test_delete_feature(self, delete_mock):
+        self.delete_feature_helper(delete_mock,
+            self.layer.delete_feature, 'test_feature_1')
 
     @patch.object(requests, 'put')
     def test_update(self, put_mock):
