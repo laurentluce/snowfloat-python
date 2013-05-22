@@ -406,13 +406,17 @@ class ClientTests(Tests):
                             'uri': '/geo/1/layers/test_layer_1',
                             'uuid': 'test_layer_1',
                             'ts_created': 1,
-                            'ts_modified': 2
+                            'ts_modified': 2,
+                            'num_features': 10,
+                            'num_points': 20
                            },
                            {'name': 'test_tag_2',
                             'uri': '/geo/1/layers/test_layer_2',
                             'uuid': 'test_layer_2',
                             'ts_created': 3,
-                            'ts_modified': 4
+                            'ts_modified': 4,
+                            'num_features': 11,
+                            'num_points': 21
                            }],
             }
         r2 = {
@@ -434,12 +438,16 @@ class ClientTests(Tests):
         self.assertEqual(layers[0].uuid, 'test_layer_1')
         self.assertEqual(layers[0].ts_created, 1)
         self.assertEqual(layers[0].ts_modified, 2)
+        self.assertEqual(layers[0].num_features, 10)
+        self.assertEqual(layers[0].num_points, 20)
         self.assertEqual(layers[1].name, 'test_tag_2')
         self.assertEqual(layers[1].uri,
             '/geo/1/layers/test_layer_2')
         self.assertEqual(layers[1].uuid, 'test_layer_2')
         self.assertEqual(layers[1].ts_created, 3)
         self.assertEqual(layers[1].ts_modified, 4)
+        self.assertEqual(layers[1].num_features, 11)
+        self.assertEqual(layers[1].num_points, 21)
         self.assertEqual(get_mock.call_args_list,
             [call('%s/geo/1/layers' % (self.url_prefix,),
                   headers={'X-Session-ID': 'test_session_uuid'},
@@ -481,13 +489,17 @@ class ClientTests(Tests):
               'uri': '/geo/1/layers/test_layer_1',
               'uuid': 'test_layer_1',
               'ts_created': 1,
-              'ts_modified': 2
+              'ts_modified': 2,
+              'num_features': 0,
+              'num_points': 0
              },
              {'name': 'test_tag_2',
               'uri': '/geo/1/layers/test_layer_2',
               'uuid': 'test_layer_2',
               'ts_created': 3,
-              'ts_modified': 4
+              'ts_modified': 4,
+              'num_features': 0,
+              'num_points': 0
              }]
         m = Mock()
         m.status_code = 200
@@ -502,12 +514,16 @@ class ClientTests(Tests):
         self.assertEqual(layers[0].uuid, 'test_layer_1')
         self.assertEqual(layers[0].ts_created, 1)
         self.assertEqual(layers[0].ts_modified, 2)
+        self.assertEqual(layers[0].num_features, 0)
+        self.assertEqual(layers[0].num_points, 0)
         self.assertEqual(layers[1].name, 'test_tag_2')
         self.assertEqual(layers[1].uri,
             '/geo/1/layers/test_layer_2')
         self.assertEqual(layers[1].uuid, 'test_layer_2')
         self.assertEqual(layers[1].ts_created, 3)
         self.assertEqual(layers[1].ts_modified, 4)
+        self.assertEqual(layers[1].num_features, 0)
+        self.assertEqual(layers[1].num_points, 0)
         self.assertEqual(post_mock.call_args_list,
             [call('%s/geo/1/layers' % (self.url_prefix,),
                   headers={'X-Session-ID': 'test_session_uuid'},

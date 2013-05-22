@@ -25,6 +25,8 @@ class Layer(object):
     uri = None
     ts_created = None
     ts_modified = None
+    num_features = 0
+    num_points = 0
 
     def __init__(self, **kwargs):
         for key, val in kwargs.items():
@@ -34,9 +36,9 @@ class Layer(object):
     
     def __str__(self):
         return 'Layer(name=%s, uuid=%s, ts_created=%d, ts_modified=%d, '\
-               'uri=%s)'\
+               'uri=%s, num_features=%d, num_points=%d)'\
             % (self.name, self.uuid, self.ts_created, self.ts_modified,
-               self.uri)
+               self.uri, self.num_features, self.num_points)
 
     def add_features(self, features):
         """Add list of features to this layer.
@@ -174,7 +176,10 @@ def parse_layers(layers):
                 uuid=layer['uuid'],
                 ts_created=layer['ts_created'],
                 ts_modified=layer['ts_modified'],
-                uri=layer['uri']) for layer in layers]
+                uri=layer['uri'],
+                num_features=layer['num_features'],
+                num_points=layer['num_points']
+                ) for layer in layers]
 
 def update_layer(layer_source, layer_destination):
     """Update Layer object from a layer dictionary.

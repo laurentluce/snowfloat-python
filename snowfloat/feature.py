@@ -36,6 +36,8 @@ class Feature(object):
     fields = {}
     layer_uuid = None
     spatial = None
+    num_features = 0
+    num_points = 0
 
     def __init__(self, geometry, fields=None, **kwargs):
         for key, val in kwargs.items():
@@ -182,7 +184,8 @@ def parse_features(features):
             uri=feature['properties']['uri'],
             ts_created=feature['properties']['ts_created'],
             ts_modified=feature['properties']['ts_modified'],
-            spatial=feature['properties']['spatial'])
+            spatial=feature['properties']['spatial'],
+            layer_uuid = feature['properties']['uri'].split('/')[4])
 
         fields = {}
         for key, val in feature['properties'].items():
