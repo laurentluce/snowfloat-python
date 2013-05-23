@@ -14,8 +14,6 @@ class Task(object):
 
         operation (str): Task operation: distance, map...
 
-        resource (str): Task geometries resource: points, polygons...
-
         task_filter (dict): Query filter.
 
         state (str): Task state: running, succeed...
@@ -31,7 +29,6 @@ class Task(object):
     uuid = None
     uri = None
     operation = None
-    resource = None
     layer_uuid = None
     task_filter = None
     state = None
@@ -62,13 +59,13 @@ class Task(object):
     def __str__(self):
         return '%s(uuid=%s, uri=%s, ' \
                 'ts_created=%s, ts_modified=%s, ' \
-                'operation=%s, resource=%s ' \
+                'operation=%s, ' \
                 'layer_uuid=%s, task_filter=%s ' \
                 'state=%s, extras=%s ' \
                 'reason=%s' \
             % (self.__class__.__name__,
                self.uuid, self.uri, self.ts_created, self.ts_modified,
-               self.geometry, self.fields,
+               self.operation,
                self.layer_uuid, self.task_filter,
                self.state, self.extras, self.reason)
 
@@ -83,7 +80,6 @@ def parse_tasks(tasks):
         list: List of Task objects.
     """
     return [Task(operation=t['operation'],
-                 resource=t['resource'],
                  uuid=t['uuid'],
                  uri=t['uri'],
                  task_filter=t['task_filter'],

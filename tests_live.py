@@ -343,11 +343,9 @@ class Tests(unittest.TestCase):
 
         tasks = [snowfloat.task.Task(
                     operation='distance',
-                    resource='points',
                     layer_uuid=layers[0].uuid),
                  snowfloat.task.Task(
                     operation='distance',
-                    resource='points',
                     layer_uuid=layers[1].uuid)]
         t = time.time()
         r = self.client.execute_tasks(tasks)
@@ -383,7 +381,6 @@ class Tests(unittest.TestCase):
 
         tasks = [snowfloat.task.Task(
                     operation='map',
-                    resource='points',
                     layer_uuid=(layers[0].uuid, layers[1].uuid),
                     extras={'llcrnrlat': -75,
                             'llcrnrlon': -165,
@@ -498,7 +495,6 @@ class Tests(unittest.TestCase):
         # task distance
         tasks = [snowfloat.task.Task(
                     operation='distance',
-                    resource='points',
                     layer_uuid=layers[0].uuid)]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r,
@@ -508,7 +504,6 @@ class Tests(unittest.TestCase):
         # task map
         tasks = [snowfloat.task.Task(
                     operation='map',
-                    resource='points',
                     layer_uuid=layers[0].uuid,
                     extras={'llcrnrlat': -75,
                             'llcrnrlon': -165,

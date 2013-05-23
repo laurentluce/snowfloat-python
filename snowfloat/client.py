@@ -223,7 +223,6 @@ class Client(object):
         # execute import data source task
         tasks = [snowfloat.task.Task(
                     operation='import_geospatial_data',
-                    resource='geometries',
                     extras={'blob_uuid': blob_uuid})]
         res = self.execute_tasks(tasks)
 
@@ -283,12 +282,7 @@ def _prepare_tasks(tasks):
     tasks_to_process = []
     for task in tasks:
         # add task
-        task_to_add = {'operation': task.operation,
-                       'resource': task.resource}
-
-        geometry_type = _convert_resource_to_type(task.resource)
-        if geometry_type:
-            task_to_add['geometry_type__exact'] = geometry_type
+        task_to_add = {'operation': task.operation}
 
         if task.layer_uuid:
             if (isinstance(task.layer_uuid, list) or
@@ -304,17 +298,3 @@ def _prepare_tasks(tasks):
 
     return tasks_to_process
 
-
-def _convert_resource_to_type(resource):
-    """Convert task resource string to geometry type string.
-
-    Args:
-        resource (str): Task resource.
-
-    Returns:
-        str: Geometry type.
-    """
-    if resource == 'geometries':
-        return None
-    else:
-        return resource[:-1].capitalize() 
