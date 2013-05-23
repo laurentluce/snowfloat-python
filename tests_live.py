@@ -489,9 +489,11 @@ class Tests(unittest.TestCase):
             geometry_type='Point', spatial_operation='distance',
             spatial_geometry=pl)]
         self.assertEqual(len(features), 4)
-        self.assertListEqual([f.spatial for f in features],
-            [8958661.49177521, 7866626.32482402, 5538314.71584491,
-             7191.65275350338])
+        distances = [f.spatial for f in features]
+        self.assertAlmostEqual(distances[0], 8958661.491775, 6)
+        self.assertAlmostEqual(distances[1], 7866626.324824, 6)
+        self.assertAlmostEqual(distances[2], 5538314.715845, 6)
+        self.assertAlmostEqual(distances[3], 7191.652754, 6)
 
         # task distance
         tasks = [snowfloat.task.Task(
