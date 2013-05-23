@@ -62,8 +62,11 @@ class Client(object):
         
         return layers
 
-    def get_layers(self):
+    def get_layers(self, **kwargs):
         """Returns all layers.
+
+        Kwargs:
+            Layer's attribute condition.
 
         Returns:
             generator. Yields Layer objects.
@@ -72,7 +75,8 @@ class Client(object):
             snowfloat.errors.RequestError
         """
         uri = self.uri + '/layers'
-        for res in snowfloat.request.get(uri):
+        params = snowfloat.request.format_params(kwargs)
+        for res in snowfloat.request.get(uri, params):
             # convert list of json layers to Layer objects
             layers = snowfloat.layer.parse_layers(res['layers'])
             for layer in layers:
@@ -141,24 +145,16 @@ class Client(object):
             layer_uuid (str): Layer's ID.
 
         Kwargs:
-            geometry_type (str): Geometries type
-            
             field_...: Field value condition.
+
+            Feature's attribute condition.
 
         Raises:
             snowfloat.errors.RequestError
         """
-        params = {}
-        for key, val in kwargs.items():
-            if key.startswith('field_'):
-                s1 = key[:key.index('_')]
-                s2 = key[key.index('_')+1:key.rindex('_')]
-                s3 = key[key.rindex('_')+1:]
-                params[s1 + '__' + s2 + '__' + s3] = val
+        params = snowfloat.request.format_fields_params(kwargs)
+        params.update(snowfloat.request.format_params(kwargs))
  
-        if 'geometry_type' in kwargs:
-            params['geometry_type__exact'] = kwargs['geometry_type']
-        
         uri = '%s/layers/%s/features' % (self.uri, layer_uuid)
         snowfloat.request.delete(uri, params)
 

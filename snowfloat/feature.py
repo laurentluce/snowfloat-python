@@ -107,8 +107,6 @@ def get_features(uri, **kwargs):
     """GET features from the server.
 
     Kwargs:
-        geometry_type (str): Geometries type.
-        
         query (str): Distance or spatial query.
         
         geometry (Geometry): Geometry object for query lookup.
@@ -121,22 +119,15 @@ def get_features(uri, **kwargs):
 
         field_...: Field value condition.
 
+        Feature's attribute condition.
+
     Returns:
         generator. Yield Feature objects.
     """
     get_uri = '%s/features' % (uri,)
 
-    params = {}
-    for key, val in kwargs.items():
-        if key.startswith('field_'):
-            s1 = key[:key.index('_')]
-            s2 = key[key.index('_')+1:key.rindex('_')]
-            s3 = key[key.rindex('_')+1:]
-            params[s1 + '__' + s2 + '__' + s3] = val
+    params = snowfloat.request.format_fields_params(kwargs)
             
-    if 'geometry_type' in kwargs:
-        params['geometry_type__exact'] = kwargs['geometry_type']
-
     if 'query' in kwargs:
         try:
             distance = kwargs['distance']
@@ -159,6 +150,9 @@ def get_features(uri, **kwargs):
                 else:
                     params[key] = value
 
+    exclude = ('query', 'distance', 'geometry')
+    params.update(snowfloat.request.format_params(kwargs, exclude=exclude))
+    
     for res in snowfloat.request.get(get_uri, params):
         # convert list of json features to Feature objects
         features = parse_features(res['geo']['features'])

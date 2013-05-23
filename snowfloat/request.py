@@ -179,3 +179,29 @@ def _format_url(uri):
     url = '%s://%s%s' % (scheme, snowfloat.settings.HOST, uri)
 
     return url
+
+def format_fields_params(kwargs):
+    params = {}
+    for key, val in kwargs.items():
+        if key.startswith('field_'):
+            s1 = key[:key.index('_')]
+            s2 = key[key.index('_')+1:key.rindex('_')]
+            s3 = key[key.rindex('_')+1:]
+            params[s1 + '__' + s2 + '__' + s3] = val
+
+    return params
+
+def format_params(kwargs, exclude=None):
+    
+    if not exclude:
+        exclude = ()
+    params = {}
+    for key, val in kwargs.items():
+        if (not key.startswith('field_') and not key.startswith('spatial_')
+                and not key in exclude):
+            s1 = key[:key.rindex('_')]
+            s2 = key[key.rindex('_')+1:]
+            params[s1 + '__' + s2] = val
+
+    return params
+

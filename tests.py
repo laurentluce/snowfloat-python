@@ -177,6 +177,7 @@ class Tests(unittest.TestCase):
                   headers={'X-Session-ID': 'test_session_uuid'},
                   params={'field__ts__gte': 1,
                           'field__ts__lte': 10,
+                          'ts_created__lte': 2,
                           'geometry__distance_lte':
                             json.dumps(distance_lookup),
                           'spatial_operation': 'intersection',
@@ -313,7 +314,8 @@ class Tests(unittest.TestCase):
         method_mock.assert_called_with(
             '%s/geo/1/layers/test_layer_1/features' % (self.url_prefix),
             headers={'X-Session-ID': 'test_session_uuid'},
-            params={'field__ts__gte': 1, 'field__ts__lte': 10},
+            params={'field__ts__gte': 1, 'field__ts__lte': 10,
+                    'ts_created__lte': 2},
             data={},
             timeout=10,
             verify=False)
@@ -431,7 +433,7 @@ class ClientTests(Tests):
         m2.status_code = 200
         m2.json.return_value = r2
         get_mock.side_effect = [m1, m2]
-        layers = [e for e in self.client.get_layers()]
+        layers = [e for e in self.client.get_layers(name_exact='test_name')]
         self.assertEqual(layers[0].name, 'test_tag_1')
         self.assertEqual(layers[0].uri,
             '/geo/1/layers/test_layer_1')
@@ -452,7 +454,7 @@ class ClientTests(Tests):
             [call('%s/geo/1/layers' % (self.url_prefix,),
                   headers={'X-Session-ID': 'test_session_uuid'},
                   data={},
-                  params={},
+                  params={'name__exact': 'test_name'},
                   timeout=10,
                   verify=False),
              call('%s/geo/1/layers?page=1&page_size=2' % (self.url_prefix,),
@@ -553,7 +555,7 @@ class ClientTests(Tests):
         point = snowfloat.geometry.Point(coordinates=[1, 2, 3])
         point2 = snowfloat.geometry.Point(coordinates=[4, 5, 6])
         self.get_features_helper(get_mock, self.client.get_features,
-            'test_layer_1', field_ts_gte=1, field_ts_lte=10,
+            'test_layer_1', field_ts_gte=1, field_ts_lte=10, ts_created_lte=2,
             query='distance_lte',
             geometry=point, distance=4, spatial_operation='intersection',
             spatial_geometry=point2, spatial_flag=True)
@@ -567,7 +569,7 @@ class ClientTests(Tests):
     def test_delete_features(self, delete_mock):
         self.delete_features_helper(delete_mock,
             self.client.delete_features,
-            'test_layer_1', field_ts_gte=1, field_ts_lte=10)
+            'test_layer_1', field_ts_gte=1, field_ts_lte=10, ts_created_lte=2)
 
     @patch.object(requests, 'post')
     def test_login(self, post_mock):
@@ -847,7 +849,8 @@ class LayerTests(Tests):
         point = snowfloat.geometry.Point(coordinates=(1, 2, 3))
         point2 = snowfloat.geometry.Point(coordinates=[4, 5, 6])
         self.get_features_helper(get_mock, self.layer.get_features,
-            field_ts_gte=1, field_ts_lte=10, query='distance_lte',
+            field_ts_gte=1, field_ts_lte=10, ts_created_lte=2,
+            query='distance_lte',
             geometry=point, distance=4, spatial_operation='intersection',
             spatial_geometry=point2, spatial_flag=True)
     
@@ -861,7 +864,8 @@ class LayerTests(Tests):
     @patch.object(requests, 'delete')
     def test_delete_features(self, delete_mock):
         self.delete_features_helper(delete_mock,
-            self.layer.delete_features, field_ts_gte=1, field_ts_lte=10)
+            self.layer.delete_features, field_ts_gte=1, field_ts_lte=10,
+            ts_created_lte=2)
         self.assertEqual(self.layer.num_features, 1)
         self.assertEqual(self.layer.num_points, 5)
     
