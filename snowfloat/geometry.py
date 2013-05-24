@@ -7,10 +7,12 @@ import time
 try:
     import shapely.geometry
     POINT_CLS = shapely.geometry.Point
+    LINESTRING_CLS = shapely.geometry.LineString
     POLYGON_CLS = shapely.geometry.Polygon
     MULTIPOLYGON_CLS = shapely.geometry.MultiPolygon
 except ImportError:
     POINT_CLS = object
+    LINESTRING_CLS = object
     POLYGON_CLS = object
     MULTIPOLYGON_CLS = object
 
@@ -20,7 +22,7 @@ class Geometry(object):
     Attributes:
         coordinates (list): Geometry coordinates. 
         
-        geometry_type(str): Point or Polygon.
+        geometry_type(str): Point, LineString... 
 
     """
 
@@ -49,7 +51,7 @@ class Point(Geometry, POINT_CLS):
     geometry_type = 'Point'
 
     def __init__(self, coordinates, **kwargs):
-        coords = coordinates
+        coords = coordinates[:]
         if POINT_CLS != object:
             shapely.geometry.Point.__init__(self, coords)
         if len(coords) == 2:
@@ -63,20 +65,44 @@ class Point(Geometry, POINT_CLS):
         return 1
 
 
+class LineString(Geometry, LINESTRING_CLS):
+    """Geometry LineString.
+    """
+
+    geometry_type = 'LineString'
+    points = None
+
+    def __init__(self, coordinates, **kwargs):
+        coords = coordinates[:]
+        self.points = [Point(c) for c in coords] 
+        if LINESTRING_CLS != object:
+            shapely.geometry.LineString.__init__(self, coords)
+        for c in coords:
+            if len(c) == 2:
+                c.append(0)
+            elif c[2] == None:
+                c[2] = 0
+        Geometry.__init__(self, coords, **kwargs)
+    
+    def num_points(self):
+        """Returns the number of points defining this linestring."""
+        return len(self.coordinates)
+
+
 class Polygon(Geometry, POLYGON_CLS):
     """Geometry Polygon."""
 
     geometry_type = 'Polygon'
 
     def __init__(self, coordinates, **kwargs):
-        coords = coordinates
+        coords = coordinates[:]
         if POLYGON_CLS != object:
             shapely.geometry.Polygon.__init__(self, coords[0])
-        for coordinates in coords[0]:
-            if len(coordinates) == 2:
-                coordinates.append(0)
-            elif len(coordinates) == 3 and coordinates[2] == None:
-                coordinates[2] = 0
+        for c in coords[0]:
+            if len(c) == 2:
+                c.append(0)
+            elif len(c) == 3 and c[2] == None:
+                c[2] = 0
         if coords[0][0] != coords[0][-1]:
             coords[0].append(coords[0][0])
         Geometry.__init__(self, coords, **kwargs)
@@ -93,7 +119,7 @@ class MultiPolygon(Geometry, MULTIPOLYGON_CLS):
     polygons = None
 
     def __init__(self, coordinates, **kwargs):
-        coords = coordinates
+        coords = coordinates[:]
         self.polygons = [Polygon(c) for c in coords] 
         if MULTIPOLYGON_CLS != object:
             shapely.geometry.MultiPolygon.__init__(self, self.polygons)
