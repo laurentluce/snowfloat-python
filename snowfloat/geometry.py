@@ -9,11 +9,13 @@ try:
     POINT_CLS = shapely.geometry.Point
     LINESTRING_CLS = shapely.geometry.LineString
     POLYGON_CLS = shapely.geometry.Polygon
+    MULTIPOINT_CLS = shapely.geometry.MultiPoint
     MULTIPOLYGON_CLS = shapely.geometry.MultiPolygon
 except ImportError:
     POINT_CLS = object
     LINESTRING_CLS = object
     POLYGON_CLS = object
+    MULTIPOINT_CLS = object
     MULTIPOLYGON_CLS = object
 
 class Geometry(object):
@@ -110,6 +112,29 @@ class Polygon(Geometry, POLYGON_CLS):
     def num_points(self):
         """Returns the number of points defining this polygon."""
         return len(self.coordinates[0])
+
+
+class MultiPoint(Geometry, MULTIPOINT_CLS):
+    """Geometry MultiPoint."""
+
+    geometry_type = 'MultiPoint'
+    points = None
+
+    def __init__(self, coordinates, **kwargs):
+        coords = coordinates[:]
+        self.points = [Point(c) for c in coords] 
+        if MULTIPOINT_CLS != object:
+            shapely.geometry.MultiPoint.__init__(self, coords)
+        for c in coords:
+            if len(c) == 2:
+                c.append(0)
+            elif c[2] == None:
+                c[2] = 0
+        Geometry.__init__(self, coords, **kwargs)
+    
+    def num_points(self):
+        """Returns the number of points defining this multipoint."""
+        return len(self.coordinates)
 
 
 class MultiPolygon(Geometry, MULTIPOLYGON_CLS):
