@@ -58,10 +58,7 @@ class Point(Geometry, POINT_CLS):
         coords = coordinates[:]
         if POINT_CLS != object:
             shapely.geometry.Point.__init__(self, coords)
-        if len(coords) == 2:
-            coords.append(0)
-        elif coords[2] == None:
-            coords[2] = 0
+        coords = convert_coords_2d_3d(coords)
         Geometry.__init__(self, coords, **kwargs)
     
     def num_points(self):
@@ -81,11 +78,7 @@ class LineString(Geometry, LINESTRING_CLS):
         self.points = [Point(c) for c in coords] 
         if LINESTRING_CLS != object:
             shapely.geometry.LineString.__init__(self, coords)
-        for c in coords:
-            if len(c) == 2:
-                c.append(0)
-            elif c[2] == None:
-                c[2] = 0
+        coords = convert_coords_2d_3d(coords)
         Geometry.__init__(self, coords, **kwargs)
     
     def num_points(self):
@@ -101,14 +94,12 @@ class Polygon(Geometry, POLYGON_CLS):
     def __init__(self, coordinates, **kwargs):
         coords = coordinates[:]
         if POLYGON_CLS != object:
-            shapely.geometry.Polygon.__init__(self, coords[0])
-        for c in coords[0]:
-            if len(c) == 2:
-                c.append(0)
-            elif len(c) == 3 and c[2] == None:
-                c[2] = 0
-        if coords[0][0] != coords[0][-1]:
-            coords[0].append(coords[0][0])
+            shapely.geometry.Polygon.__init__(self, coords[0], coords[1:])
+        coords = convert_coords_2d_3d(coords)
+        # close the rings if not closed
+        for c in coords:
+            if c[0] != c[-1]:
+                c.append(c[0])
         Geometry.__init__(self, coords, **kwargs)
 
     def num_points(self):
@@ -127,11 +118,7 @@ class MultiPoint(Geometry, MULTIPOINT_CLS):
         self.points = [Point(c) for c in coords] 
         if MULTIPOINT_CLS != object:
             shapely.geometry.MultiPoint.__init__(self, coords)
-        for c in coords:
-            if len(c) == 2:
-                c.append(0)
-            elif c[2] == None:
-                c[2] = 0
+        coords = convert_coords_2d_3d(coords)
         Geometry.__init__(self, coords, **kwargs)
     
     def num_points(self):
@@ -175,3 +162,13 @@ class MultiLineString(Geometry, MULTILINESTRING_CLS):
         return sum([e.num_points() for e in self.linestrings])
 
 
+def convert_coords_2d_3d(coords):
+    if isinstance(coords[0], list):
+        for i in range(len(coords)):
+            coords[i] = convert_coords_2d_3d(coords[i])
+        return coords
+    else:
+        res = [coords[0], coords[1], 0]
+        if len(coords) == 3:
+            res[2] = coords[2]
+        return res 
