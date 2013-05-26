@@ -59,6 +59,18 @@ class Tests(unittest.TestCase):
         fields = {'ts': 41, 'tag': 'test_tag_5'}
         feature = snowfloat.feature.Feature(geometry, fields=fields)
         self.features.append(feature)
+        geometry = snowfloat.geometry.MultiLineString(
+                  coordinates=[[[11, 12, 13],
+                                [14, 15, 16],
+                                [17, 18, 19],
+                                [11, 12, 13]],
+                               [[21, 22, 23],
+                                [24, 25, 26],
+                                [27, 28, 29],
+                                [21, 22, 23]]])
+        fields = {'ts': 51, 'tag': 'test_tag_6'}
+        feature = snowfloat.feature.Feature(geometry, fields=fields)
+        self.features.append(feature)
 
     def get_features_helper(self, method_mock, method, *args, **kwargs):
         r1 = {
@@ -155,6 +167,28 @@ class Tests(unittest.TestCase):
                             'spatial': {'type': 'Point',
                                         'coordinates': [16, 17, 18]}}
                         },
+                        {'type': 'Feature',
+                         'id': 'test_multilinestring_1',
+                         'geometry': {'type': 'MultiLineString',
+                                      'coordinates': [[[11, 12, 13],
+                                                       [14, 15, 16],
+                                                       [17, 18, 19],
+                                                       [11, 12, 13]],
+                                                      [[21, 22, 23],
+                                                       [24, 25, 26],
+                                                       [27, 28, 29],
+                                                       [21, 22, 23]]]},
+                         'properties': {
+                            'uri': '/geo/1/layers/test_layer_1/'\
+                                'features/test_multilinestring_1',
+                            'field_ts': 51,
+                            'field_tag': 'test_tag_6',
+                            'ts_created': 52,
+                            'ts_modified': 53,
+                            'spatial': {'type': 'Point',
+                                        'coordinates': [19, 20, 21]}}
+
+                        },
                         ]}}
         r2 = {
               'next_page_uri': None,
@@ -235,6 +269,25 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.ts_modified, 43)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [16, 17, 18])
+        feature = features[5]
+        self.assertListEqual(feature.geometry.coordinates, [[[11, 12, 13],
+                                                             [14, 15, 16],
+                                                             [17, 18, 19],
+                                                             [11, 12, 13]],
+                                                            [[21, 22, 23],
+                                                             [24, 25, 26],
+                                                             [27, 28, 29],
+                                                             [21, 22, 23]]])
+        self.assertEqual(feature.fields['ts'], 51)
+        self.assertEqual(feature.fields['tag'], 'test_tag_6')
+        self.assertEqual(feature.uri,
+            '/geo/1/layers/test_layer_1/features/test_multilinestring_1')
+        self.assertEqual(feature.uuid, 'test_multilinestring_1')
+        self.assertEqual(feature.ts_created, 52)
+        self.assertEqual(feature.ts_modified, 53)
+        self.assertEqual(feature.spatial.geometry_type, 'Point')
+        self.assertListEqual(feature.spatial.coordinates, [19, 20, 21])
+
         distance_lookup = {'type': 'Point',
                            'coordinates': [1, 2, 3],
                            'properties': {'distance': 4}}
@@ -342,7 +395,26 @@ class Tests(unittest.TestCase):
                     'field_ts': 41,
                     'ts_created': 42,
                     'ts_modified': 43},
-                }
+                },
+                {'type': 'Feature',
+                 'id': 'test_multilinestring_1',
+                 'geometry': {'type': 'MultiLineString',
+                              'coordinates': [[[11, 12, 13],
+                                               [14, 15, 16],
+                                               [17, 18, 19],
+                                               [11, 12, 13]],
+                                              [[21, 22, 23],
+                                               [24, 25, 26],
+                                               [27, 28, 29],
+                                               [21, 22, 23]]]},
+                 'properties': {
+                    'uri': '/geo/1/layers/test_layer_1/'\
+                        'features/test_multilinestring_1',
+                    'field_tag': 'test_tag_6',
+                    'field_ts': 51,
+                    'ts_created': 52,
+                    'ts_modified': 53}
+                },
                 ]}
         m = Mock()
         m.status_code = 200
@@ -411,7 +483,24 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.uuid, 'test_multipoint_1')
         self.assertEqual(feature.ts_created, 42)
         self.assertEqual(feature.ts_modified, 43)
-        for i in range(5):
+        feature = features[5]
+        self.assertListEqual(feature.geometry.coordinates, [[[11, 12, 13],
+                                                             [14, 15, 16],
+                                                             [17, 18, 19],
+                                                             [11, 12, 13]],
+                                                            [[21, 22, 23],
+                                                             [24, 25, 26],
+                                                             [27, 28, 29],
+                                                             [21, 22, 23]]])
+        self.assertEqual(feature.fields['ts'], 51)
+        self.assertEqual(feature.fields['tag'], 'test_tag_6')
+        self.assertEqual(feature.uri,
+            '/geo/1/layers/test_layer_1/features/test_multilinestring_1')
+        self.assertEqual(feature.layer_uuid, 'test_layer_1')
+        self.assertEqual(feature.uuid, 'test_multilinestring_1')
+        self.assertEqual(feature.ts_created, 52)
+        self.assertEqual(feature.ts_modified, 53)
+        for i in range(6):
             del r['features'][i]['id']
             del r['features'][i]['properties']['uri']
             del r['features'][i]['properties']['ts_created']
@@ -978,8 +1067,8 @@ class LayerTests(Tests):
     def test_add_features(self, post_mock):
         self.add_features_helper(post_mock, self.layer.add_features,
             self.features)
-        self.assertEqual(self.layer.num_features, 8)
-        self.assertEqual(self.layer.num_points, 23)
+        self.assertEqual(self.layer.num_features, 9)
+        self.assertEqual(self.layer.num_points, 31)
 
     @patch.object(requests, 'delete')
     def test_delete_features(self, delete_mock):

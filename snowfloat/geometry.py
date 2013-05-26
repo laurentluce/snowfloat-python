@@ -11,12 +11,14 @@ try:
     POLYGON_CLS = shapely.geometry.Polygon
     MULTIPOINT_CLS = shapely.geometry.MultiPoint
     MULTIPOLYGON_CLS = shapely.geometry.MultiPolygon
+    MULTILINESTRING_CLS = shapely.geometry.MultiLineString
 except ImportError:
     POINT_CLS = object
     LINESTRING_CLS = object
     POLYGON_CLS = object
     MULTIPOINT_CLS = object
     MULTIPOLYGON_CLS = object
+    MULTILINESTRING_CLS = object
 
 class Geometry(object):
     """Parent class of all geometries.
@@ -153,5 +155,23 @@ class MultiPolygon(Geometry, MULTIPOLYGON_CLS):
     def num_points(self):
         """Returns the number of points defining this multipolygon."""
         return sum([p.num_points() for p in self.polygons])
+
+
+class MultiLineString(Geometry, MULTILINESTRING_CLS):
+    """Geometry MultiLineString."""
+
+    geometry_type = 'MultiLineString'
+    linestrings = None
+
+    def __init__(self, coordinates, **kwargs):
+        coords = coordinates[:]
+        self.linestrings = [LineString(c) for c in coords] 
+        if MULTILINESTRING_CLS != object:
+            shapely.geometry.MultiLineString.__init__(self, self.linestrings)
+        Geometry.__init__(self, coords, **kwargs)
+
+    def num_points(self):
+        """Returns the number of points defining this multilinestrings."""
+        return sum([e.num_points() for e in self.linestrings])
 
 
