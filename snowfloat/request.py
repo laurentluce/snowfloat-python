@@ -4,6 +4,7 @@ import json
 import time
 
 import requests
+import requests.exceptions
 
 import snowfloat.auth
 import snowfloat.errors
@@ -131,6 +132,7 @@ def send(method, uri, params=None, data=None, headers=None):
    
     url = _format_url(uri)
 
+    message = None
     retries = snowfloat.settings.HTTP_RETRIES
     while retries:
         try:
@@ -141,14 +143,13 @@ def send(method, uri, params=None, data=None, headers=None):
                 return res.json()
             elif res.status_code in (400, 403, 404, 413):
                 break
-        except Exception:
-            pass
+        except requests.exceptions.RequestException, e:
+            message = str(e)
         time.sleep(snowfloat.settings.HTTP_RETRY_INTERVAL)
         retries -= 1
    
     status = None
     code = None
-    message = None
     more = None
     try:
         status = res.status_code
