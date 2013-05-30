@@ -117,7 +117,7 @@ def get_features(uri, **kwargs):
 
         spatial_geometry (Geometry): Geometry object for spatial operation.
 
-        field_...: Field value condition.
+        Field value condition.
 
         Feature's attribute condition.
 

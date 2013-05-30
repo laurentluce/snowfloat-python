@@ -77,7 +77,7 @@ class Layer(object):
 
             spatial_geometry (Geometry): Geometry object for spatial operation.
 
-            field_...: Field value condition.
+            Field value condition.
 
         Returns:
             generator. Yields Feature objects.
@@ -94,7 +94,7 @@ class Layer(object):
         Kwargs:
             Feature's attribute condition.
            
-            field_...: Field value condition.
+            Field value condition.
 
         Raises:
             snowfloat.errors.RequestError

@@ -125,7 +125,7 @@ class Client(object):
             
             spatial_geometry (Geometry): Geometry object for spatial operation.
 
-            field_...: Field value condition.
+            Field value condition.
 
         Returns:
             generator. Yields Feature objects.
@@ -145,7 +145,7 @@ class Client(object):
             layer_uuid (str): Layer's ID.
 
         Kwargs:
-            field_...: Field value condition.
+            Field value condition.
 
             Feature's attribute condition.
 
