@@ -19,6 +19,7 @@ class RequestError(Error):
     Attributes:
         status (int): Error http status code.
         code (int): Internal error code.
+        message (str): Error message.
         more (str): Additional details.
     """
 

@@ -221,6 +221,9 @@ class Client(object):
                     operation='import_geospatial_data',
                     extras={'blob_uuid': blob_uuid})]
         res = self.execute_tasks(tasks)
+        if 'error' in res[0]:
+            raise snowfloat.errors.RequestError(status=400, 
+                code=2, message=res[0]['error'], more=None)
 
         # delete blob
         uri = '%s/blobs/%s' % (self.uri, blob_uuid)
