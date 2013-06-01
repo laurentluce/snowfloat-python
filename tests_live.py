@@ -320,44 +320,6 @@ class Tests(unittest.TestCase):
               [45.05, 45.05, 0]
             ]])
 
-    def test_execute_tasks_distance(self):
-
-        # add layers and points to compute on
-        layers = [snowfloat.layer.Layer(name='test_tag_1'),
-                      snowfloat.layer.Layer(name='test_tag_2')]
-        layers = self.client.add_layers(layers)
-
-        # add features points
-        for i in range(2):
-            features_to_add = []
-            for j in range(1000):
-                point = snowfloat.geometry.Point(
-                    coordinates=[random.random() * 90,
-                                 random.random() * -90,
-                                 random.random() * 1000])
-                fields = {'tag': 'test_tag_%d' % (j+1),
-                          'ts': random.random() * 1000}
-                feature = snowfloat.feature.Feature(point, fields=fields)
-                features_to_add.append(feature)
- 
-            self.client.add_features(layers[i].uuid, features_to_add)
-
-        tasks = [snowfloat.task.Task(
-                    operation='distance',
-                    layer_uuid=layers[0].uuid),
-                 snowfloat.task.Task(
-                    operation='distance',
-                    layer_uuid=layers[1].uuid)]
-        t = time.time()
-        r = self.client.execute_tasks(tasks)
-        print 'distance: %.2f' % (time.time() - t)
-        self.assertEqual(r[0][0]['count'], 1000)
-        self.assertGreater(r[0][0]['distance'], 0)
-        self.assertIsNone(r[0][0]['velocity'])
-        self.assertEqual(r[1][0]['count'], 1000)
-        self.assertGreater(r[1][0]['distance'], 0)
-        self.assertIsNone(r[1][0]['velocity'])
-
     def test_execute_tasks_map(self):
 
         # add layers and points to draw on the map
@@ -492,15 +454,6 @@ class Tests(unittest.TestCase):
         self.assertAlmostEqual(distances[1], 7866626.324824, 6)
         self.assertAlmostEqual(distances[2], 5538314.715845, 6)
         self.assertAlmostEqual(distances[3], 7191.652754, 6)
-
-        # task distance
-        tasks = [snowfloat.task.Task(
-                    operation='distance',
-                    layer_uuid=layers[0].uuid)]
-        r = self.client.execute_tasks(tasks)
-        self.assertListEqual(r,
-            [[{u'count': 4, u'distance': 9722488.93059933,
-               u'velocity': None}]])
 
         # task map
         tasks = [snowfloat.task.Task(

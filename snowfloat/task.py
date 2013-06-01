@@ -12,7 +12,7 @@ class Task(object):
 
         uri (str): Task URI.
 
-        operation (str): Task operation: distance, map...
+        operation (str): Task operation: map.
 
         task_filter (dict): Query filter.
 
