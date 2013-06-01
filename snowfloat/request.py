@@ -134,17 +134,20 @@ def send(method, uri, params=None, data=None, headers=None):
 
     message = None
     retries = snowfloat.settings.HTTP_RETRIES
+    timeout = snowfloat.settings.HTTP_TIMEOUT
     while retries:
         try:
             res = method(url, params=request_params, data=request_data,
                 headers=request_headers,
-                timeout=snowfloat.settings.HTTP_TIMEOUT, verify=False)
+                timeout=timeout, verify=False)
             if res.status_code == 200:
                 return res.json()
             elif res.status_code in (400, 403, 404, 413):
                 break
         except requests.exceptions.RequestException, e:
             message = str(e)
+            if 'timeout' in message:
+                timeout *= 2
         time.sleep(snowfloat.settings.HTTP_RETRY_INTERVAL)
         retries -= 1
    
