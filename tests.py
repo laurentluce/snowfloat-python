@@ -1192,11 +1192,12 @@ class PolygonsTests(Tests):
 
 class ImportDataSourceTests(Tests):
    
+    @patch.object(requests, 'get')
     @patch.object(requests, 'delete')
     @patch.object(snowfloat.client.Client, 'execute_tasks')
     @patch.object(requests, 'post')
     def test_import_geospatial_data(self, post_mock, execute_tasks_mock,
-            delete_mock):
+            delete_mock, get_mock):
         r = {'uuid': 'test_blob_uuid'}
         m1 = Mock()
         m1.status_code = 200
@@ -1206,9 +1207,14 @@ class ImportDataSourceTests(Tests):
         m2.status_code = 200
         m2.json.return_value = {}
         delete_mock.return_value = m2
+        m3 = Mock()
+        m3.status_code = 200
+        m3.json.return_value = {'uuid': 'test_blob_uuid', 'state': 'success'}
+        get_mock.return_value = m3
         tf = tempfile.NamedTemporaryFile(delete=False)
         tf.close()
         r = self.client.import_geospatial_data(tf.name)
+        # validate post call
         ca = post_mock.call_args
         self.assertEqual(ca[0][0], '%s/geo/1/blobs' % (self.url_prefix,))
         self.assertDictEqual(ca[1]['headers'],
@@ -1216,6 +1222,16 @@ class ImportDataSourceTests(Tests):
         self.assertDictEqual(ca[1]['params'], {})
         self.assertEqual(ca[1]['timeout'], 10)
         self.assertEqual(ca[1]['verify'], False)
+        # validate get call
+        ca = get_mock.call_args
+        self.assertEqual(ca[0][0],
+            '%s/geo/1/blobs/test_blob_uuid' % (self.url_prefix,))
+        self.assertDictEqual(ca[1]['headers'],
+            {'X-Session-ID': 'test_session_uuid'})
+        self.assertDictEqual(ca[1]['params'], {})
+        self.assertEqual(ca[1]['timeout'], 10)
+        self.assertEqual(ca[1]['verify'], False)
+        # validate execute_tasks call
         ca = execute_tasks_mock.call_args
         task = ca[0][0][0]
         self.assertEqual(task.operation, 'import_geospatial_data')

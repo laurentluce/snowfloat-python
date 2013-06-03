@@ -215,19 +215,32 @@ class Client(object):
         with open(path) as archive:
             res = snowfloat.request.post(uri, archive, serialize=False)
         blob_uuid = res['uuid']
-        
+
+        # make sure the blob is in the success state
+        uri = '%s/blobs/%s' % (self.uri, blob_uuid)
+        while True:
+            res = [e for e in snowfloat.request.get(uri)]
+            if res[0]['state'] == 'started':
+                time.sleep(5)
+            else:
+                if res[0]['state'] == 'failure':
+                    raise snowfloat.errors.RequestError(status=500, 
+                        code=None, message='Upload failed.', more=None)
+                break
+
         # execute import data source task
         tasks = [snowfloat.task.Task(
                     operation='import_geospatial_data',
                     extras={'blob_uuid': blob_uuid})]
         res = self.execute_tasks(tasks)
-        if 'error' in res[0]:
-            raise snowfloat.errors.RequestError(status=400, 
-                code=2, message=res[0]['error'], more=None)
-
+        
         # delete blob
         uri = '%s/blobs/%s' % (self.uri, blob_uuid)
         snowfloat.request.delete(uri)
+
+        if 'error' in res[0]:
+            raise snowfloat.errors.RequestError(status=400, 
+                code=2, message=res[0]['error'], more=None)
 
         return res[0][0]
 
