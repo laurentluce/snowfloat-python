@@ -28,7 +28,13 @@ class Tests(unittest.TestCase):
         self.assertListEqual(layers, [])
 
         # add layers
-        layers = [snowfloat.layer.Layer(name='test_tag_%d' % (i+1,))
+        layers = [snowfloat.layer.Layer(name='test_tag_%d' % (i+1,),
+                                        fields=[{'name': 'field_%d' % (i+1,),
+                                                 'type': 'string',
+                                                 'size': 256},],
+                                        srs={'type': 'EPSG',
+                                             'properties':
+                                                {'code': 4326, 'dim': 3}})
             for i in range(10)]
         t = time.time()
         layers = self.client.add_layers(layers)
@@ -36,6 +42,11 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(layers), 10)
         for i in range(10):
             self.assertEqual(layers[i].name, 'test_tag_%d' % (i+1,))
+            self.assertListEqual(layers[i].fields,
+                [{'name': 'field_%d' % (i+1,), 'type': 'string',
+                  'size': 256},])
+            self.assertDictEqual(layers[i].srs,
+                {'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}})
         
         # list layers
         t = time.time()
@@ -44,6 +55,11 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(layers), 10)
         for i in range(10):
             self.assertEqual(layers[i].name, 'test_tag_%d' % (i+1,))
+            self.assertListEqual(layers[i].fields,
+                [{'name': 'field_%d' % (i+1,), 'type': 'string',
+                  'size': 256},])
+            self.assertDictEqual(layers[i].srs,
+                {'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}})
 
         # update layer
         t = time.time()
@@ -62,6 +78,11 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(layers), 9)
         for i in range(9):
             self.assertEqual(layers[i].name, 'test_tag_%d' % (i+2,))
+            self.assertListEqual(layers[i].fields,
+                [{'name': 'field_%d' % (i+2,), 'type': 'string',
+                  'size': 256},])
+            self.assertDictEqual(layers[i].srs,
+                {'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}})
 
         # delete layers
         self.client.delete_layers()
@@ -73,9 +94,16 @@ class Tests(unittest.TestCase):
     def test_features_points(self):
 
         # add layer
-        layers = [snowfloat.layer.Layer(name='test_tag_1')]
+        layers = [snowfloat.layer.Layer(name='test_tag_1',
+                                        fields=[{'name': 'tag',
+                                                 'type': 'string',
+                                                 'size': 256},
+                                                {'name': 'ts',
+                                                 'type': 'real'},],
+                                        srs={'type': 'EPSG',
+                                             'properties':
+                                                {'code': 4326, 'dim': 3}}),]
         layers = self.client.add_layers(layers)
-        self.assertEqual(layers[0].name, 'test_tag_1')
 
         # get features
         features = [e for e in self.client.get_features(
@@ -194,9 +222,16 @@ class Tests(unittest.TestCase):
     def test_features_polygons(self):
 
         # add layer
-        layers = [snowfloat.layer.Layer(name='test_tag_1')]
+        layers = [snowfloat.layer.Layer(name='test_tag_1',
+                                        fields=[{'name': 'tag',
+                                                 'type': 'string',
+                                                 'size': 256},
+                                                {'name': 'ts',
+                                                 'type': 'real'},],
+                                        srs={'type': 'EPSG',
+                                             'properties':
+                                                {'code': 4326, 'dim': 3}}),]
         layers = self.client.add_layers(layers)
-        self.assertEqual(layers[0].name, 'test_tag_1')
 
         # get features polygons
         polygons = [e for e in self.client.get_features(
@@ -305,7 +340,8 @@ class Tests(unittest.TestCase):
                                                [45.0, 45.0, 0]
                                        ]])
         features = [e for e in self.client.get_features(layers[0].uuid,
-            geometry_type_exact='Polygon', query='contained', geometry=polygon)]
+            geometry_type_exact='Polygon', query='contained',
+            geometry=polygon)]
         self.assertEqual(len(features), 2)
         self.assertListEqual(features[0].geometry.coordinates,
             [[[45.0, 45.0, 0],
@@ -323,28 +359,34 @@ class Tests(unittest.TestCase):
     def test_execute_tasks_map(self):
 
         # add layers and points to draw on the map
-        layers = [snowfloat.layer.Layer(name='test_tag_1'),
-                      snowfloat.layer.Layer(name='test_tag_2')]
+        layers = [snowfloat.layer.Layer(name='test_tag_1',
+                                        fields=[{'name': 'tag',
+                                                 'type': 'string',
+                                                 'size': 256},
+                                                {'name': 'ts',
+                                                 'type': 'real'},],
+                                        srs={'type': 'EPSG',
+                                             'properties':
+                                                {'code': 4326, 'dim': 3}}),]
         layers = self.client.add_layers(layers)
 
         # add features points
-        for i in range(2):
-            features_to_add = []
-            for j in range(100):
-                point = snowfloat.geometry.Point(
-                    coordinates=[random.random() * 90,
-                                 random.random() * -90,
-                                 random.random() * 1000])
-                fields = {'tag': 'test_tag_%d' % (j+1),
-                          'ts': time.time()}
-                feature = snowfloat.feature.Feature(point, fields=fields)
-                features_to_add.append(feature)
- 
-            self.client.add_features(layers[i].uuid, features_to_add)
+        features_to_add = []
+        for i in range(100):
+            point = snowfloat.geometry.Point(
+                coordinates=[random.random() * 90,
+                             random.random() * -90,
+                             random.random() * 1000])
+            fields = {'tag': 'test_tag_1',
+                      'ts': time.time()}
+            feature = snowfloat.feature.Feature(point, fields=fields)
+            features_to_add.append(feature)
+
+        self.client.add_features(layers[0].uuid, features_to_add)
 
         tasks = [snowfloat.task.Task(
                     operation='map',
-                    layer_uuid=(layers[0].uuid, layers[1].uuid),
+                    layer_uuid=layers[0].uuid,
                     extras={'llcrnrlat': -75,
                             'llcrnrlon': -165,
                             'urcrnrlat': 75,
@@ -356,17 +398,26 @@ class Tests(unittest.TestCase):
 
     def test_execute_tasks_import_geospatial_data(self):
 
-        tag_fields = ['dbl', 'int', 'str']
-        geometry_ts_field = 'int'
         path = 'tests/test_point.zip'
-        r = self.client.import_geospatial_data(path)
+        srs={'type': 'EPSG',
+             'properties':
+                {'code': 4326, 'dim': 3}}
+        r = self.client.import_geospatial_data(path, srs)
         self.assertDictEqual(r,
             {'layers_count': 1, 'features_count': 5})
 
     def test_usa(self):
 
         # add layer
-        layers = [snowfloat.layer.Layer(name='World')]
+        layers = [snowfloat.layer.Layer(name='World',
+                                        fields=[{'name': 'tag',
+                                                 'type': 'string',
+                                                 'size': 256},
+                                                {'name': 'ts',
+                                                 'type': 'real'},],
+                                        srs={'type': 'EPSG',
+                                             'properties':
+                                                {'code': 4326, 'dim': 3}}),]
         layers = self.client.add_layers(layers)
 
         # add cities
@@ -409,7 +460,7 @@ class Tests(unittest.TestCase):
                                       [-100, 30, 0],
                                       [-100, 40, 0],
                                       [-125, 40, 0]]])
-        fields = {'tag': 'West'}
+        fields = {'tag': 'West', 'ts': 5}
         feature = snowfloat.feature.Feature(poly_west, fields=fields)
         features.append(feature)
 
@@ -419,7 +470,7 @@ class Tests(unittest.TestCase):
                                       [-65, 35, 0],
                                       [-65, 45, 0],
                                       [-75, 45, 0]]])
-        fields = {'tag': 'East'}
+        fields = {'tag': 'East', 'ts': 6}
         feature = snowfloat.feature.Feature(poly_east, fields=fields)
         features.append(feature)
         

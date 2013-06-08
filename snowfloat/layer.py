@@ -19,6 +19,10 @@ class Layer(object):
         ts_created (int): Creation timestamp.
         
         ts_modified (int): Modification timestamp.
+
+        fields (list): List of fields definitions.
+
+        srs (dict): Spatial reference system dictionary.
     """
     name = ''
     uuid = None
@@ -27,6 +31,8 @@ class Layer(object):
     ts_modified = None
     num_features = 0
     num_points = 0
+    fields = None
+    srs = None
 
     def __init__(self, **kwargs):
         for key, val in kwargs.items():
@@ -35,9 +41,11 @@ class Layer(object):
     
     def __str__(self):
         return 'Layer(name=%s, uuid=%s, ts_created=%d, ts_modified=%d, '\
-               'uri=%s, num_features=%d, num_points=%d)'\
+               'uri=%s, num_features=%d, num_points=%d, fields=%s, '\
+               'srs=%s)' \
             % (self.name, self.uuid, self.ts_created, self.ts_modified,
-               self.uri, self.num_features, self.num_points)
+               self.uri, self.num_features, self.num_points, self.fields,
+               self.srs)
 
     def add_features(self, features):
         """Add list of features to this layer.
@@ -131,10 +139,15 @@ class Layer(object):
         Raises:
             snowfloat.errors.RequestError
         """
+        layer = Layer()
+        for key, value in kwargs.items():
+            getattr(self, key)
+            setattr(layer, key, value)
+        snowfloat.request.put(self.uri,
+            data=snowfloat.layer.format_layer(layer))
+        # if success: update self attributes
         for key, value in kwargs.items():
             setattr(self, key, value)
-        snowfloat.request.put(self.uri,
-            data=snowfloat.layer.format_layer(self))
         self.ts_modified = int(time.time())
 
     def delete(self):
@@ -166,7 +179,13 @@ def format_layer(layer):
     Returns:
         dict: Layer dictionary to be sent to the server.
     """
-    return {'name': layer.name}
+    d = {'name': layer.name}
+    if layer.fields:
+        d['fields'] = layer.fields
+    if layer.srs:
+        d['srs'] = layer.srs
+    
+    return d
 
 def parse_layers(layers):
     """Convert layer dictionaries.
@@ -184,7 +203,9 @@ def parse_layers(layers):
                 ts_modified=layer['ts_modified'],
                 uri=layer['uri'],
                 num_features=layer['num_features'],
-                num_points=layer['num_points']
+                num_points=layer['num_points'],
+                fields=layer['fields'],
+                srs=layer['srs']
                 ) for layer in layers]
 
 def update_layer(layer_source, layer_destination):

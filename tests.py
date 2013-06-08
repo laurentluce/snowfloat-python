@@ -619,7 +619,11 @@ class ClientTests(Tests):
                             'ts_created': 1,
                             'ts_modified': 2,
                             'num_features': 10,
-                            'num_points': 20
+                            'num_points': 20,
+                            'fields': [{'name': 'field_1', 'type': 'string',
+                                        'size': 256},],
+                            'srs': {'type': 'EPSG',
+                                    'properties': {'code': 4326, 'dim': 3}},
                            },
                            {'name': 'test_tag_2',
                             'uri': '/geo/1/layers/test_layer_2',
@@ -627,7 +631,11 @@ class ClientTests(Tests):
                             'ts_created': 3,
                             'ts_modified': 4,
                             'num_features': 11,
-                            'num_points': 21
+                            'num_points': 21,
+                            'fields': [{'name': 'field_2', 'type': 'string',
+                                        'size': 256},],
+                            'srs': {'type': 'EPSG',
+                                    'properties': {'code': 4327, 'dim': 2}},
                            }],
             }
         r2 = {
@@ -651,6 +659,10 @@ class ClientTests(Tests):
         self.assertEqual(layers[0].ts_modified, 2)
         self.assertEqual(layers[0].num_features, 10)
         self.assertEqual(layers[0].num_points, 20)
+        self.assertListEqual(layers[0].fields,
+            [{'name': 'field_1', 'type': 'string', 'size': 256},])
+        self.assertDictEqual(layers[0].srs,
+            {'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}})
         self.assertEqual(layers[1].name, 'test_tag_2')
         self.assertEqual(layers[1].uri,
             '/geo/1/layers/test_layer_2')
@@ -659,6 +671,10 @@ class ClientTests(Tests):
         self.assertEqual(layers[1].ts_modified, 4)
         self.assertEqual(layers[1].num_features, 11)
         self.assertEqual(layers[1].num_points, 21)
+        self.assertListEqual(layers[1].fields,
+            [{'name': 'field_2', 'type': 'string', 'size': 256},])
+        self.assertDictEqual(layers[1].srs,
+            {'type': 'EPSG', 'properties': {'code': 4327, 'dim': 2}})
         self.assertEqual(get_mock.call_args_list,
             [call('%s/geo/1/layers' % (self.url_prefix,),
                   headers={'X-Session-ID': 'test_session_uuid'},
@@ -702,7 +718,9 @@ class ClientTests(Tests):
               'ts_created': 1,
               'ts_modified': 2,
               'num_features': 0,
-              'num_points': 0
+              'num_points': 0,
+              'fields': [{'name': 'field_1', 'type': 'string', 'size': 256},],
+              'srs': {'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}},
              },
              {'name': 'test_tag_2',
               'uri': '/geo/1/layers/test_layer_2',
@@ -710,14 +728,22 @@ class ClientTests(Tests):
               'ts_created': 3,
               'ts_modified': 4,
               'num_features': 0,
-              'num_points': 0
+              'num_points': 0,
+              'fields': [{'name': 'field_2', 'type': 'string', 'size': 256},],
+              'srs': {'type': 'EPSG', 'properties': {'code': 4327, 'dim': 2}},
              }]
         m = Mock()
         m.status_code = 200
         m.json.return_value = r
         post_mock.return_value = m
-        layers = [snowfloat.layer.Layer(name='test_tag_1'),
-                      snowfloat.layer.Layer(name='test_tag_2')]
+        layers = [
+            snowfloat.layer.Layer(name='test_tag_1',
+                fields=[{'name': 'field_1', 'type': 'string', 'size': 256},],
+                srs={'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}}),
+            snowfloat.layer.Layer(name='test_tag_2',
+                fields=[{'name': 'field_2', 'type': 'string', 'size': 256},],
+                srs={'type': 'EPSG', 'properties': {'code': 4327, 'dim': 2}}),
+        ]
         layers = self.client.add_layers(layers)
         self.assertEqual(layers[0].name, 'test_tag_1')
         self.assertEqual(layers[0].uri,
@@ -727,6 +753,10 @@ class ClientTests(Tests):
         self.assertEqual(layers[0].ts_modified, 2)
         self.assertEqual(layers[0].num_features, 0)
         self.assertEqual(layers[0].num_points, 0)
+        self.assertListEqual(layers[0].fields,
+            [{'name': 'field_1', 'type': 'string', 'size': 256},])
+        self.assertDictEqual(layers[0].srs,
+            {'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}})
         self.assertEqual(layers[1].name, 'test_tag_2')
         self.assertEqual(layers[1].uri,
             '/geo/1/layers/test_layer_2')
@@ -735,11 +765,26 @@ class ClientTests(Tests):
         self.assertEqual(layers[1].ts_modified, 4)
         self.assertEqual(layers[1].num_features, 0)
         self.assertEqual(layers[1].num_points, 0)
+        self.assertListEqual(layers[1].fields,
+            [{'name': 'field_2', 'type': 'string', 'size': 256},])
+        self.assertDictEqual(layers[1].srs,
+            {'type': 'EPSG', 'properties': {'code': 4327, 'dim': 2}})
+        
         self.assertEqual(post_mock.call_args_list,
             [call('%s/geo/1/layers' % (self.url_prefix,),
                   headers={'X-Session-ID': 'test_session_uuid'},
-                  data=json.dumps([{'name': 'test_tag_1'},
-                                   {'name': 'test_tag_2'}]),
+                  data=json.dumps([
+                    {'name': 'test_tag_1',
+                     'fields': [{'name': 'field_1', 'type': 'string',
+                                 'size': 256},],
+                     'srs': {'type': 'EPSG',
+                             'properties': {'code': 4326, 'dim': 3}}},
+                    {'name': 'test_tag_2',
+                     'fields': [{'name': 'field_2', 'type': 'string',
+                                 'size': 256},],
+                     'srs': {'type': 'EPSG',
+                             'properties': {'code': 4327, 'dim': 2}}},
+                    ]),
                   params={},
                   timeout=10,
                   verify=False)])

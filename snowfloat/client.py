@@ -201,11 +201,13 @@ class Client(object):
 
         return [results[task.uuid] for task in tasks_to_process]
 
-    def import_geospatial_data(self, path):
+    def import_geospatial_data(self, path, srs=None):
         """Import geospatial data.
 
         Args:
             path (str): OGR data archive path.
+
+            srs (dict): Spatial reference system to replace the one in the data source file.
         
         Returns:
             dict: Dictionary containing the number of layers and features added.
@@ -229,9 +231,12 @@ class Client(object):
                 break
 
         # execute import data source task
+        extras={'blob_uuid': blob_uuid}
+        if srs:
+            extras['srs'] = srs
         tasks = [snowfloat.task.Task(
                     operation='import_geospatial_data',
-                    extras={'blob_uuid': blob_uuid})]
+                    extras=extras)]
         res = self.execute_tasks(tasks)
         
         # delete blob
@@ -301,7 +306,7 @@ def _prepare_tasks(tasks):
                 isinstance(task.layer_uuid, tuple)):
                 task_to_add['layer__uuid__in'] = task.layer_uuid
             else:
-                task_to_add['layer__uuid'] = task.layer_uuid
+                task_to_add['layer__uuid__exact'] = task.layer_uuid
 
         if task.extras:
             task_to_add['extras'] = task.extras
