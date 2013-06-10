@@ -24,21 +24,6 @@ class Client(object):
     def __init__(self):
         pass
 
-    def login(self, username, key):
-        """Login to the server and store a session ID locally.
-
-        Args:
-            username (str): Username to use to login.
-
-            key (str): API key to use to login.
-
-        Raises:
-            snowfloat.errors.RequestError
-        """
-        res = snowfloat.request.post(self.uri + '/login',
-            {'username': username, 'key': key})
-        snowfloat.auth.session_uuid = res['more'] 
-
     def add_layers(self, layers):
         """Add list of layers.
 

@@ -1,7 +1,12 @@
 """HTTP requests to server."""
 
+import base64
+import email.utils
+import hashlib
+import hmac
 import json
 import time
+import urllib
 
 import requests
 import requests.exceptions
@@ -113,6 +118,8 @@ def send(method, uri, params=None, data=None, headers=None):
     Kwargs:
         params (dict): Request parameters.
 
+        data (str): Request body data.
+
         headers (dict): Request headers.
 
     Returns:
@@ -126,7 +133,37 @@ def send(method, uri, params=None, data=None, headers=None):
     if request_data is None:
         request_data = {}
 
-    request_headers = {'X-Session-ID': snowfloat.auth.session_uuid}
+    verb = method.__name__.upper()
+    if verb in ('PUT', 'POST'):
+        content_sha = _get_sha(request_data)
+        
+        if isinstance(request_data, file):
+            content_type = 'application/octet-stream'
+        else:
+            content_type = 'application/json'
+    else:
+        content_sha = ''
+        content_type = ''
+
+    date = email.utils.formatdate(usegmt=True)
+
+    if request_params:
+        full_uri = '%s?%s' % (uri, urllib.urlencode(request_params))
+    else:
+        full_uri = uri
+
+    msg = '%s\n%s\n%s\n%s\n%s' % (
+        verb, content_sha, content_type, date, full_uri)
+
+    request_headers = {'Authorization': 'GEO %s:%s' % (
+        snowfloat.settings.API_KEY,
+        _get_hmac_sha(msg, snowfloat.settings.API_PRIVATE_KEY))}
+    
+    if verb in ('PUT', 'POST'):
+        request_headers['Content-Sha'] = content_sha
+        request_headers['Content-Type'] = content_type
+    request_headers['Date'] = date 
+
     if headers:
         request_headers.update(headers)
    
@@ -164,6 +201,25 @@ def send(method, uri, params=None, data=None, headers=None):
         pass 
 
     raise snowfloat.errors.RequestError(status, code, message, more)
+
+def _get_hmac_sha(msg, private_key):
+    return base64.b64encode(hmac.new(
+        private_key, msg=msg, digestmod=hashlib.sha256).digest())
+
+def _get_sha(request_data):
+    if isinstance(request_data, file):
+        sha = hashlib.sha256()
+        while True:
+            chunk = request_data.read(8192)
+            if chunk:
+                sha.update(chunk)
+            else:
+                request_data.seek(0)
+                break
+    else:
+        sha = hashlib.sha256(request_data)
+
+    return base64.b64encode(sha.digest())
 
 def _format_url(uri):
     """Format URL based on URI and port number.

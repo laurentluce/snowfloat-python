@@ -15,9 +15,6 @@ class Tests(unittest.TestCase):
 
     def setUp(self):
         self.client = snowfloat.client.Client()
-        # login
-        self.client.login(snowfloat.settings.USERNAME,
-            snowfloat.settings.API_KEY)
         # remove layers
         self.client.delete_layers()
 

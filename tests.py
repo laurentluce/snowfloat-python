@@ -1,3 +1,4 @@
+import email.utils
 import json
 import os
 import tempfile
@@ -71,6 +72,15 @@ class Tests(unittest.TestCase):
         fields = {'ts': 51, 'tag': 'test_tag_6'}
         feature = snowfloat.feature.Feature(geometry, fields=fields)
         self.features.append(feature)
+    
+        email.utils.formatdate = Mock()
+        email.utils.formatdate.return_value = 'Sat, 08 Jun 2013 22:12:05 GMT'
+        snowfloat.request._get_sha = Mock()
+        snowfloat.request._get_sha.return_value = \
+            'n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg='
+        snowfloat.request._get_hmac_sha = Mock()
+        snowfloat.request._get_hmac_sha.return_value = \
+            'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='
 
     def get_features_helper(self, method_mock, method, *args, **kwargs):
         r1 = {
@@ -294,9 +304,12 @@ class Tests(unittest.TestCase):
         spatial_geometry = {'type': 'Point',
                             'coordinates': [4, 5, 6]}
         self.assertEqual(method_mock.call_args_list,
-            [call('%s/geo/1/layers/test_layer_1/features'
-                    % (self.url_prefix,),
-                  headers={'X-Session-ID': 'test_session_uuid'},
+            [call('%s/geo/1/layers/test_layer_1/features' % 
+                (self.url_prefix,),
+                  headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                           'Authorization':
+                               'GEO IY3487E2J6ZHFOW5A7P5:'\
+                               'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
                   params={'field__ts__gte': 1,
                           'field__ts__lte': 10,
                           'ts_created__lte': 2,
@@ -312,7 +325,10 @@ class Tests(unittest.TestCase):
              call('%s/geo/1/layers/test_layer_1/features?page=1'\
                     '&page_size=2'
                   % (self.url_prefix,),
-                  headers={'X-Session-ID': 'test_session_uuid'},
+                  headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                           'Authorization':
+                               'GEO IY3487E2J6ZHFOW5A7P5:'\
+                               'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
                   params={},
                   data={},
                   timeout=10,
@@ -508,7 +524,13 @@ class Tests(unittest.TestCase):
         self.assertEqual(method_mock.call_args_list,
             [call('%s/geo/1/layers/test_layer_1/features'
                     % (self.url_prefix,),
-                  headers={'X-Session-ID': 'test_session_uuid'},
+                  headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                           'Content-Type': 'application/json',
+                           'Content-Sha':
+                               'n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=',
+                           'Authorization':
+                               'GEO IY3487E2J6ZHFOW5A7P5:'\
+                               'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
                   data=json.dumps(r),
                   params={},
                   timeout=10,
@@ -522,7 +544,10 @@ class Tests(unittest.TestCase):
         method(*args, **kwargs)
         method_mock.assert_called_with(
             '%s/geo/1/layers/test_layer_1/features' % (self.url_prefix),
-            headers={'X-Session-ID': 'test_session_uuid'},
+            headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                     'Authorization':
+                         'GEO IY3487E2J6ZHFOW5A7P5:'\
+                         'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
             params={'field__ts__gte': 1, 'field__ts__lte': 10,
                     'ts_created__lte': 2},
             data={},
@@ -538,7 +563,10 @@ class Tests(unittest.TestCase):
         method_mock.assert_called_with(
             '%s/geo/1/layers/test_layer_1/'\
                 'features/test_feature_1' % (self.url_prefix),
-            headers={'X-Session-ID': 'test_session_uuid'},
+            headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                     'Authorization':
+                         'GEO IY3487E2J6ZHFOW5A7P5:'\
+                         'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
             params={},
             data={},
             timeout=10,
@@ -592,14 +620,20 @@ class Tests(unittest.TestCase):
         self.assertEqual(result.ts_modified, 4)
         self.assertEqual(method_mock.call_args_list,
             [call('%s/geo/1/tasks/test_task_1/results' % (self.url_prefix,),
-                  headers={'X-Session-ID': 'test_session_uuid'},
+                  headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                           'Authorization':
+                               'GEO IY3487E2J6ZHFOW5A7P5:'\
+                               'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
                   data={},
                   params={},
                   timeout=10,
                   verify=False),
              call('%s/geo/1/tasks/test_task_1/results?page=1&page_size=2'
                   % (self.url_prefix,),
-                  headers={'X-Session-ID': 'test_session_uuid'},
+                  headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                           'Authorization':
+                               'GEO IY3487E2J6ZHFOW5A7P5:'\
+                               'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
                   data={},
                   params={},
                   timeout=10,
@@ -610,6 +644,7 @@ class ClientTests(Tests):
    
     @patch.object(requests, 'get')
     def test_get_layers(self, get_mock):
+        get_mock.__name__ = 'get'
         r1 = {
                 'next_page_uri': '/geo/1/layers?page=1&page_size=2',
                 'total': 2,
@@ -677,13 +712,19 @@ class ClientTests(Tests):
             {'type': 'EPSG', 'properties': {'code': 4327, 'dim': 2}})
         self.assertEqual(get_mock.call_args_list,
             [call('%s/geo/1/layers' % (self.url_prefix,),
-                  headers={'X-Session-ID': 'test_session_uuid'},
+                  headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                           'Authorization':
+                               'GEO IY3487E2J6ZHFOW5A7P5:'\
+                               'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
                   data={},
                   params={'name__exact': 'test_name'},
                   timeout=10,
                   verify=False),
              call('%s/geo/1/layers?page=1&page_size=2' % (self.url_prefix,),
-                  headers={'X-Session-ID': 'test_session_uuid'},
+                  headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                           'Authorization':
+                               'GEO IY3487E2J6ZHFOW5A7P5:'\
+                               'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
                   data={},
                   params={},
                   timeout=10,
@@ -712,6 +753,7 @@ class ClientTests(Tests):
 
     @patch.object(requests, 'post')
     def test_add_layers(self, post_mock):
+        post_mock.__name__ = 'post'
         r = [{'name': 'test_tag_1',
               'uri': '/geo/1/layers/test_layer_1',
               'uuid': 'test_layer_1',
@@ -772,7 +814,13 @@ class ClientTests(Tests):
         
         self.assertEqual(post_mock.call_args_list,
             [call('%s/geo/1/layers' % (self.url_prefix,),
-                  headers={'X-Session-ID': 'test_session_uuid'},
+                  headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                           'Content-Type': 'application/json',
+                           'Authorization':
+                               'GEO IY3487E2J6ZHFOW5A7P5:'\
+                               'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I=',
+                           'Content-Sha':
+                               'n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg='},
                   data=json.dumps([
                     {'name': 'test_tag_1',
                      'fields': [{'name': 'field_1', 'type': 'string',
@@ -791,6 +839,7 @@ class ClientTests(Tests):
 
     @patch.object(requests, 'delete')
     def test_delete_layers(self, delete_mock):
+        delete_mock.__name__ = 'delete'
         m = Mock()
         m.status_code = 200
         m.json.return_value = {}
@@ -798,7 +847,10 @@ class ClientTests(Tests):
         self.client.delete_layers()
         delete_mock.assert_called_with(
             '%s/geo/1/layers' % (self.url_prefix),
-            headers={'X-Session-ID': 'test_session_uuid'},
+            headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                     'Authorization':
+                         'GEO IY3487E2J6ZHFOW5A7P5:'\
+                         'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
             data={},
             params={},
             timeout=10,
@@ -806,6 +858,7 @@ class ClientTests(Tests):
 
     @patch.object(requests, 'get')
     def test_get_features(self, get_mock):
+        get_mock.__name__ = 'get'
         point = snowfloat.geometry.Point(coordinates=[1, 2, 3])
         point2 = snowfloat.geometry.Point(coordinates=[4, 5, 6])
         self.get_features_helper(get_mock, self.client.get_features,
@@ -816,27 +869,20 @@ class ClientTests(Tests):
 
     @patch.object(requests, 'post')
     def test_add_features(self, post_mock):
+        post_mock.__name__ = 'post'
         self.add_features_helper(post_mock, self.client.add_features,
             'test_layer_1', self.features)
 
     @patch.object(requests, 'delete')
     def test_delete_features(self, delete_mock):
+        delete_mock.__name__ = 'delete'
         self.delete_features_helper(delete_mock,
             self.client.delete_features,
             'test_layer_1', field_ts_gte=1, field_ts_lte=10, ts_created_lte=2)
 
     @patch.object(requests, 'post')
-    def test_login(self, post_mock):
-        r = {'more': 'test_session_2'}
-        m = Mock()
-        m.status_code = 200
-        m.json.return_value = r
-        post_mock.return_value = m
-        self.client.login('test_user', 'test_key')
-        self.assertEqual(snowfloat.auth.session_uuid, 'test_session_2')
-
-    @patch.object(requests, 'post')
     def test_add_tasks(self, post_mock):
+        post_mock.__name__ = 'post'
         r = [{'operation': 'test_operation_1',
               'task_filter': 'test_task_filter_1',
               'uri': '/geo/1/tasks/test_task_1',
@@ -885,6 +931,7 @@ class ClientTests(Tests):
 
     @patch.object(requests, 'get')
     def test_get_task(self, get_mock):
+        get_mock.__name__ = 'get'
         r = {'operation': 'test_operation_1',
              'task_filter': 'test_task_filter_1',
              'uri': '/geo/1/tasks/test_task_1',
@@ -911,7 +958,10 @@ class ClientTests(Tests):
         self.assertEqual(task.ts_modified, 2)
         get_mock.assert_called_with(
             '%s/geo/1/tasks/test_task_1' % (self.url_prefix,),
-            headers={'X-Session-ID': 'test_session_uuid'},
+            headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                     'Authorization':
+                         'GEO IY3487E2J6ZHFOW5A7P5:'\
+                         'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
             data={},
             params={},
             timeout=10,
@@ -919,6 +969,7 @@ class ClientTests(Tests):
 
     @patch.object(requests, 'get')
     def test_get_results(self, get_mock):
+        get_mock.__name__ = 'get'
         self.get_results_helper(get_mock, self.client._get_results,
             'test_task_1')
 
@@ -952,9 +1003,9 @@ class ClientTests(Tests):
         self.assertListEqual(r, [['test_result_1',], ['test_result_2',]])
         d = [
             {'operation': 'test_operation_1',
-             'layer__uuid': 'test_layer_1'},
+             'layer__uuid__exact': 'test_layer_1'},
             {'operation': 'test_operation_2',
-             'layer__uuid': 'test_layer_2'}
+             'layer__uuid__exact': 'test_layer_2'}
         ]
         _add_tasks_mock.assert_called_with(d)
         self.assertEqual(_get_task_mock.call_args_list,
@@ -995,7 +1046,7 @@ class ClientTests(Tests):
             {'operation': 'test_operation_1',
              'layer__uuid__in': ['test_layer_1', 'test_layer_1b']},
             {'operation': 'test_operation_2',
-             'layer__uuid': 'test_layer_2'}
+             'layer__uuid__exact': 'test_layer_2'}
         ]
         _add_tasks_mock.assert_called_with(d)
         self.assertEqual(_get_task_mock.call_args_list,
@@ -1035,9 +1086,9 @@ class ClientTests(Tests):
         self.assertListEqual(r, [['test_result_1',], ['test_result_2',]])
         d = [
             {'operation': 'test_operation_1',
-             'layer__uuid': 'test_layer_1'},
+             'layer__uuid__exact': 'test_layer_1'},
             {'operation': 'test_operation_2',
-             'layer__uuid': 'test_layer_2'}
+             'layer__uuid__exact': 'test_layer_2'}
         ]
         _add_tasks_mock.assert_called_with(d)
         self.assertEqual(_get_task_mock.call_args_list,
@@ -1074,9 +1125,9 @@ class ClientTests(Tests):
         self.assertListEqual(r, [['test_result_1',], None])
         d = [
             {'operation': 'test_operation_1',
-             'layer__uuid': 'test_layer_1'},
+             'layer__uuid__exact': 'test_layer_1'},
             {'operation': 'test_operation_2',
-             'layer__uuid': 'test_layer_2'}
+             'layer__uuid__exact': 'test_layer_2'}
         ]
         _add_tasks_mock.assert_called_with(d)
         self.assertEqual(_get_task_mock.call_args_list,
@@ -1100,6 +1151,7 @@ class LayerTests(Tests):
 
     @patch.object(requests, 'get')
     def test_get_features(self, get_mock):
+        get_mock.__name__ = 'get'
         point = snowfloat.geometry.Point(coordinates=(1, 2, 3))
         point2 = snowfloat.geometry.Point(coordinates=[4, 5, 6])
         self.get_features_helper(get_mock, self.layer.get_features,
@@ -1110,6 +1162,7 @@ class LayerTests(Tests):
     
     @patch.object(requests, 'post')
     def test_add_features(self, post_mock):
+        post_mock.__name__ = 'post'
         self.add_features_helper(post_mock, self.layer.add_features,
             self.features)
         self.assertEqual(self.layer.num_features, 9)
@@ -1117,6 +1170,7 @@ class LayerTests(Tests):
 
     @patch.object(requests, 'delete')
     def test_delete_features(self, delete_mock):
+        delete_mock.__name__ = 'delete'
         self.delete_features_helper(delete_mock,
             self.layer.delete_features, field_ts_gte=1, field_ts_lte=10,
             ts_created_lte=2)
@@ -1125,11 +1179,13 @@ class LayerTests(Tests):
     
     @patch.object(requests, 'delete')
     def test_delete_feature(self, delete_mock):
+        delete_mock.__name__ = 'delete'
         self.delete_feature_helper(delete_mock,
             self.layer.delete_feature, 'test_feature_1')
 
     @patch.object(requests, 'put')
     def test_update(self, put_mock):
+        put_mock.__name__ = 'put'
         m = Mock()
         m.status_code = 200
         m.json.return_value = {}
@@ -1137,7 +1193,13 @@ class LayerTests(Tests):
         self.layer.update(name='test_tag')
         put_mock.assert_called_with(
             '%s/geo/1/layers/test_layer_1' % (self.url_prefix),
-            headers={'X-Session-ID': 'test_session_uuid'},
+            headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                     'Content-Type': 'application/json',
+                     'Authorization':
+                         'GEO IY3487E2J6ZHFOW5A7P5:'\
+                         'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I=',
+                     'Content-Sha':
+                               'n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg='},
             data=json.dumps({'name': 'test_tag'}),
             params={},
             timeout=10,
@@ -1146,6 +1208,7 @@ class LayerTests(Tests):
 
     @patch.object(requests, 'delete')
     def test_delete(self, delete_mock):
+        delete_mock.__name__ = 'delete'
         m = Mock()
         m.status_code = 200
         m.json.return_value = {}
@@ -1153,7 +1216,10 @@ class LayerTests(Tests):
         self.layer.delete()
         delete_mock.assert_called_with(
             '%s/geo/1/layers/test_layer_1' % (self.url_prefix),
-            headers={'X-Session-ID': 'test_session_uuid'},
+            headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                     'Authorization':
+                         'GEO IY3487E2J6ZHFOW5A7P5:'\
+                         'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
             data={},
             params={},
             timeout=10,
@@ -1175,6 +1241,7 @@ class ResultsTests(Tests):
 
     @patch.object(requests, 'get')
     def test_get_results(self, get_mock):
+        get_mock.__name__ = 'get'
         self.get_results_helper(get_mock, self.task.get_results)
 
 
@@ -1187,6 +1254,7 @@ class FeaturesTests(Tests):
 
     @patch.object(requests, 'put')
     def test_update(self, put_mock):
+        put_mock.__name__ = 'put'
         m = Mock()
         m.status_code = 200
         m.json.return_value = {}
@@ -1204,7 +1272,13 @@ class FeaturesTests(Tests):
         put_mock.assert_called_with(
             '%s/geo/1/layers/test_layer_1/'\
                 'features/test_feature_1' % (self.url_prefix),
-            headers={'X-Session-ID': 'test_session_uuid'},
+            headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                     'Content-Type': 'application/json',
+                     'Authorization':
+                         'GEO IY3487E2J6ZHFOW5A7P5:'\
+                         'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I=',
+                     'Content-Sha':
+                               'n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg='},
             data=json.dumps(d),
             params={},
             timeout=10,
@@ -1215,6 +1289,7 @@ class FeaturesTests(Tests):
 
     @patch.object(requests, 'delete')
     def test_delete(self, delete_mock):
+        delete_mock.__name__ = 'delete'
         self.delete_feature_helper(delete_mock,
             self.feature.delete)
 
@@ -1243,6 +1318,9 @@ class ImportDataSourceTests(Tests):
     @patch.object(requests, 'post')
     def test_import_geospatial_data(self, post_mock, execute_tasks_mock,
             delete_mock, get_mock):
+        get_mock.__name__ = 'get'
+        delete_mock.__name__ = 'delete'
+        post_mock.__name__ = 'post'
         r = {'uuid': 'test_blob_uuid'}
         m1 = Mock()
         m1.status_code = 200
@@ -1263,7 +1341,13 @@ class ImportDataSourceTests(Tests):
         ca = post_mock.call_args
         self.assertEqual(ca[0][0], '%s/geo/1/blobs' % (self.url_prefix,))
         self.assertDictEqual(ca[1]['headers'],
-            {'X-Session-ID': 'test_session_uuid'})
+            {'Authorization':
+                 'GEO IY3487E2J6ZHFOW5A7P5:'\
+                 'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I=',
+             'Content-Sha':
+                 'n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=',
+             'Content-Type': 'application/octet-stream',
+             'Date': 'Sat, 08 Jun 2013 22:12:05 GMT'})
         self.assertDictEqual(ca[1]['params'], {})
         self.assertEqual(ca[1]['timeout'], 10)
         self.assertEqual(ca[1]['verify'], False)
@@ -1272,7 +1356,10 @@ class ImportDataSourceTests(Tests):
         self.assertEqual(ca[0][0],
             '%s/geo/1/blobs/test_blob_uuid' % (self.url_prefix,))
         self.assertDictEqual(ca[1]['headers'],
-            {'X-Session-ID': 'test_session_uuid'})
+            {'Authorization':
+                 'GEO IY3487E2J6ZHFOW5A7P5:'\
+                 'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I=',
+             'Date': 'Sat, 08 Jun 2013 22:12:05 GMT'})
         self.assertDictEqual(ca[1]['params'], {})
         self.assertEqual(ca[1]['timeout'], 10)
         self.assertEqual(ca[1]['verify'], False)
@@ -1282,12 +1369,15 @@ class ImportDataSourceTests(Tests):
         self.assertEqual(task.operation, 'import_geospatial_data')
         self.assertDictEqual(task.extras, {'blob_uuid': 'test_blob_uuid'})
         delete_mock.assert_called_with(
-        '%s/geo/1/blobs/test_blob_uuid' % (self.url_prefix),
-        headers={'X-Session-ID': 'test_session_uuid'},
-        data={},
-        params={},
-        timeout=10,
-        verify=False)
+            '%s/geo/1/blobs/test_blob_uuid' % (self.url_prefix),
+            headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+                     'Authorization':
+                         'GEO IY3487E2J6ZHFOW5A7P5:'\
+                         'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
+            data={},
+            params={},
+            timeout=10,
+            verify=False)
         os.remove(tf.name)
 
 
