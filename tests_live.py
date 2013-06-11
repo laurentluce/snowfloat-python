@@ -21,7 +21,7 @@ class Tests(unittest.TestCase):
     def test_layers(self):
 
         # list layers, should be none
-        layers = [e for e in self.client.get_layers()]
+        layers = self.client.get_layers()
         self.assertListEqual(layers, [])
 
         # add layers
@@ -47,7 +47,7 @@ class Tests(unittest.TestCase):
         
         # list layers
         t = time.time()
-        layers = [e for e in self.client.get_layers()]
+        layers = self.client.get_layers()
         print 'get layers: %.2f' % (time.time() - t)
         self.assertEqual(len(layers), 10)
         for i in range(10):
@@ -62,7 +62,7 @@ class Tests(unittest.TestCase):
         t = time.time()
         layers[0].update(name='test_tag')
         print 'update layer: %.2f' % (time.time() - t)
-        layers = [e for e in self.client.get_layers()]
+        layers = self.client.get_layers()
         self.assertEqual(layers[0].name, 'test_tag')
 
         # delete a layer
@@ -71,7 +71,7 @@ class Tests(unittest.TestCase):
         print 'delete layer: %.2f' % (time.time() - t)
         
         # list layers
-        layers = [e for e in self.client.get_layers()]
+        layers = self.client.get_layers()
         self.assertEqual(len(layers), 9)
         for i in range(9):
             self.assertEqual(layers[i].name, 'test_tag_%d' % (i+2,))
@@ -85,7 +85,7 @@ class Tests(unittest.TestCase):
         self.client.delete_layers()
         
         # list layers
-        layers = [e for e in self.client.get_layers()]
+        layers = self.client.get_layers()
         self.assertEqual(len(layers), 0)
 
     def test_features_points(self):
@@ -103,8 +103,8 @@ class Tests(unittest.TestCase):
         layers = self.client.add_layers(layers)
 
         # get features
-        features = [e for e in self.client.get_features(
-            layers[0].uuid, geometry_type_exact='Point')]
+        features = self.client.get_features(
+            layers[0].uuid, geometry_type_exact='Point')
         self.assertListEqual(features, [])
 
         # add features
@@ -134,8 +134,8 @@ class Tests(unittest.TestCase):
 
         # get features
         t = time.time()
-        features = [e for e in self.client.get_features(layers[0].uuid,
-            geometry_type_exact='Point')]
+        features = self.client.get_features(layers[0].uuid,
+            geometry_type_exact='Point')
         print 'get features points: %.2f' % (time.time() - t)
         self.assertEqual(len(features), 1000)
         for i in range(1000):
@@ -154,8 +154,8 @@ class Tests(unittest.TestCase):
         fields = {'tag': 'test_tag', 'ts': 10}
         features[0].update(geometry=point, fields=fields)
         print 'update feature point: %.2f' % (time.time() - t)
-        points = [e for e in self.client.get_features(layers[0].uuid,
-            geometry_type_exact='Point')]
+        points = self.client.get_features(layers[0].uuid,
+            geometry_type_exact='Point')
         self.assertListEqual(features[0].geometry.coordinates, [1, 2, 3])
         self.assertEqual(features[0].geometry.geometry_type, 'Point')
         self.assertEqual(features[0].fields['tag'], 'test_tag')
@@ -165,8 +165,8 @@ class Tests(unittest.TestCase):
         features[0].delete()
 
         # get features
-        features = [e for e in self.client.get_features(layers[0].uuid,
-            geometry_type_exact='Point')]
+        features = self.client.get_features(layers[0].uuid,
+            geometry_type_exact='Point')
         self.assertEqual(len(features), 999)
         
         # delete features
@@ -176,8 +176,8 @@ class Tests(unittest.TestCase):
         print 'delete features points: %.2f' % (time.time() - t)
         
         # get features
-        features = [e for e in self.client.get_features(layers[0].uuid,
-            geometry_type_exact='Point')]
+        features = self.client.get_features(layers[0].uuid,
+            geometry_type_exact='Point')
         self.assertListEqual(features, [])
   
         # add features
@@ -198,18 +198,18 @@ class Tests(unittest.TestCase):
  
         # get points using a spatial lookup
         point = snowfloat.geometry.Point([45.05, 45.0, 0])
-        features = [e for e in self.client.get_features(layers[0].uuid,
+        features = self.client.get_features(layers[0].uuid,
             geometry_type_exact='Point', query='distance_lte', geometry=point,
-            distance=10000)]
+            distance=10000)
         self.assertEqual(len(features), 2)
         self.assertListEqual(features[0].geometry.coordinates, [45.0, 45.0, 0])
         self.assertListEqual(features[1].geometry.coordinates, [45.1, 45.0, 0])
         
         # get points using a transform spatial operation
-        features = [e for e in self.client.get_features(layers[0].uuid,
+        features = self.client.get_features(layers[0].uuid,
             geometry_type_exact='Point', query='distance_lte', geometry=point,
             distance=10000, spatial_operation='transform',
-            spatial_srid=32140)]
+            spatial_srid=32140)
         self.assertEqual(len(features), 2)
         self.assertListEqual(features[0].geometry.coordinates,
             [9648070.041703206, 12327847.650520932, 0])
@@ -231,8 +231,8 @@ class Tests(unittest.TestCase):
         layers = self.client.add_layers(layers)
 
         # get features polygons
-        polygons = [e for e in self.client.get_features(
-            layers[0].uuid, geometry_type_exact='Polygon')]
+        polygons = self.client.get_features(
+            layers[0].uuid, geometry_type_exact='Polygon')
         self.assertListEqual(polygons, [])
 
         # add features polygons
@@ -274,8 +274,8 @@ class Tests(unittest.TestCase):
 
         # get features polygons
         t = time.time()
-        features = [e for e in self.client.get_features(layers[0].uuid,
-            geometry_type_exact='Polygon')]
+        features = self.client.get_features(layers[0].uuid,
+            geometry_type_exact='Polygon')
         print 'get features polygons: %.2f' % (time.time() - t)
         self.assertEqual(len(features), 1000)
         for i in range(1000):
@@ -297,8 +297,8 @@ class Tests(unittest.TestCase):
         print 'delete features polygons: %.2f' % (time.time() - t)
         
         # get features polygons
-        features = [e for e in self.client.get_features(layers[0].uuid,
-            geometry_type_exact='Polygon')]
+        features = self.client.get_features(layers[0].uuid,
+            geometry_type_exact='Polygon')
         self.assertListEqual(features, [])
   
         # add features polygons
@@ -336,9 +336,9 @@ class Tests(unittest.TestCase):
                                                [45.2, 45.2, 0],
                                                [45.0, 45.0, 0]
                                        ]])
-        features = [e for e in self.client.get_features(layers[0].uuid,
+        features = self.client.get_features(layers[0].uuid,
             geometry_type_exact='Polygon', query='contained',
-            geometry=polygon)]
+            geometry=polygon)
         self.assertEqual(len(features), 2)
         self.assertListEqual(features[0].geometry.coordinates,
             [[[45.0, 45.0, 0],
@@ -474,8 +474,9 @@ class Tests(unittest.TestCase):
         features = self.client.add_features(layers[0].uuid, features)
 
         # look for points contained by the west polygon
-        features = [e for e in self.client.get_features(layers[0].uuid,
-            geometry_type_exact='Point', query='contained', geometry=poly_west)]
+        features = self.client.get_features(layers[0].uuid,
+            geometry_type_exact='Point', query='contained',
+            geometry=poly_west)
         self.assertEqual(len(features), 2)
         self.assertListEqual(features[0].geometry.coordinates,
             [-122.4194155, 37.7749295, 0])
@@ -484,18 +485,18 @@ class Tests(unittest.TestCase):
 
         # look for points using distance_lt
         pl = snowfloat.geometry.Point(coordinates=[2.45, 48.85, 0])
-        features = [e for e in self.client.get_features(layers[0].uuid,
+        features = self.client.get_features(layers[0].uuid,
             geometry_type_exact='Point', query='distance_lt', geometry=pl,
-            distance=20000)]
+            distance=20000)
         self.assertEqual(len(features), 1)
         self.assertListEqual(features[0].geometry.coordinates,
             [2.3522219, 48.856614, 0.0])
 
         # spatial operation distance
         pl = snowfloat.geometry.Point(coordinates=[2.45, 48.85, 0])
-        features = [e for e in self.client.get_features(layers[0].uuid,
+        features = self.client.get_features(layers[0].uuid,
             geometry_type_exact='Point', spatial_operation='distance',
-            spatial_geometry=pl)]
+            spatial_geometry=pl)
         self.assertEqual(len(features), 4)
         distances = [f.spatial for f in features]
         self.assertAlmostEqual(distances[0], 8958661.491775, 6)

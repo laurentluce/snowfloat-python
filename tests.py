@@ -6,6 +6,7 @@ import unittest
 
 from mock import Mock, patch, call
 import requests
+import requests.exceptions
 
 import snowfloat.auth
 import snowfloat.client
@@ -211,7 +212,7 @@ class Tests(unittest.TestCase):
         m2.status_code = 200
         m2.json.return_value = r2
         method_mock.side_effect = [m1, m2]
-        features = [e for e in method(*args, **kwargs)]
+        features = method(*args, **kwargs)
         feature = features[0]
         self.assertListEqual(feature.geometry.coordinates, [1, 2, 3])
         self.assertEqual(feature.fields['ts'], 4)
@@ -685,7 +686,7 @@ class ClientTests(Tests):
         m2.status_code = 200
         m2.json.return_value = r2
         get_mock.side_effect = [m1, m2]
-        layers = [e for e in self.client.get_layers(name_exact='test_name')]
+        layers = self.client.get_layers(name_exact='test_name')
         self.assertEqual(layers[0].name, 'test_tag_1')
         self.assertEqual(layers[0].uri,
             '/geo/1/layers/test_layer_1')
@@ -729,27 +730,6 @@ class ClientTests(Tests):
                   params={},
                   timeout=10,
                   verify=False)])
-
-
-    @patch.object(requests, 'get')
-    def test_get_layers_requests_get_error(self, get_mock):
-        r = {'status': 400,
-             'code': 1,
-             'message': 'test_message',
-             'more': 'test_more'
-            }
-        m = Mock()
-        m.status_code = 400
-        m.json.return_value = r
-        get_mock.return_value = m
-        self.assertRaises(snowfloat.errors.RequestError,
-            r = self.client.get_layers())
-
-    @patch.object(requests, 'get')
-    def test_get_layers_status_400(self, get_mock):
-        get_mock.side_effect = Exception('error')
-        self.assertRaises(snowfloat.errors.RequestError,
-            r = self.client.get_layers())
 
     @patch.object(requests, 'post')
     def test_add_layers(self, post_mock):

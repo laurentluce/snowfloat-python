@@ -54,18 +54,19 @@ class Client(object):
             Layer's attribute condition.
 
         Returns:
-            generator. Yields Layer objects.
+            list. List of Layer objects.
         
         Raises:
             snowfloat.errors.RequestError
         """
         uri = self.uri + '/layers'
         params = snowfloat.request.format_params(kwargs)
+        layers = []
         for res in snowfloat.request.get(uri, params):
             # convert list of json layers to Layer objects
-            layers = snowfloat.layer.parse_layers(res['layers'])
-            for layer in layers:
-                yield layer
+            layers.extend(snowfloat.layer.parse_layers(res['layers']))
+        
+        return layers
 
     def delete_layers(self):
         """Deletes all layers.
@@ -113,14 +114,14 @@ class Client(object):
             Field value condition.
 
         Returns:
-            generator. Yields Feature objects.
+            list. List of Feature objects.
         
         Raises:
             snowfloat.errors.RequestError
         """
         uri = '%s/layers/%s' % (self.uri, layer_uuid)
-        for feature in snowfloat.feature.get_features(uri, **kwargs):
-            yield feature
+        return [feature for feature in snowfloat.feature.get_features(
+            uri, **kwargs)]
 
     def delete_features(self, layer_uuid,
             **kwargs):

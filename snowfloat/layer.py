@@ -87,13 +87,13 @@ class Layer(object):
             Field value condition.
 
         Returns:
-            generator. Yields Feature objects.
+            list. List of Feature objects.
         
         Raises:
             snowfloat.errors.RequestError
         """
-        for res in snowfloat.feature.get_features(self.uri, **kwargs):
-            yield res
+        return [res for res in snowfloat.feature.get_features(
+            self.uri, **kwargs)]
 
     def delete_features(self, **kwargs):
         """Deletes layer's features.
