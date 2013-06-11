@@ -100,8 +100,8 @@ class Tests(unittest.TestCase):
                                 'features/test_point_1',
                             'field_ts': 4,
                             'field_tag': 'test_tag_1',
-                            'ts_created': 5,
-                            'ts_modified': 6,
+                            'date_created': 5,
+                            'date_modified': 6,
                             'spatial': {'type': 'Point',
                                         'coordinates': [4, 5, 6]}}
                         },
@@ -118,8 +118,8 @@ class Tests(unittest.TestCase):
                                 'features/test_polygon_1',
                             'field_ts': 11,
                             'field_tag': 'test_tag_2',
-                            'ts_created': 12,
-                            'ts_modified': 13,
+                            'date_created': 12,
+                            'date_modified': 13,
                             'spatial': {'type': 'Point',
                                         'coordinates': [7, 8, 9]}}
                         },
@@ -139,8 +139,8 @@ class Tests(unittest.TestCase):
                                 'features/test_multipolygon_1',
                             'field_ts': 21,
                             'field_tag': 'test_tag_3',
-                            'ts_created': 22,
-                            'ts_modified': 23,
+                            'date_created': 22,
+                            'date_modified': 23,
                             'spatial': {'type': 'Point',
                                         'coordinates': [10, 11, 12]}}
 
@@ -156,8 +156,8 @@ class Tests(unittest.TestCase):
                                 'features/test_linestring_1',
                             'field_ts': 31,
                             'field_tag': 'test_tag_4',
-                            'ts_created': 32,
-                            'ts_modified': 33,
+                            'date_created': 32,
+                            'date_modified': 33,
                             'spatial': {'type': 'Point',
                                         'coordinates': [13, 14, 15]}}
                         },
@@ -172,8 +172,8 @@ class Tests(unittest.TestCase):
                                 'features/test_multipoint_1',
                             'field_ts': 41,
                             'field_tag': 'test_tag_5',
-                            'ts_created': 42,
-                            'ts_modified': 43,
+                            'date_created': 42,
+                            'date_modified': 43,
                             'spatial': {'type': 'Point',
                                         'coordinates': [16, 17, 18]}}
                         },
@@ -193,8 +193,8 @@ class Tests(unittest.TestCase):
                                 'features/test_multilinestring_1',
                             'field_ts': 51,
                             'field_tag': 'test_tag_6',
-                            'ts_created': 52,
-                            'ts_modified': 53,
+                            'date_created': 52,
+                            'date_modified': 53,
                             'spatial': {'type': 'Point',
                                         'coordinates': [19, 20, 21]}}
 
@@ -219,8 +219,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.uri,
             '/geo/1/layers/test_layer_1/features/test_point_1')
         self.assertEqual(feature.uuid, 'test_point_1')
-        self.assertEqual(feature.ts_created, 5)
-        self.assertEqual(feature.ts_modified, 6)
+        self.assertEqual(feature.date_created, 5)
+        self.assertEqual(feature.date_modified, 6)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [4, 5, 6])
         feature = features[1]
@@ -233,8 +233,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.uri,
             '/geo/1/layers/test_layer_1/features/test_polygon_1')
         self.assertEqual(feature.uuid, 'test_polygon_1')
-        self.assertEqual(feature.ts_created, 12)
-        self.assertEqual(feature.ts_modified, 13)
+        self.assertEqual(feature.date_created, 12)
+        self.assertEqual(feature.date_modified, 13)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [7, 8, 9])
         feature = features[2]
@@ -251,8 +251,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.uri,
             '/geo/1/layers/test_layer_1/features/test_multipolygon_1')
         self.assertEqual(feature.uuid, 'test_multipolygon_1')
-        self.assertEqual(feature.ts_created, 22)
-        self.assertEqual(feature.ts_modified, 23)
+        self.assertEqual(feature.date_created, 22)
+        self.assertEqual(feature.date_modified, 23)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [10, 11, 12])
         feature = features[3]
@@ -263,8 +263,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.uri,
             '/geo/1/layers/test_layer_1/features/test_linestring_1')
         self.assertEqual(feature.uuid, 'test_linestring_1')
-        self.assertEqual(feature.ts_created, 32)
-        self.assertEqual(feature.ts_modified, 33)
+        self.assertEqual(feature.date_created, 32)
+        self.assertEqual(feature.date_modified, 33)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [13, 14, 15])
         feature = features[4]
@@ -275,8 +275,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.uri,
             '/geo/1/layers/test_layer_1/features/test_multipoint_1')
         self.assertEqual(feature.uuid, 'test_multipoint_1')
-        self.assertEqual(feature.ts_created, 42)
-        self.assertEqual(feature.ts_modified, 43)
+        self.assertEqual(feature.date_created, 42)
+        self.assertEqual(feature.date_modified, 43)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [16, 17, 18])
         feature = features[5]
@@ -293,8 +293,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.uri,
             '/geo/1/layers/test_layer_1/features/test_multilinestring_1')
         self.assertEqual(feature.uuid, 'test_multilinestring_1')
-        self.assertEqual(feature.ts_created, 52)
-        self.assertEqual(feature.ts_modified, 53)
+        self.assertEqual(feature.date_created, 52)
+        self.assertEqual(feature.date_modified, 53)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [19, 20, 21])
 
@@ -312,7 +312,7 @@ class Tests(unittest.TestCase):
                                'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
                   params={'field__ts__gte': 1,
                           'field__ts__lte': 10,
-                          'ts_created__lte': 2,
+                          'date_created__lte': '2002-12-25 00:00:00-00:00',
                           'geometry__distance_lte':
                             json.dumps(distance_lookup),
                           'spatial_operation': 'intersection',
@@ -346,8 +346,8 @@ class Tests(unittest.TestCase):
                           'features/test_point_1',
                    'field_tag': 'test_tag_1',
                    'field_ts': 4,
-                   'ts_created': 5,
-                   'ts_modified': 6}
+                   'date_created': 5,
+                   'date_modified': 6}
                },
                {'type': 'Feature',
                 'id': 'test_polygon_1',
@@ -362,8 +362,8 @@ class Tests(unittest.TestCase):
                           'features/test_polygon_1',
                    'field_tag': 'test_tag_2',
                    'field_ts': 11,
-                   'ts_created': 12,
-                   'ts_modified': 13}
+                   'date_created': 12,
+                   'date_modified': 13}
                },
                 {'type': 'Feature',
                  'id': 'test_multipolygon_1',
@@ -381,8 +381,8 @@ class Tests(unittest.TestCase):
                         'features/test_multipolygon_1',
                     'field_tag': 'test_tag_3',
                     'field_ts': 21,
-                    'ts_created': 22,
-                    'ts_modified': 23}
+                    'date_created': 22,
+                    'date_modified': 23}
                 },
                 {'type': 'Feature',
                  'id': 'test_linestring_1',
@@ -395,8 +395,8 @@ class Tests(unittest.TestCase):
                         'features/test_linestring_1',
                     'field_tag': 'test_tag_4',
                     'field_ts': 31,
-                    'ts_created': 32,
-                    'ts_modified': 33},
+                    'date_created': 32,
+                    'date_modified': 33},
                 },
                 {'type': 'Feature',
                  'id': 'test_multipoint_1',
@@ -409,8 +409,8 @@ class Tests(unittest.TestCase):
                         'features/test_multipoint_1',
                     'field_tag': 'test_tag_5',
                     'field_ts': 41,
-                    'ts_created': 42,
-                    'ts_modified': 43},
+                    'date_created': 42,
+                    'date_modified': 43},
                 },
                 {'type': 'Feature',
                  'id': 'test_multilinestring_1',
@@ -428,8 +428,8 @@ class Tests(unittest.TestCase):
                         'features/test_multilinestring_1',
                     'field_tag': 'test_tag_6',
                     'field_ts': 51,
-                    'ts_created': 52,
-                    'ts_modified': 53}
+                    'date_created': 52,
+                    'date_modified': 53}
                 },
                 ]}
         m = Mock()
@@ -445,8 +445,8 @@ class Tests(unittest.TestCase):
             '/geo/1/layers/test_layer_1/features/test_point_1')
         self.assertEqual(feature.layer_uuid, 'test_layer_1')
         self.assertEqual(feature.uuid, 'test_point_1')
-        self.assertEqual(feature.ts_created, 5)
-        self.assertEqual(feature.ts_modified, 6)
+        self.assertEqual(feature.date_created, 5)
+        self.assertEqual(feature.date_modified, 6)
         feature = features[1]
         self.assertListEqual(feature.geometry.coordinates, [[[11, 12, 13],
                                                              [14, 15, 16],
@@ -458,8 +458,8 @@ class Tests(unittest.TestCase):
             '/geo/1/layers/test_layer_1/features/test_polygon_1')
         self.assertEqual(feature.layer_uuid, 'test_layer_1')
         self.assertEqual(feature.uuid, 'test_polygon_1')
-        self.assertEqual(feature.ts_created, 12)
-        self.assertEqual(feature.ts_modified, 13)
+        self.assertEqual(feature.date_created, 12)
+        self.assertEqual(feature.date_modified, 13)
         feature = features[2]
         self.assertListEqual(feature.geometry.coordinates, [[[[11, 12, 13],
                                                               [14, 15, 16],
@@ -475,8 +475,8 @@ class Tests(unittest.TestCase):
             '/geo/1/layers/test_layer_1/features/test_multipolygon_1')
         self.assertEqual(feature.layer_uuid, 'test_layer_1')
         self.assertEqual(feature.uuid, 'test_multipolygon_1')
-        self.assertEqual(feature.ts_created, 22)
-        self.assertEqual(feature.ts_modified, 23)
+        self.assertEqual(feature.date_created, 22)
+        self.assertEqual(feature.date_modified, 23)
         feature = features[3]
         self.assertListEqual(feature.geometry.coordinates, [[11, 12, 13],
                                                             [14, 15, 16]])
@@ -486,8 +486,8 @@ class Tests(unittest.TestCase):
             '/geo/1/layers/test_layer_1/features/test_linestring_1')
         self.assertEqual(feature.layer_uuid, 'test_layer_1')
         self.assertEqual(feature.uuid, 'test_linestring_1')
-        self.assertEqual(feature.ts_created, 32)
-        self.assertEqual(feature.ts_modified, 33)
+        self.assertEqual(feature.date_created, 32)
+        self.assertEqual(feature.date_modified, 33)
         feature = features[4]
         self.assertListEqual(feature.geometry.coordinates, [[11, 12, 13],
                                                             [14, 15, 16]])
@@ -497,8 +497,8 @@ class Tests(unittest.TestCase):
             '/geo/1/layers/test_layer_1/features/test_multipoint_1')
         self.assertEqual(feature.layer_uuid, 'test_layer_1')
         self.assertEqual(feature.uuid, 'test_multipoint_1')
-        self.assertEqual(feature.ts_created, 42)
-        self.assertEqual(feature.ts_modified, 43)
+        self.assertEqual(feature.date_created, 42)
+        self.assertEqual(feature.date_modified, 43)
         feature = features[5]
         self.assertListEqual(feature.geometry.coordinates, [[[11, 12, 13],
                                                              [14, 15, 16],
@@ -514,13 +514,13 @@ class Tests(unittest.TestCase):
             '/geo/1/layers/test_layer_1/features/test_multilinestring_1')
         self.assertEqual(feature.layer_uuid, 'test_layer_1')
         self.assertEqual(feature.uuid, 'test_multilinestring_1')
-        self.assertEqual(feature.ts_created, 52)
-        self.assertEqual(feature.ts_modified, 53)
+        self.assertEqual(feature.date_created, 52)
+        self.assertEqual(feature.date_modified, 53)
         for i in range(6):
             del r['features'][i]['id']
             del r['features'][i]['properties']['uri']
-            del r['features'][i]['properties']['ts_created']
-            del r['features'][i]['properties']['ts_modified']
+            del r['features'][i]['properties']['date_created']
+            del r['features'][i]['properties']['date_modified']
         self.assertEqual(method_mock.call_args_list,
             [call('%s/geo/1/layers/test_layer_1/features'
                     % (self.url_prefix,),
@@ -549,7 +549,7 @@ class Tests(unittest.TestCase):
                          'GEO IY3487E2J6ZHFOW5A7P5:'\
                          'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
             params={'field__ts__gte': 1, 'field__ts__lte': 10,
-                    'ts_created__lte': 2},
+                    'date_created__lte': '2002-12-25 00:00:00-00:00'},
             data={},
             timeout=10,
             verify=False)
@@ -582,15 +582,15 @@ class Tests(unittest.TestCase):
                   'uuid': 'test_result_1',
                   'uri': '/geo/1/tasks/test_task_1/results/test_result_1',
                   'tag': 'test_tag_1',
-                  'ts_created': 1,
-                  'ts_modified': 2,
+                  'date_created': 1,
+                  'date_modified': 2,
                 },
                 {
                   'uuid': 'test_result_2',
                   'uri': '/geo/1/tasks/test_task_1/results/test_result_2',
                   'tag': 'test_tag_2',
-                  'ts_created': 3,
-                  'ts_modified': 4,
+                  'date_created': 3,
+                  'date_modified': 4,
                 }]}
         r2 = {
               'next_page_uri': None,
@@ -609,15 +609,15 @@ class Tests(unittest.TestCase):
         self.assertEqual(result.uri,
             '/geo/1/tasks/test_task_1/results/test_result_1')
         self.assertEqual(result.tag, 'test_tag_1')
-        self.assertEqual(result.ts_created, 1)
-        self.assertEqual(result.ts_modified, 2)
+        self.assertEqual(result.date_created, 1)
+        self.assertEqual(result.date_modified, 2)
         result = results[1]
         self.assertEqual(result.uuid, 'test_result_2')
         self.assertEqual(result.uri,
             '/geo/1/tasks/test_task_1/results/test_result_2')
         self.assertEqual(result.tag, 'test_tag_2')
-        self.assertEqual(result.ts_created, 3)
-        self.assertEqual(result.ts_modified, 4)
+        self.assertEqual(result.date_created, 3)
+        self.assertEqual(result.date_modified, 4)
         self.assertEqual(method_mock.call_args_list,
             [call('%s/geo/1/tasks/test_task_1/results' % (self.url_prefix,),
                   headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
@@ -651,8 +651,8 @@ class ClientTests(Tests):
                 'layers': [{'name': 'test_tag_1',
                             'uri': '/geo/1/layers/test_layer_1',
                             'uuid': 'test_layer_1',
-                            'ts_created': 1,
-                            'ts_modified': 2,
+                            'date_created': 1,
+                            'date_modified': 2,
                             'num_features': 10,
                             'num_points': 20,
                             'fields': [{'name': 'field_1', 'type': 'string',
@@ -663,8 +663,8 @@ class ClientTests(Tests):
                            {'name': 'test_tag_2',
                             'uri': '/geo/1/layers/test_layer_2',
                             'uuid': 'test_layer_2',
-                            'ts_created': 3,
-                            'ts_modified': 4,
+                            'date_created': 3,
+                            'date_modified': 4,
                             'num_features': 11,
                             'num_points': 21,
                             'fields': [{'name': 'field_2', 'type': 'string',
@@ -690,8 +690,8 @@ class ClientTests(Tests):
         self.assertEqual(layers[0].uri,
             '/geo/1/layers/test_layer_1')
         self.assertEqual(layers[0].uuid, 'test_layer_1')
-        self.assertEqual(layers[0].ts_created, 1)
-        self.assertEqual(layers[0].ts_modified, 2)
+        self.assertEqual(layers[0].date_created, 1)
+        self.assertEqual(layers[0].date_modified, 2)
         self.assertEqual(layers[0].num_features, 10)
         self.assertEqual(layers[0].num_points, 20)
         self.assertListEqual(layers[0].fields,
@@ -702,8 +702,8 @@ class ClientTests(Tests):
         self.assertEqual(layers[1].uri,
             '/geo/1/layers/test_layer_2')
         self.assertEqual(layers[1].uuid, 'test_layer_2')
-        self.assertEqual(layers[1].ts_created, 3)
-        self.assertEqual(layers[1].ts_modified, 4)
+        self.assertEqual(layers[1].date_created, 3)
+        self.assertEqual(layers[1].date_modified, 4)
         self.assertEqual(layers[1].num_features, 11)
         self.assertEqual(layers[1].num_points, 21)
         self.assertListEqual(layers[1].fields,
@@ -757,8 +757,8 @@ class ClientTests(Tests):
         r = [{'name': 'test_tag_1',
               'uri': '/geo/1/layers/test_layer_1',
               'uuid': 'test_layer_1',
-              'ts_created': 1,
-              'ts_modified': 2,
+              'date_created': 1,
+              'date_modified': 2,
               'num_features': 0,
               'num_points': 0,
               'fields': [{'name': 'field_1', 'type': 'string', 'size': 256},],
@@ -767,8 +767,8 @@ class ClientTests(Tests):
              {'name': 'test_tag_2',
               'uri': '/geo/1/layers/test_layer_2',
               'uuid': 'test_layer_2',
-              'ts_created': 3,
-              'ts_modified': 4,
+              'date_created': 3,
+              'date_modified': 4,
               'num_features': 0,
               'num_points': 0,
               'fields': [{'name': 'field_2', 'type': 'string', 'size': 256},],
@@ -791,8 +791,8 @@ class ClientTests(Tests):
         self.assertEqual(layers[0].uri,
             '/geo/1/layers/test_layer_1')
         self.assertEqual(layers[0].uuid, 'test_layer_1')
-        self.assertEqual(layers[0].ts_created, 1)
-        self.assertEqual(layers[0].ts_modified, 2)
+        self.assertEqual(layers[0].date_created, 1)
+        self.assertEqual(layers[0].date_modified, 2)
         self.assertEqual(layers[0].num_features, 0)
         self.assertEqual(layers[0].num_points, 0)
         self.assertListEqual(layers[0].fields,
@@ -803,8 +803,8 @@ class ClientTests(Tests):
         self.assertEqual(layers[1].uri,
             '/geo/1/layers/test_layer_2')
         self.assertEqual(layers[1].uuid, 'test_layer_2')
-        self.assertEqual(layers[1].ts_created, 3)
-        self.assertEqual(layers[1].ts_modified, 4)
+        self.assertEqual(layers[1].date_created, 3)
+        self.assertEqual(layers[1].date_modified, 4)
         self.assertEqual(layers[1].num_features, 0)
         self.assertEqual(layers[1].num_points, 0)
         self.assertListEqual(layers[1].fields,
@@ -862,7 +862,8 @@ class ClientTests(Tests):
         point = snowfloat.geometry.Point(coordinates=[1, 2, 3])
         point2 = snowfloat.geometry.Point(coordinates=[4, 5, 6])
         self.get_features_helper(get_mock, self.client.get_features,
-            'test_layer_1', field_ts_gte=1, field_ts_lte=10, ts_created_lte=2,
+            'test_layer_1', field_ts_gte=1, field_ts_lte=10,
+            date_created_lte='2002-12-25 00:00:00-00:00',
             query='distance_lte',
             geometry=point, distance=4, spatial_operation='intersection',
             spatial_geometry=point2, spatial_flag=True)
@@ -878,7 +879,8 @@ class ClientTests(Tests):
         delete_mock.__name__ = 'delete'
         self.delete_features_helper(delete_mock,
             self.client.delete_features,
-            'test_layer_1', field_ts_gte=1, field_ts_lte=10, ts_created_lte=2)
+            'test_layer_1', field_ts_gte=1, field_ts_lte=10,
+            date_created_lte='2002-12-25 00:00:00-00:00')
 
     @patch.object(requests, 'post')
     def test_add_tasks(self, post_mock):
@@ -890,8 +892,8 @@ class ClientTests(Tests):
               'state': 'started',
               'extras': {'extra': 'test_extra_1'},
               'reason': 'test_reason_1',
-              'ts_created': 1,
-              'ts_modified': 2
+              'date_created': 1,
+              'date_modified': 2
              },
              {'operation': 'test_operation_2',
               'task_filter': 'test_task_filter_2',
@@ -900,8 +902,8 @@ class ClientTests(Tests):
               'state': 'started',
               'extras': {'extra': 'test_extra_2'},
               'reason': 'test_reason_2',
-              'ts_created': 3,
-              'ts_modified': 4
+              'date_created': 3,
+              'date_modified': 4
              }]
         m = Mock()
         m.status_code = 200
@@ -917,8 +919,8 @@ class ClientTests(Tests):
         self.assertDictEqual(tasks[0].extras, {'extra': 'test_extra_1'})
         self.assertEqual(tasks[0].reason, 'test_reason_1')
         self.assertEqual(tasks[0].uri, '/geo/1/tasks/test_task_1')
-        self.assertEqual(tasks[0].ts_created, 1)
-        self.assertEqual(tasks[0].ts_modified, 2)
+        self.assertEqual(tasks[0].date_created, 1)
+        self.assertEqual(tasks[0].date_modified, 2)
         self.assertEqual(tasks[1].operation, 'test_operation_2')
         self.assertEqual(tasks[1].task_filter, 'test_task_filter_2')
         self.assertEqual(tasks[1].uuid, 'test_task_2')
@@ -926,8 +928,8 @@ class ClientTests(Tests):
         self.assertDictEqual(tasks[1].extras, {'extra': 'test_extra_2'})
         self.assertEqual(tasks[1].reason, 'test_reason_2')
         self.assertEqual(tasks[1].uri, '/geo/1/tasks/test_task_2')
-        self.assertEqual(tasks[1].ts_created, 3)
-        self.assertEqual(tasks[1].ts_modified, 4)
+        self.assertEqual(tasks[1].date_created, 3)
+        self.assertEqual(tasks[1].date_modified, 4)
 
     @patch.object(requests, 'get')
     def test_get_task(self, get_mock):
@@ -939,8 +941,8 @@ class ClientTests(Tests):
              'state': 'started',
              'extras': {'extra': 'test_extra_1'},
              'reason': 'test_reason_1',
-             'ts_created': 1,
-             'ts_modified': 2
+             'date_created': 1,
+             'date_modified': 2
             }
         m = Mock()
         m.status_code = 200
@@ -954,8 +956,8 @@ class ClientTests(Tests):
         self.assertEqual(task.state, 'started')
         self.assertDictEqual(task.extras, {'extra': 'test_extra_1'})
         self.assertEqual(task.reason, 'test_reason_1')
-        self.assertEqual(task.ts_created, 1)
-        self.assertEqual(task.ts_modified, 2)
+        self.assertEqual(task.date_created, 1)
+        self.assertEqual(task.date_modified, 2)
         get_mock.assert_called_with(
             '%s/geo/1/tasks/test_task_1' % (self.url_prefix,),
             headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
@@ -1143,8 +1145,8 @@ class LayerTests(Tests):
             name='test_tag_1',
             uuid='test_layer_1',
             uri='/geo/1/layers/test_layer_1',
-            ts_created=1,
-            ts_modified=2,
+            date_created=1,
+            date_modified=2,
             num_features=3,
             num_points=6)
         Tests.setUp(self)
@@ -1155,7 +1157,8 @@ class LayerTests(Tests):
         point = snowfloat.geometry.Point(coordinates=(1, 2, 3))
         point2 = snowfloat.geometry.Point(coordinates=[4, 5, 6])
         self.get_features_helper(get_mock, self.layer.get_features,
-            field_ts_gte=1, field_ts_lte=10, ts_created_lte=2,
+            field_ts_gte=1, field_ts_lte=10,
+            date_created_lte='2002-12-25 00:00:00-00:00',
             query='distance_lte',
             geometry=point, distance=4, spatial_operation='intersection',
             spatial_geometry=point2, spatial_flag=True)
@@ -1173,7 +1176,7 @@ class LayerTests(Tests):
         delete_mock.__name__ = 'delete'
         self.delete_features_helper(delete_mock,
             self.layer.delete_features, field_ts_gte=1, field_ts_lte=10,
-            ts_created_lte=2)
+            date_created_lte='2002-12-25 00:00:00-00:00')
         self.assertEqual(self.layer.num_features, 1)
         self.assertEqual(self.layer.num_points, 5)
     
@@ -1236,8 +1239,8 @@ class ResultsTests(Tests):
         extras={},
         state='started',
         reason='',
-        ts_created=1,
-        ts_modified=2)
+        date_created=1,
+        date_modified=2)
 
     @patch.object(requests, 'get')
     def test_get_results(self, get_mock):

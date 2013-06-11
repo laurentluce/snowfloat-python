@@ -16,9 +16,9 @@ class Layer(object):
 
         uri (str): URI.
         
-        ts_created (int): Creation timestamp.
-        
-        ts_modified (int): Modification timestamp.
+        date_created (str): Creation date in ISO format.
+
+        date_modified (str): Modification date in ISO format.
 
         fields (list): List of fields definitions.
 
@@ -27,8 +27,8 @@ class Layer(object):
     name = ''
     uuid = None
     uri = None
-    ts_created = None
-    ts_modified = None
+    date_created = None
+    date_modified = None
     num_features = 0
     num_points = 0
     fields = None
@@ -40,10 +40,10 @@ class Layer(object):
             setattr(self, key, val)
     
     def __str__(self):
-        return 'Layer(name=%s, uuid=%s, ts_created=%d, ts_modified=%d, '\
+        return 'Layer(name=%s, uuid=%s, date_created=%d, date_modified=%d, '\
                'uri=%s, num_features=%d, num_points=%d, fields=%s, '\
                'srs=%s)' \
-            % (self.name, self.uuid, self.ts_created, self.ts_modified,
+            % (self.name, self.uuid, self.date_created, self.date_modified,
                self.uri, self.num_features, self.num_points, self.fields,
                self.srs)
 
@@ -65,7 +65,6 @@ class Layer(object):
         self.num_features += len(features)
         self.num_points += \
             sum([feature.geometry.num_points() for feature in features])
-        self.ts_modified = int(time.time())
 
         return res
 
@@ -115,7 +114,6 @@ class Layer(object):
         
         self.num_features -= res['num_features']
         self.num_points -= res['num_points']
-        self.ts_modified = int(time.time())
 
     def delete_feature(self, uuid):
         """Deletes a feature.
@@ -131,7 +129,6 @@ class Layer(object):
         
         self.num_features -= 1
         self.num_points -= res['num_points']
-        self.ts_modified = int(time.time())
 
     def update(self, **kwargs):
         """Update layer's attributes.
@@ -148,7 +145,6 @@ class Layer(object):
         # if success: update self attributes
         for key, value in kwargs.items():
             setattr(self, key, value)
-        self.ts_modified = int(time.time())
 
     def delete(self):
         """Deletes this layer.
@@ -199,8 +195,8 @@ def parse_layers(layers):
     return [Layer(
                 name=layer['name'],
                 uuid=layer['uuid'],
-                ts_created=layer['ts_created'],
-                ts_modified=layer['ts_modified'],
+                date_created=layer['date_created'],
+                date_modified=layer['date_modified'],
                 uri=layer['uri'],
                 num_features=layer['num_features'],
                 num_points=layer['num_points'],
@@ -219,6 +215,6 @@ def update_layer(layer_source, layer_destination):
     layer_destination.uuid = layer_source['uuid']
     layer_destination.uri = layer_source['uri']
     layer_destination.name = layer_source['name']
-    layer_destination.ts_created = layer_source['ts_created']
-    layer_destination.ts_modified = layer_source['ts_modified']
+    layer_destination.date_created = layer_source['date_created']
+    layer_destination.date_modified = layer_source['date_modified']
  

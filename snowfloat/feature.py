@@ -15,9 +15,9 @@ class Feature(object):
 
         uri (str): URI.
 
-        ts_created (int): Creation timestamp.
+        date_created (str): Creation date in ISO format.
 
-        ts_modified (int): Modification timestamp.
+        date_modified (str): Modification date in ISO format.
 
         geometry (Geometry): Geometry.
 
@@ -30,8 +30,8 @@ class Feature(object):
 
     uuid = None
     uri = None
-    ts_created = None
-    ts_modified = None
+    date_created = None
+    date_modified = None
     geometry = None
     fields = {}
     layer_uuid = None
@@ -57,11 +57,11 @@ class Feature(object):
     
     def __str__(self):
         return '%s(uuid=%s, uri=%s, ' \
-                'ts_created=%s, ts_modified=%s, ' \
+                'date_created=%s, date_modified=%s, ' \
                 'geometry=%s, fields=%s ' \
                 'layer_uuid=%s, spatial=%s' \
             % (self.__class__.__name__,
-               self.uuid, self.uri, self.ts_created, self.ts_modified,
+               self.uuid, self.uri, self.date_created, self.date_modified,
                self.geometry, self.fields,
                self.layer_uuid, self.spatial)
 
@@ -75,7 +75,6 @@ class Feature(object):
             setattr(self, key, value)
         snowfloat.request.put(self.uri,
             data=snowfloat.feature.format_feature(self))
-        self.ts_modified = int(time.time())
 
     def delete(self):
         """Deletes a feature.
@@ -176,8 +175,8 @@ def parse_features(features):
                 feature['geometry']['coordinates']),
             uuid=feature['id'],
             uri=feature['properties']['uri'],
-            ts_created=feature['properties']['ts_created'],
-            ts_modified=feature['properties']['ts_modified'],
+            date_created=feature['properties']['date_created'],
+            date_modified=feature['properties']['date_modified'],
             spatial=feature['properties']['spatial'],
             layer_uuid = feature['properties']['uri'].split('/')[4])
 
@@ -230,7 +229,7 @@ def update_feature(destination, source):
     destination.uuid = source['id']
     destination.uri = source['properties']['uri']
     destination.layer_uuid = destination.uri.split('/')[4]
-    destination.ts_created = source['properties']['ts_created']
-    destination.ts_modified = source['properties']['ts_modified']
+    destination.date_created = source['properties']['date_created']
+    destination.date_modified = source['properties']['date_modified']
 
 

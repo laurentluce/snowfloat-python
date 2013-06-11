@@ -22,9 +22,9 @@ class Task(object):
 
         reason (str): Task error reason.
 
-        ts_created (int): Creation timestamp.
+        date_created (str): Creation date in ISO format.
 
-        ts_modified (int): Modification timestamp.
+        date_modified (str): Modification date in ISO format.
     """
     uuid = None
     uri = None
@@ -34,8 +34,8 @@ class Task(object):
     state = None
     extras = None
     reason = None
-    ts_created = None
-    ts_modified = None
+    date_created = None
+    date_modified = None
 
     def __init__(self, **kwargs):
         for key, val in kwargs.items():
@@ -58,13 +58,13 @@ class Task(object):
 
     def __str__(self):
         return '%s(uuid=%s, uri=%s, ' \
-                'ts_created=%s, ts_modified=%s, ' \
+                'date_created=%s, date_modified=%s, ' \
                 'operation=%s, ' \
                 'layer_uuid=%s, task_filter=%s ' \
                 'state=%s, extras=%s ' \
                 'reason=%s' \
             % (self.__class__.__name__,
-               self.uuid, self.uri, self.ts_created, self.ts_modified,
+               self.uuid, self.uri, self.date_created, self.date_modified,
                self.operation,
                self.layer_uuid, self.task_filter,
                self.state, self.extras, self.reason)
@@ -86,5 +86,5 @@ def parse_tasks(tasks):
                  extras=t['extras'],
                  state=t['state'],
                  reason=t['reason'],
-                 ts_created=t['ts_created'],
-                 ts_modified=t['ts_modified']) for t in tasks]
+                 date_created=t['date_created'],
+                 date_modified=t['date_modified']) for t in tasks]

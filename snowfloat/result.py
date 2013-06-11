@@ -10,15 +10,15 @@ class Result(object):
 
         tag: Tag data.
 
-        ts_created: Creation timestamp.
+        date_created (str): Creation date in ISO format.
 
-        ts_modified: Modification timestamp.
+        date_modified (str): Modification date in ISO format.
     """
     uuid = None
     uri = None
     tag = None
-    ts_created = None
-    ts_modified = None
+    date_created = None
+    date_modified = None
 
     def __init__(self, **kwargs):
         for key, val in kwargs.items():
@@ -37,5 +37,5 @@ def parse_results(results):
     return [Result(uuid=r['uuid'],
                    uri=r['uri'],
                    tag=r['tag'],
-                   ts_created=r['ts_created'],
-                   ts_modified=r['ts_modified']) for r in results]
+                   date_created=r['date_created'],
+                   date_modified=r['date_modified']) for r in results]
