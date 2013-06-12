@@ -311,8 +311,8 @@ class Tests(unittest.TestCase):
                            'Authorization':
                                'GEO IY3487E2J6ZHFOW5A7P5:'\
                                'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
-                  params={'field__ts__gte': 1,
-                          'field__ts__lte': 10,
+                  params={'field_ts__gte': 1,
+                          'field_ts__lte': 10,
                           'date_created__lte': '2002-12-25 00:00:00-00:00',
                           'geometry__distance_lte':
                             json.dumps(distance_lookup),
@@ -549,7 +549,7 @@ class Tests(unittest.TestCase):
                      'Authorization':
                          'GEO IY3487E2J6ZHFOW5A7P5:'\
                          'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
-            params={'field__ts__gte': 1, 'field__ts__lte': 10,
+            params={'field_ts__gte': 1, 'field_ts__lte': 10,
                     'date_created__lte': '2002-12-25 00:00:00-00:00'},
             data={},
             timeout=10,

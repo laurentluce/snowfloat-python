@@ -138,7 +138,7 @@ class Client(object):
         Raises:
             snowfloat.errors.RequestError
         """
-        params = snowfloat.request.format_fields_params(kwargs)
+        params = {}
         params.update(snowfloat.request.format_params(kwargs))
  
         uri = '%s/layers/%s/features' % (self.uri, layer_uuid)

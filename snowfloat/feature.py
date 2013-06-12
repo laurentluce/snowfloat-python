@@ -125,7 +125,7 @@ def get_features(uri, **kwargs):
     """
     get_uri = '%s/features' % (uri,)
 
-    params = snowfloat.request.format_fields_params(kwargs)
+    params = {}
             
     if 'query' in kwargs:
         try:
