@@ -58,7 +58,6 @@ class Point(Geometry, POINT_CLS):
         coords = coordinates[:]
         if POINT_CLS != object:
             shapely.geometry.Point.__init__(self, coords)
-        coords = convert_coords_2d_3d(coords)
         Geometry.__init__(self, coords, **kwargs)
     
     def num_points(self):
@@ -78,7 +77,6 @@ class LineString(Geometry, LINESTRING_CLS):
         self.points = [Point(c) for c in coords] 
         if LINESTRING_CLS != object:
             shapely.geometry.LineString.__init__(self, coords)
-        coords = convert_coords_2d_3d(coords)
         Geometry.__init__(self, coords, **kwargs)
     
     def num_points(self):
@@ -95,7 +93,6 @@ class Polygon(Geometry, POLYGON_CLS):
         coords = coordinates[:]
         if POLYGON_CLS != object:
             shapely.geometry.Polygon.__init__(self, coords[0], coords[1:])
-        coords = convert_coords_2d_3d(coords)
         # close the rings if not closed
         for c in coords:
             if c[0] != c[-1]:
@@ -118,7 +115,6 @@ class MultiPoint(Geometry, MULTIPOINT_CLS):
         self.points = [Point(c) for c in coords] 
         if MULTIPOINT_CLS != object:
             shapely.geometry.MultiPoint.__init__(self, coords)
-        coords = convert_coords_2d_3d(coords)
         Geometry.__init__(self, coords, **kwargs)
     
     def num_points(self):

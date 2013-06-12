@@ -1277,13 +1277,6 @@ class FeaturesTests(Tests):
             self.feature.delete)
 
 
-class PointsTests(Tests):
-
-    def test_point_no_z(self):
-        point = snowfloat.geometry.Point([1, 2])
-        self.assertListEqual(point.coordinates, [1, 2, 0])
-
-
 class PolygonsTests(Tests):
 
     def test_polygon_not_closed(self):
