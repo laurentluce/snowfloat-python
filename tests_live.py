@@ -412,9 +412,22 @@ class Tests(unittest.TestCase):
         r = self.client.import_geospatial_data(path, srs)
         self.assertDictEqual(r,
             {'layers_count': 1, 'features_count': 3671})
+        
         layers = self.client.get_layers()
         self.assertEqual(len(layers), 1)
         layer = layers[0]
+        
+        tasks = [snowfloat.task.Task(
+            operation='map',
+            layer_uuid=layer.uuid,
+            extras={'xlim': [472227.213333, 699296.070000],
+                    'ylim': [5057213.467333, 5155844.443333]})]
+                    
+        t = time.time()
+        r = self.client.execute_tasks(tasks)
+        print 'map: %.2f' % (time.time() - t)
+        self.assertTrue('url' in r[0][0])
+ 
         features = layer.get_features(order_by=('field_name',))
         self.assertEqual(len(features), 3671)
         self.assertListEqual([f.fields['name'] for f in features[5:10]],
@@ -537,17 +550,6 @@ class Tests(unittest.TestCase):
         self.assertAlmostEqual(distances[1], 7866626.324824, 6)
         self.assertAlmostEqual(distances[2], 5538314.715845, 6)
         self.assertAlmostEqual(distances[3], 7191.652754, 6)
-
-        # task map
-        tasks = [snowfloat.task.Task(
-                    operation='map',
-                    layer_uuid=layers[0].uuid,
-                    extras={'llcrnrlat': -75,
-                            'llcrnrlon': -165,
-                            'urcrnrlat': 75,
-                            'urcrnrlon': 165})]
-        r = self.client.execute_tasks(tasks)
-        self.assertTrue('url' in r[0][0])
 
 
 if __name__ == "__main__":
