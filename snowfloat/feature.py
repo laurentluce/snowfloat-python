@@ -170,9 +170,14 @@ def parse_features(features):
     thismodule = sys.modules[__name__]
     res = []
     for feature in features:
+        if feature['geometry']:
+            geometry = getattr(
+                snowfloat.geometry, feature['geometry']['type'])(
+                    feature['geometry']['coordinates'])
+        else:
+            geometry = None
         feature_to_add = Feature(
-            getattr(snowfloat.geometry, feature['geometry']['type'])(
-                feature['geometry']['coordinates']),
+            geometry,
             uuid=feature['id'],
             uri=feature['properties']['uri'],
             date_created=feature['properties']['date_created'],

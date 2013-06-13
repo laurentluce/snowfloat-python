@@ -398,10 +398,44 @@ class Tests(unittest.TestCase):
         path = 'tests/test_point.zip'
         srs={'type': 'EPSG',
              'properties':
-                {'code': 4326, 'dim': 3}}
+                {'code': 4326}}
         r = self.client.import_geospatial_data(path, srs)
         self.assertDictEqual(r,
             {'layers_count': 1, 'features_count': 5})
+
+    def test_execute_tasks_import_geospatial_data_mi_forest_roads(self):
+
+        path = 'tests/mi_forest_roads.zip'
+        srs={'type': 'EPSG',
+             'properties':
+                {'code': 26916}}
+        r = self.client.import_geospatial_data(path, srs)
+        self.assertDictEqual(r,
+            {'layers_count': 1, 'features_count': 3671})
+        layers = self.client.get_layers()
+        self.assertEqual(len(layers), 1)
+        layer = layers[0]
+        features = layer.get_features(order_by=('field_name',))
+        self.assertEqual(len(features), 3671)
+        self.assertListEqual([f.fields['name'] for f in features[5:10]],
+            [u'2008 SPUR M12E',
+             u'2010A SPUR R93B',
+             u'2010 SPUR R93C',
+             u'2036 SPUR R120L',
+             u'2041 SPUR R116D'])
+        features = layer.get_features(spatial_operation='length')
+        self.assertEqual(len(features), 3671)
+        self.assertListEqual([f.spatial for f in features[:10]],
+            [833.228853280628,
+             578.312883521976,
+             8278.66192812599,
+             63.7906336300756,
+             1288.71910814592,
+             1714.5922385602,
+             231.215921489381,
+             3176.51957020512,
+             122.116921566437,
+             470.569520880827])
 
     def test_usa(self):
 

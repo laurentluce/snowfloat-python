@@ -53,6 +53,8 @@ class Client(object):
         Kwargs:
             Layer's attribute condition.
 
+            order_by (tuple): Tuple of attributes and fields to order by.
+
         Returns:
             list. List of Layer objects.
         
@@ -112,6 +114,8 @@ class Client(object):
             spatial_geometry (Geometry): Geometry object for spatial operation.
 
             Field value condition.
+
+            order_by (tuple): Tuple of attributes and fields to order by.
 
         Returns:
             list. List of Feature objects.

@@ -86,6 +86,8 @@ class Layer(object):
 
             Field value condition.
 
+            order_by (tuple): Tuple of attributes and fields to order by.
+
         Returns:
             list. List of Feature objects.
         

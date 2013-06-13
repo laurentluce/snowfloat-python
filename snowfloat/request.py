@@ -246,7 +246,9 @@ def format_params(kwargs, exclude=None):
         exclude = ()
     params = {}
     for key, val in kwargs.items():
-        if (not key.startswith('spatial_')
+        if key == 'order_by':
+            params[key] = ','.join(val)            
+        elif (not key.startswith('spatial_')
                 and not key in exclude):
             s1 = key[:key.rindex('_')]
             s2 = key[key.rindex('_')+1:]

@@ -319,7 +319,8 @@ class Tests(unittest.TestCase):
                           'spatial_operation': 'intersection',
                           'spatial_geometry':
                             json.dumps(spatial_geometry),
-                          'spatial_flag': True},
+                          'spatial_flag': True,
+                          'order_by': '-field_ts,date_created'},
                   data={},
                   timeout=10,
                   verify=False),
@@ -846,7 +847,8 @@ class ClientTests(Tests):
             date_created_lte='2002-12-25 00:00:00-00:00',
             query='distance_lte',
             geometry=point, distance=4, spatial_operation='intersection',
-            spatial_geometry=point2, spatial_flag=True)
+            spatial_geometry=point2, spatial_flag=True,
+            order_by=('-field_ts', 'date_created'))
 
     @patch.object(requests, 'post')
     def test_add_features(self, post_mock):
@@ -1141,7 +1143,8 @@ class LayerTests(Tests):
             date_created_lte='2002-12-25 00:00:00-00:00',
             query='distance_lte',
             geometry=point, distance=4, spatial_operation='intersection',
-            spatial_geometry=point2, spatial_flag=True)
+            spatial_geometry=point2, spatial_flag=True,
+            order_by=('-field_ts', 'date_created'))
     
     @patch.object(requests, 'post')
     def test_add_features(self, post_mock):
