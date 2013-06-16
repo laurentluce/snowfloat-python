@@ -36,8 +36,6 @@ class Feature(object):
     fields = {}
     layer_uuid = None
     spatial = None
-    num_features = 0
-    num_points = 0
 
     def __init__(self, geometry, fields=None, **kwargs):
         for key, val in kwargs.items():
