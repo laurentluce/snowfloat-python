@@ -40,7 +40,7 @@ class Layer(object):
             setattr(self, key, val)
     
     def __str__(self):
-        return 'Layer(name=%s, uuid=%s, date_created=%d, date_modified=%d, '\
+        return 'Layer(name=%s, uuid=%s, date_created=%s, date_modified=%s, '\
                'uri=%s, num_features=%d, num_points=%d, fields=%s, '\
                'srs=%s)' \
             % (self.name, self.uuid, self.date_created, self.date_modified,
