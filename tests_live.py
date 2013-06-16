@@ -384,10 +384,8 @@ class Tests(unittest.TestCase):
         tasks = [snowfloat.task.Task(
                     operation='map',
                     layer_uuid=layers[0].uuid,
-                    extras={'llcrnrlat': -75,
-                            'llcrnrlon': -165,
-                            'urcrnrlat': 75,
-                            'urcrnrlon': 165})]
+                    extras={'xlim': [-165, 165],
+                            'ylim': [-75, 75]})]
         t = time.time()
         r = self.client.execute_tasks(tasks)
         print 'map: %.2f' % (time.time() - t)
@@ -420,8 +418,8 @@ class Tests(unittest.TestCase):
         tasks = [snowfloat.task.Task(
             operation='map',
             layer_uuid=layer.uuid,
-            extras={'xlim': [472227.213333, 699296.070000],
-                    'ylim': [5057213.467333, 5155844.443333]})]
+            extras={'xlim': [472227.213333, 580296.070000],
+                    'ylim': [5057213.467333, 5106528.955333]})]
                     
         t = time.time()
         r = self.client.execute_tasks(tasks)
