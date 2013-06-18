@@ -383,7 +383,10 @@ class Tests(unittest.TestCase):
 
         tasks = [snowfloat.task.Task(
                     operation='map',
-                    layer_uuid=layers[0].uuid,
+                    task_filter = {
+                        'layer__uuid_exact': layers[0].uuid},
+                    spatial = {
+                        'operation': 'transform', 'srid': 4326},
                     extras={'xlim': [-165, 165],
                             'ylim': [-75, 75]})]
         t = time.time()
@@ -417,7 +420,10 @@ class Tests(unittest.TestCase):
         
         tasks = [snowfloat.task.Task(
             operation='map',
-            layer_uuid=layer.uuid,
+            task_filter = {
+                'layer__uuid_exact': layer.uuid},
+            spatial = {
+                'operation': 'transform', 'srid': 4326},
             extras={'xlim': [472227.213333, 580296.070000],
                     'ylim': [5057213.467333, 5106528.955333]})]
                     

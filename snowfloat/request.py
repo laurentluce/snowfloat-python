@@ -246,7 +246,18 @@ def format_params(kwargs, exclude=None):
         exclude = ()
     params = {}
     for key, val in kwargs.items():
-        if key == 'order_by':
+        if key == 'query':
+            try:
+                distance = kwargs['distance']
+            except KeyError:
+                distance = None
+            geojson = {'type': kwargs['geometry'].geometry_type,
+                       'coordinates': kwargs['geometry'].coordinates,
+                       'properties': {
+                           'distance': distance}
+                }
+            params['geometry__%s' % (val,)] = json.dumps(geojson)
+        elif key == 'order_by':
             params[key] = ','.join(val)            
         elif (not key.startswith('spatial_')
                 and not key in exclude):

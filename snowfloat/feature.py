@@ -125,18 +125,6 @@ def get_features(uri, **kwargs):
 
     params = {}
             
-    if 'query' in kwargs:
-        try:
-            distance = kwargs['distance']
-        except KeyError:
-            distance = None
-        geojson = {'type': kwargs['geometry'].geometry_type,
-                   'coordinates': kwargs['geometry'].coordinates,
-                   'properties': {
-                       'distance': distance}
-            }
-        params['geometry__%s' % (kwargs['query'],)] = json.dumps(geojson)
-
     if 'spatial_operation' in kwargs:
         for key, value in kwargs.iteritems():
             if key.startswith('spatial_'):
@@ -147,7 +135,7 @@ def get_features(uri, **kwargs):
                 else:
                     params[key] = value
 
-    exclude = ('query', 'distance', 'geometry')
+    exclude = ('distance', 'geometry')
     params.update(snowfloat.request.format_params(kwargs, exclude=exclude))
     
     for res in snowfloat.request.get(get_uri, params):

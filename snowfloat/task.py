@@ -16,6 +16,8 @@ class Task(object):
 
         task_filter (dict): Query filter.
 
+        spatial (dict): Query spatial operation.
+
         state (str): Task state: running, succeed...
 
         extras (dict): Optional task parameters.
@@ -30,9 +32,10 @@ class Task(object):
     uri = None
     operation = None
     layer_uuid = None
-    task_filter = None
+    task_filter = {}
+    spatial = {}
     state = None
-    extras = None
+    extras = {}
     reason = None
     date_created = None
     date_modified = None
@@ -60,13 +63,13 @@ class Task(object):
         return '%s(uuid=%s, uri=%s, ' \
                 'date_created=%s, date_modified=%s, ' \
                 'operation=%s, ' \
-                'layer_uuid=%s, task_filter=%s ' \
+                'layer_uuid=%s, task_filter=%s, spatial=%s ' \
                 'state=%s, extras=%s ' \
                 'reason=%s' \
             % (self.__class__.__name__,
                self.uuid, self.uri, self.date_created, self.date_modified,
                self.operation,
-               self.layer_uuid, self.task_filter,
+               self.layer_uuid, self.task_filter, self.spatial,
                self.state, self.extras, self.reason)
 
 
@@ -83,6 +86,7 @@ def parse_tasks(tasks):
                  uuid=t['uuid'],
                  uri=t['uri'],
                  task_filter=t['task_filter'],
+                 spatial=t['spatial'],
                  extras=t['extras'],
                  state=t['state'],
                  reason=t['reason'],

@@ -868,7 +868,8 @@ class ClientTests(Tests):
     def test_add_tasks(self, post_mock):
         post_mock.__name__ = 'post'
         r = [{'operation': 'test_operation_1',
-              'task_filter': 'test_task_filter_1',
+              'task_filter': {'filter_1': 'test_task_filter_1'},
+              'spatial': {'spatial_1': 'test_task_spatial_1'},
               'uri': '/geo/1/tasks/test_task_1',
               'uuid': 'test_task_1',
               'state': 'started',
@@ -878,7 +879,8 @@ class ClientTests(Tests):
               'date_modified': 2
              },
              {'operation': 'test_operation_2',
-              'task_filter': 'test_task_filter_2',
+              'task_filter': {'filter_2': 'test_task_filter_2'},
+              'spatial': {'spatial_2': 'test_task_spatial_2'},
               'uri': '/geo/1/tasks/test_task_2',
               'uuid': 'test_task_2',
               'state': 'started',
@@ -895,7 +897,10 @@ class ClientTests(Tests):
                  {'operation': 'test_operation_2'}]
         tasks = self.client._add_tasks(tasks)
         self.assertEqual(tasks[0].operation, 'test_operation_1')
-        self.assertEqual(tasks[0].task_filter, 'test_task_filter_1')
+        self.assertDictEqual(tasks[0].task_filter, 
+            {'filter_1': 'test_task_filter_1'})
+        self.assertDictEqual(tasks[0].spatial, 
+            {'spatial_1': 'test_task_spatial_1'})
         self.assertEqual(tasks[0].uuid, 'test_task_1')
         self.assertEqual(tasks[0].state, 'started')
         self.assertDictEqual(tasks[0].extras, {'extra': 'test_extra_1'})
@@ -904,7 +909,10 @@ class ClientTests(Tests):
         self.assertEqual(tasks[0].date_created, 1)
         self.assertEqual(tasks[0].date_modified, 2)
         self.assertEqual(tasks[1].operation, 'test_operation_2')
-        self.assertEqual(tasks[1].task_filter, 'test_task_filter_2')
+        self.assertDictEqual(tasks[1].task_filter, 
+            {'filter_2': 'test_task_filter_2'})
+        self.assertDictEqual(tasks[1].spatial, 
+            {'spatial_2': 'test_task_spatial_2'})
         self.assertEqual(tasks[1].uuid, 'test_task_2')
         self.assertEqual(tasks[1].state, 'started')
         self.assertDictEqual(tasks[1].extras, {'extra': 'test_extra_2'})
@@ -917,7 +925,8 @@ class ClientTests(Tests):
     def test_get_task(self, get_mock):
         get_mock.__name__ = 'get'
         r = {'operation': 'test_operation_1',
-             'task_filter': 'test_task_filter_1',
+             'task_filter': {'filter_1': 'test_task_filter_1'},
+             'spatial': {'spatial_1': 'test_task_spatial_1'},
              'uri': '/geo/1/tasks/test_task_1',
              'uuid': 'test_task_1',
              'state': 'started',
@@ -932,7 +941,10 @@ class ClientTests(Tests):
         get_mock.return_value = m
         task = self.client._get_task('test_task_1')
         self.assertEqual(task.operation, 'test_operation_1')
-        self.assertEqual(task.task_filter, 'test_task_filter_1')
+        self.assertDictEqual(task.task_filter, 
+            {'filter_1': 'test_task_filter_1'})
+        self.assertDictEqual(task.spatial, 
+            {'spatial_1': 'test_task_spatial_1'})
         self.assertEqual(task.uri, '/geo/1/tasks/test_task_1')
         self.assertEqual(task.uuid, 'test_task_1')
         self.assertEqual(task.state, 'started')
@@ -979,17 +991,19 @@ class ClientTests(Tests):
         _get_results_mock.side_effect = [[result1], [result2]]
         tasks = [snowfloat.task.Task(
                     operation='test_operation_1',
-                    layer_uuid='test_layer_1'),
+                    task_filter={'layer__uuid_exact': 'test_layer_1'}),
                  snowfloat.task.Task(
                     operation='test_operation_2',
-                    layer_uuid='test_layer_2')]
+                    task_filter={'layer__uuid_exact': 'test_layer_2'})]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], ['test_result_2',]])
         d = [
             {'operation': 'test_operation_1',
-             'layer__uuid__exact': 'test_layer_1'},
+             'filter': {'layer__uuid__exact': 'test_layer_1'},
+             'spatial': {}},
             {'operation': 'test_operation_2',
-             'layer__uuid__exact': 'test_layer_2'}
+             'filter': {'layer__uuid__exact': 'test_layer_2'},
+             'spatial': {}},
         ]
         _add_tasks_mock.assert_called_with(d)
         self.assertEqual(_get_task_mock.call_args_list,
@@ -1020,17 +1034,19 @@ class ClientTests(Tests):
         _get_results_mock.side_effect = [[result1], [result2]]
         tasks = [snowfloat.task.Task(
                     operation='test_operation_1',
-                    layer_uuid= ['test_layer_1', 'test_layer_1b']),
+                    task_filter={'layer__uuid_exact': 'test_layer_1'}),
                  snowfloat.task.Task(
                     operation='test_operation_2',
-                    layer_uuid='test_layer_2')]
+                    task_filter={'layer__uuid_exact': 'test_layer_2'})]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], {'error': 'test_reason'}])
         d = [
             {'operation': 'test_operation_1',
-             'layer__uuid__in': ['test_layer_1', 'test_layer_1b']},
+             'filter': {'layer__uuid__exact': 'test_layer_1'},
+             'spatial': {}},
             {'operation': 'test_operation_2',
-             'layer__uuid__exact': 'test_layer_2'}
+             'filter': {'layer__uuid__exact': 'test_layer_2'},
+             'spatial': {}},
         ]
         _add_tasks_mock.assert_called_with(d)
         self.assertEqual(_get_task_mock.call_args_list,
@@ -1062,17 +1078,19 @@ class ClientTests(Tests):
         _get_results_mock.side_effect = [[result1], [result2]]
         tasks = [snowfloat.task.Task(
                     operation='test_operation_1',
-                    layer_uuid='test_layer_1'),
+                    task_filter={'layer__uuid_exact': 'test_layer_1'}),
                  snowfloat.task.Task(
                     operation='test_operation_2',
-                    layer_uuid='test_layer_2')]
+                    task_filter={'layer__uuid_exact': 'test_layer_2'})]
         r = self.client.execute_tasks(tasks, interval=0.1)
         self.assertListEqual(r, [['test_result_1',], ['test_result_2',]])
         d = [
             {'operation': 'test_operation_1',
-             'layer__uuid__exact': 'test_layer_1'},
+             'filter': {'layer__uuid__exact': 'test_layer_1'},
+             'spatial': {}},
             {'operation': 'test_operation_2',
-             'layer__uuid__exact': 'test_layer_2'}
+             'filter': {'layer__uuid__exact': 'test_layer_2'},
+             'spatial': {}},
         ]
         _add_tasks_mock.assert_called_with(d)
         self.assertEqual(_get_task_mock.call_args_list,
@@ -1101,17 +1119,19 @@ class ClientTests(Tests):
         _get_results_mock.side_effect = [[result1], [result2]]
         tasks = [snowfloat.task.Task(
                     operation='test_operation_1',
-                    layer_uuid='test_layer_1'),
+                    task_filter={'layer__uuid_exact': 'test_layer_1'}),
                  snowfloat.task.Task(
                     operation='test_operation_2',
-                    layer_uuid='test_layer_2')]
+                    task_filter={'layer__uuid_exact': 'test_layer_2'})]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], None])
         d = [
             {'operation': 'test_operation_1',
-             'layer__uuid__exact': 'test_layer_1'},
+             'filter': {'layer__uuid__exact': 'test_layer_1'},
+             'spatial': {}},
             {'operation': 'test_operation_2',
-             'layer__uuid__exact': 'test_layer_2'}
+             'filter': {'layer__uuid__exact': 'test_layer_2'},
+             'spatial': {}},
         ]
         _add_tasks_mock.assert_called_with(d)
         self.assertEqual(_get_task_mock.call_args_list,
@@ -1218,7 +1238,8 @@ class ResultsTests(Tests):
         operation='test_operation_1',
         uuid='test_task_1',
         uri='/geo/1/tasks/test_task_1',
-        task_filter='test_task_filter_1',
+        task_filter={'filter': 'test_task_filter_1'},
+        spatial={'spatial': 'test_task_spatial_1'},
         extras={},
         state='started',
         reason='',

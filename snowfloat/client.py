@@ -290,17 +290,13 @@ def _prepare_tasks(tasks):
     for task in tasks:
         # add task
         task_to_add = {'operation': task.operation}
-
-        if task.layer_uuid:
-            if (isinstance(task.layer_uuid, list) or
-                isinstance(task.layer_uuid, tuple)):
-                task_to_add['layer__uuid__in'] = task.layer_uuid
-            else:
-                task_to_add['layer__uuid__exact'] = task.layer_uuid
+        task_to_add['filter'] = snowfloat.request.format_params(
+            task.task_filter)
+        task_to_add['spatial'] = task.spatial
 
         if task.extras:
             task_to_add['extras'] = task.extras
-
+        
         tasks_to_process.append(task_to_add)
 
     return tasks_to_process
