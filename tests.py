@@ -25,9 +25,9 @@ class Tests(unittest.TestCase):
         self.client = snowfloat.client.Client()
 
         self.features = []
-        geometry = snowfloat.geometry.Point(coordinates=[1, 2, 3])
+        point = snowfloat.geometry.Point(coordinates=[1, 2, 3])
         fields = {'ts': 4, 'tag': 'test_tag_1'}
-        feature = snowfloat.feature.Feature(geometry, fields=fields)
+        feature = snowfloat.feature.Feature(point, fields=fields)
         self.features.append(feature)
         geometry = snowfloat.geometry.Polygon(
                   coordinates=[[[11, 12, 13],
@@ -55,11 +55,11 @@ class Tests(unittest.TestCase):
         fields = {'ts': 31, 'tag': 'test_tag_4'}
         feature = snowfloat.feature.Feature(geometry, fields=fields)
         self.features.append(feature)
-        geometry = snowfloat.geometry.MultiPoint(
+        multipoint = snowfloat.geometry.MultiPoint(
                   coordinates=[[11, 12, 13],
                                [14, 15, 16]])
         fields = {'ts': 41, 'tag': 'test_tag_5'}
-        feature = snowfloat.feature.Feature(geometry, fields=fields)
+        feature = snowfloat.feature.Feature(multipoint, fields=fields)
         self.features.append(feature)
         geometry = snowfloat.geometry.MultiLineString(
                   coordinates=[[[11, 12, 13],
@@ -71,6 +71,11 @@ class Tests(unittest.TestCase):
                                 [27, 28, 29],
                                 [21, 22, 23]]])
         fields = {'ts': 51, 'tag': 'test_tag_6'}
+        feature = snowfloat.feature.Feature(geometry, fields=fields)
+        self.features.append(feature)
+        geometry = snowfloat.geometry.GeometryCollection([point,
+            multipoint])
+        fields = {'ts': 61, 'tag': 'test_tag_7'}
         feature = snowfloat.feature.Feature(geometry, fields=fields)
         self.features.append(feature)
     
@@ -200,6 +205,29 @@ class Tests(unittest.TestCase):
                                         'coordinates': [19, 20, 21]}}
 
                         },
+                        {'type': 'Feature',
+                         'id': 'test_geometrycollection_1',
+                         'geometry': {
+                            'type': 'GeometryCollection',
+                            'geometries': [
+                                      {'type': 'Point',
+                                       'coordinates': [1, 2, 3],
+                                                      },
+                                      {'type': 'MultiPoint',
+                                       'coordinates': [[11, 12, 13],
+                                                       [14, 15, 16]
+                                                      ]},
+                                      ]},
+                         'properties': {
+                            'uri': '/geo/1/layers/test_layer_1/'\
+                                'features/test_geometrycollection_1',
+                            'field_ts': 61,
+                            'field_tag': 'test_tag_7',
+                            'date_created': 62,
+                            'date_modified': 63,
+                            'spatial': {'type': 'Point',
+                                        'coordinates': [22, 23, 24]}}
+                        },
                         ]}}
         r2 = {
               'next_page_uri': None,
@@ -213,6 +241,7 @@ class Tests(unittest.TestCase):
         m2.json.return_value = r2
         method_mock.side_effect = [m1, m2]
         features = method(*args, **kwargs)
+        
         feature = features[0]
         self.assertListEqual(feature.geometry.coordinates, [1, 2, 3])
         self.assertEqual(feature.fields['ts'], 4)
@@ -224,6 +253,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.date_modified, 6)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [4, 5, 6])
+        
         feature = features[1]
         self.assertListEqual(feature.geometry.coordinates, [[[11, 12, 13],
                                                              [14, 15, 16],
@@ -238,6 +268,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.date_modified, 13)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [7, 8, 9])
+        
         feature = features[2]
         self.assertListEqual(feature.geometry.coordinates, [[[[11, 12, 13],
                                                               [14, 15, 16],
@@ -256,6 +287,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.date_modified, 23)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [10, 11, 12])
+        
         feature = features[3]
         self.assertListEqual(feature.geometry.coordinates, [[11, 12, 13],
                                                             [14, 15, 16]])
@@ -268,6 +300,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.date_modified, 33)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [13, 14, 15])
+        
         feature = features[4]
         self.assertListEqual(feature.geometry.coordinates, [[11, 12, 13],
                                                             [14, 15, 16]])
@@ -280,6 +313,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.date_modified, 43)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [16, 17, 18])
+        
         feature = features[5]
         self.assertListEqual(feature.geometry.coordinates, [[[11, 12, 13],
                                                              [14, 15, 16],
@@ -298,6 +332,22 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.date_modified, 53)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [19, 20, 21])
+
+        feature = features[6]
+        geometry = feature.geometry.geometries[0]
+        self.assertListEqual(geometry.coordinates, [1, 2, 3])
+        geometry = feature.geometry.geometries[1]
+        self.assertListEqual(geometry.coordinates, [[11, 12, 13],
+                                                    [14, 15, 16]])
+        self.assertEqual(feature.fields['ts'], 61)
+        self.assertEqual(feature.fields['tag'], 'test_tag_7')
+        self.assertEqual(feature.uri,
+            '/geo/1/layers/test_layer_1/features/test_geometrycollection_1')
+        self.assertEqual(feature.uuid, 'test_geometrycollection_1')
+        self.assertEqual(feature.date_created, 62)
+        self.assertEqual(feature.date_modified, 63)
+        self.assertEqual(feature.spatial.geometry_type, 'Point')
+        self.assertListEqual(feature.spatial.coordinates, [22, 23, 24])
 
         distance_lookup = {'type': 'Point',
                            'coordinates': [1, 2, 3],
@@ -433,12 +483,34 @@ class Tests(unittest.TestCase):
                     'date_created': 52,
                     'date_modified': 53}
                 },
+                {'type': 'Feature',
+                 'id': 'test_geometrycollection_1',
+                 'geometry': {
+                    'type': 'GeometryCollection',
+                    'geometries': [
+                              {'type': 'Point',
+                               'coordinates': [1, 2, 3],
+                                              },
+                              {'type': 'MultiPoint',
+                               'coordinates': [[11, 12, 13],
+                                               [14, 15, 16]
+                                              ]},
+                              ]},
+                 'properties': {
+                    'uri': '/geo/1/layers/test_layer_1/'\
+                        'features/test_geometrycollection_1',
+                    'field_tag': 'test_tag_7',
+                    'field_ts': 61,
+                    'date_created': 62,
+                    'date_modified': 63}
+                },
                 ]}
         m = Mock()
         m.status_code = 200
         m.json.return_value = r
         method_mock.return_value = m
         features = method(*args, **kwargs)
+        
         feature = features[0]
         self.assertListEqual(feature.geometry.coordinates, [1, 2, 3])
         self.assertEqual(feature.fields['ts'], 4)
@@ -449,6 +521,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.uuid, 'test_point_1')
         self.assertEqual(feature.date_created, 5)
         self.assertEqual(feature.date_modified, 6)
+        
         feature = features[1]
         self.assertListEqual(feature.geometry.coordinates, [[[11, 12, 13],
                                                              [14, 15, 16],
@@ -479,6 +552,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.uuid, 'test_multipolygon_1')
         self.assertEqual(feature.date_created, 22)
         self.assertEqual(feature.date_modified, 23)
+        
         feature = features[3]
         self.assertListEqual(feature.geometry.coordinates, [[11, 12, 13],
                                                             [14, 15, 16]])
@@ -490,6 +564,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.uuid, 'test_linestring_1')
         self.assertEqual(feature.date_created, 32)
         self.assertEqual(feature.date_modified, 33)
+        
         feature = features[4]
         self.assertListEqual(feature.geometry.coordinates, [[11, 12, 13],
                                                             [14, 15, 16]])
@@ -501,6 +576,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.uuid, 'test_multipoint_1')
         self.assertEqual(feature.date_created, 42)
         self.assertEqual(feature.date_modified, 43)
+        
         feature = features[5]
         self.assertListEqual(feature.geometry.coordinates, [[[11, 12, 13],
                                                              [14, 15, 16],
@@ -518,7 +594,22 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.uuid, 'test_multilinestring_1')
         self.assertEqual(feature.date_created, 52)
         self.assertEqual(feature.date_modified, 53)
-        for i in range(6):
+       
+        feature = features[6]
+        geometry = feature.geometry.geometries[0]
+        self.assertListEqual(geometry.coordinates, [1, 2, 3])
+        geometry = feature.geometry.geometries[1]
+        self.assertListEqual(geometry.coordinates, [[11, 12, 13],
+                                                    [14, 15, 16]])
+        self.assertEqual(feature.fields['ts'], 61)
+        self.assertEqual(feature.fields['tag'], 'test_tag_7')
+        self.assertEqual(feature.uri,
+            '/geo/1/layers/test_layer_1/features/test_geometrycollection_1')
+        self.assertEqual(feature.uuid, 'test_geometrycollection_1')
+        self.assertEqual(feature.date_created, 62)
+        self.assertEqual(feature.date_modified, 63)
+ 
+        for i in range(7):
             del r['features'][i]['id']
             del r['features'][i]['properties']['uri']
             del r['features'][i]['properties']['date_created']
@@ -1171,8 +1262,8 @@ class LayerTests(Tests):
         post_mock.__name__ = 'post'
         self.add_features_helper(post_mock, self.layer.add_features,
             self.features)
-        self.assertEqual(self.layer.num_features, 9)
-        self.assertEqual(self.layer.num_points, 31)
+        self.assertEqual(self.layer.num_features, 10)
+        self.assertEqual(self.layer.num_points, 34)
 
     @patch.object(requests, 'delete')
     def test_delete_features(self, delete_mock):

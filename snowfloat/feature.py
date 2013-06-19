@@ -157,11 +157,20 @@ def parse_features(features):
     res = []
     for feature in features:
         if feature['geometry']:
-            geometry = getattr(
-                snowfloat.geometry, feature['geometry']['type'])(
-                    feature['geometry']['coordinates'])
+            if feature['geometry']['type'] == 'GeometryCollection':
+                geometries = [
+                    getattr(
+                        snowfloat.geometry, geom['type'])(
+                            geom['coordinates'])
+                        for geom in feature['geometry']['geometries']]
+                geometry = snowfloat.geometry.GeometryCollection(geometries)
+            else:
+                geometry = getattr(
+                    snowfloat.geometry, feature['geometry']['type'])(
+                        feature['geometry']['coordinates'])
         else:
             geometry = None
+
         feature_to_add = Feature(
             geometry,
             uuid=feature['id'],
@@ -202,9 +211,18 @@ def format_feature(feature):
     Returns:
         str: geojson dictionary.
     """
+    if feature.geometry.geometry_type == 'GeometryCollection':
+        geometry = {'type': feature.geometry.geometry_type,
+                    'geometries': [
+                        {'type': geom.geometry_type,
+                         'coordinates': geom.coordinates}
+                            for geom in feature.geometry.geometries]}
+    else:
+        geometry = {'type': feature.geometry.geometry_type,
+                    'coordinates': feature.geometry.coordinates}
+    
     return {'type': 'Feature',
-            'geometry': {'type': feature.geometry.geometry_type,
-                         'coordinates': feature.geometry.coordinates},
+            'geometry': geometry,
             'properties': {'field_%s' % (key,): val
                 for key, val in feature.fields.items()}
            }

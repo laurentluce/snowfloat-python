@@ -158,6 +158,21 @@ class MultiLineString(Geometry, MULTILINESTRING_CLS):
         return sum([e.num_points() for e in self.linestrings])
 
 
+class GeometryCollection(Geometry):
+    """Geometry Collection."""
+
+    geometry_type = 'GeometryCollection'
+    geometries = None
+
+    def __init__(self, geometries, **kwargs):
+        self.geometries = geometries
+        Geometry.__init__(self, None, **kwargs)
+
+    def num_points(self):
+        """Returns the number of points defining this collection."""
+        return sum([e.num_points() for e in self.geometries])
+
+
 def convert_coords_2d_3d(coords):
     if isinstance(coords[0], list):
         for i in range(len(coords)):

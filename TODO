@@ -1,9 +1,6 @@
 P1:
 
+- pep8
+
 P2:
 
-- add fields conditions to tasks 
-
-- add order arg to get_
-
-- pep8
