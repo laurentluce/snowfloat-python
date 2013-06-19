@@ -407,10 +407,7 @@ class Tests(unittest.TestCase):
     def test_execute_tasks_import_geospatial_data_mi_forest_roads(self):
 
         path = 'tests/mi_forest_roads.zip'
-        srs={'type': 'EPSG',
-             'properties':
-                {'code': 26916}}
-        r = self.client.import_geospatial_data(path, srs)
+        r = self.client.import_geospatial_data(path)
         self.assertDictEqual(r,
             {'layers_count': 1, 'features_count': 3671})
         
