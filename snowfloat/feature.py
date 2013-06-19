@@ -46,12 +46,7 @@ class Feature(object):
             self.fields = fields
         # spatial can be a geometry in the geojson format
         if self.spatial and isinstance(self.spatial, dict):
-            try:
-                self.spatial = getattr(snowfloat.geometry,
-                    self.spatial['type'])(
-                        self.spatial['coordinates'])
-            except AttributeError:
-                raise
+            self.spatial = get_geometry_from_geojson(self.spatial)
     
     def __str__(self):
         return '%s(uuid=%s, uri=%s, ' \
@@ -157,17 +152,7 @@ def parse_features(features):
     res = []
     for feature in features:
         if feature['geometry']:
-            if feature['geometry']['type'] == 'GeometryCollection':
-                geometries = [
-                    getattr(
-                        snowfloat.geometry, geom['type'])(
-                            geom['coordinates'])
-                        for geom in feature['geometry']['geometries']]
-                geometry = snowfloat.geometry.GeometryCollection(geometries)
-            else:
-                geometry = getattr(
-                    snowfloat.geometry, feature['geometry']['type'])(
-                        feature['geometry']['coordinates'])
+            geometry = get_geometry_from_geojson(feature['geometry'])
         else:
             geometry = None
 
@@ -189,6 +174,21 @@ def parse_features(features):
         res.append(feature_to_add)
 
     return res
+
+def get_geometry_from_geojson(d): 
+    if d['type'] == 'GeometryCollection':
+        geometries = [
+            getattr(
+                snowfloat.geometry, geom['type'])(
+                    geom['coordinates'])
+                for geom in d['geometries']]
+        geometry = snowfloat.geometry.GeometryCollection(geometries)
+    else:
+        geometry = getattr(
+            snowfloat.geometry, d['type'])(
+                d['coordinates'])
+
+    return geometry
 
 def format_features(features):
     """Format geojson dictionary using Feature objects.
