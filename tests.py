@@ -1082,10 +1082,10 @@ class ClientTests(Tests):
         _get_results_mock.side_effect = [[result1], [result2]]
         tasks = [snowfloat.task.Task(
                     operation='test_operation_1',
-                    task_filter={'layer__uuid_exact': 'test_layer_1'}),
+                    task_filter={'layer_uuid_exact': 'test_layer_1'}),
                  snowfloat.task.Task(
                     operation='test_operation_2',
-                    task_filter={'layer__uuid_exact': 'test_layer_2'})]
+                    task_filter={'layer_uuid_exact': 'test_layer_2'})]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], ['test_result_2',]])
         d = [
@@ -1125,10 +1125,10 @@ class ClientTests(Tests):
         _get_results_mock.side_effect = [[result1], [result2]]
         tasks = [snowfloat.task.Task(
                     operation='test_operation_1',
-                    task_filter={'layer__uuid_exact': 'test_layer_1'}),
+                    task_filter={'layer_uuid_exact': 'test_layer_1'}),
                  snowfloat.task.Task(
                     operation='test_operation_2',
-                    task_filter={'layer__uuid_exact': 'test_layer_2'})]
+                    task_filter={'layer_uuid_exact': 'test_layer_2'})]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], {'error': 'test_reason'}])
         d = [
@@ -1169,10 +1169,10 @@ class ClientTests(Tests):
         _get_results_mock.side_effect = [[result1], [result2]]
         tasks = [snowfloat.task.Task(
                     operation='test_operation_1',
-                    task_filter={'layer__uuid_exact': 'test_layer_1'}),
+                    task_filter={'layer_uuid_exact': 'test_layer_1'}),
                  snowfloat.task.Task(
                     operation='test_operation_2',
-                    task_filter={'layer__uuid_exact': 'test_layer_2'})]
+                    task_filter={'layer_uuid_exact': 'test_layer_2'})]
         r = self.client.execute_tasks(tasks, interval=0.1)
         self.assertListEqual(r, [['test_result_1',], ['test_result_2',]])
         d = [
@@ -1210,10 +1210,10 @@ class ClientTests(Tests):
         _get_results_mock.side_effect = [[result1], [result2]]
         tasks = [snowfloat.task.Task(
                     operation='test_operation_1',
-                    task_filter={'layer__uuid_exact': 'test_layer_1'}),
+                    task_filter={'layer_uuid_exact': 'test_layer_1'}),
                  snowfloat.task.Task(
                     operation='test_operation_2',
-                    task_filter={'layer__uuid_exact': 'test_layer_2'})]
+                    task_filter={'layer_uuid_exact': 'test_layer_2'})]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], None])
         d = [

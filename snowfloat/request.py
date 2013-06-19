@@ -261,6 +261,7 @@ def format_params(kwargs, exclude=None):
             params[key] = ','.join(val)            
         elif (not key.startswith('spatial_')
                 and not key in exclude):
+            key = key.replace('layer_', 'layer__')
             s1 = key[:key.rindex('_')]
             s2 = key[key.rindex('_')+1:]
             params[s1 + '__' + s2] = val
