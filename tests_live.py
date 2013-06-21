@@ -31,7 +31,8 @@ class Tests(unittest.TestCase):
                                                  'size': 256},],
                                         srs={'type': 'EPSG',
                                              'properties':
-                                                {'code': 4326, 'dim': 3}})
+                                                {'code': 4326, 'dim': 3}},
+                                        extent=[1, 2, 3, 4])
             for i in range(10)]
         t = time.time()
         layers = self.client.add_layers(layers)
@@ -44,6 +45,7 @@ class Tests(unittest.TestCase):
                   'size': 256},])
             self.assertDictEqual(layers[i].srs,
                 {'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}})
+            self.assertListEqual(layers[i].extent, [1, 2, 3, 4])
         
         # list layers
         t = time.time()
@@ -57,6 +59,7 @@ class Tests(unittest.TestCase):
                   'size': 256},])
             self.assertDictEqual(layers[i].srs,
                 {'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}})
+            self.assertListEqual(layers[i].extent, [1, 2, 3, 4])
 
         # update layer
         t = time.time()
@@ -80,6 +83,7 @@ class Tests(unittest.TestCase):
                   'size': 256},])
             self.assertDictEqual(layers[i].srs,
                 {'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}})
+            self.assertListEqual(layers[i].extent, [1, 2, 3, 4])
 
         # delete layers
         self.client.delete_layers()
@@ -384,7 +388,7 @@ class Tests(unittest.TestCase):
         tasks = [snowfloat.task.Task(
                     operation='map',
                     task_filter = {
-                        'layer__uuid_exact': layers[0].uuid},
+                        'layer_uuid_exact': layers[0].uuid},
                     spatial = {
                         'operation': 'transform', 'srid': 4326},
                     extras={'xlim': [-165, 165],
@@ -418,11 +422,9 @@ class Tests(unittest.TestCase):
         tasks = [snowfloat.task.Task(
             operation='map',
             task_filter = {
-                'layer__uuid_exact': layer.uuid},
+                'layer_uuid_exact': layer.uuid},
             spatial = {
-                'operation': 'transform', 'srid': 4326},
-            extras={'xlim': [472227.213333, 580296.070000],
-                    'ylim': [5057213.467333, 5106528.955333]})]
+                'operation': 'transform', 'srid': 4326})]
                     
         t = time.time()
         r = self.client.execute_tasks(tasks)

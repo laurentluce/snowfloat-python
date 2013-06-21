@@ -752,6 +752,7 @@ class ClientTests(Tests):
                                         'size': 256},],
                             'srs': {'type': 'EPSG',
                                     'properties': {'code': 4326, 'dim': 3}},
+                            'extent': [1, 2, 3, 4]
                            },
                            {'name': 'test_tag_2',
                             'uri': '/geo/1/layers/test_layer_2',
@@ -764,6 +765,7 @@ class ClientTests(Tests):
                                         'size': 256},],
                             'srs': {'type': 'EPSG',
                                     'properties': {'code': 4327, 'dim': 2}},
+                            'extent': None
                            }],
             }
         r2 = {
@@ -791,6 +793,7 @@ class ClientTests(Tests):
             [{'name': 'field_1', 'type': 'string', 'size': 256},])
         self.assertDictEqual(layers[0].srs,
             {'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}})
+        self.assertListEqual(layers[0].extent, [1, 2, 3, 4])
         self.assertEqual(layers[1].name, 'test_tag_2')
         self.assertEqual(layers[1].uri,
             '/geo/1/layers/test_layer_2')
@@ -803,6 +806,7 @@ class ClientTests(Tests):
             [{'name': 'field_2', 'type': 'string', 'size': 256},])
         self.assertDictEqual(layers[1].srs,
             {'type': 'EPSG', 'properties': {'code': 4327, 'dim': 2}})
+        self.assertIsNone(layers[1].extent)
         self.assertEqual(get_mock.call_args_list,
             [call('%s/geo/1/layers' % (self.url_prefix,),
                   headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
@@ -835,6 +839,7 @@ class ClientTests(Tests):
               'num_points': 0,
               'fields': [{'name': 'field_1', 'type': 'string', 'size': 256},],
               'srs': {'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}},
+              'extent': [1, 2, 3, 4]
              },
              {'name': 'test_tag_2',
               'uri': '/geo/1/layers/test_layer_2',
@@ -845,6 +850,7 @@ class ClientTests(Tests):
               'num_points': 0,
               'fields': [{'name': 'field_2', 'type': 'string', 'size': 256},],
               'srs': {'type': 'EPSG', 'properties': {'code': 4327, 'dim': 2}},
+              'extent': None
              }]
         m = Mock()
         m.status_code = 200
@@ -853,7 +859,8 @@ class ClientTests(Tests):
         layers = [
             snowfloat.layer.Layer(name='test_tag_1',
                 fields=[{'name': 'field_1', 'type': 'string', 'size': 256},],
-                srs={'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}}),
+                srs={'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}},
+                extent=[1, 2, 3, 4]),
             snowfloat.layer.Layer(name='test_tag_2',
                 fields=[{'name': 'field_2', 'type': 'string', 'size': 256},],
                 srs={'type': 'EPSG', 'properties': {'code': 4327, 'dim': 2}}),
@@ -871,6 +878,7 @@ class ClientTests(Tests):
             [{'name': 'field_1', 'type': 'string', 'size': 256},])
         self.assertDictEqual(layers[0].srs,
             {'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}})
+        self.assertListEqual(layers[0].extent, [1, 2, 3, 4])
         self.assertEqual(layers[1].name, 'test_tag_2')
         self.assertEqual(layers[1].uri,
             '/geo/1/layers/test_layer_2')
@@ -883,6 +891,7 @@ class ClientTests(Tests):
             [{'name': 'field_2', 'type': 'string', 'size': 256},])
         self.assertDictEqual(layers[1].srs,
             {'type': 'EPSG', 'properties': {'code': 4327, 'dim': 2}})
+        self.assertIsNone(layers[1].extent)
         
         self.assertEqual(post_mock.call_args_list,
             [call('%s/geo/1/layers' % (self.url_prefix,),
@@ -898,7 +907,8 @@ class ClientTests(Tests):
                      'fields': [{'name': 'field_1', 'type': 'string',
                                  'size': 256},],
                      'srs': {'type': 'EPSG',
-                             'properties': {'code': 4326, 'dim': 3}}},
+                             'properties': {'code': 4326, 'dim': 3}},
+                     'extent': [1, 2, 3, 4]},
                     {'name': 'test_tag_2',
                      'fields': [{'name': 'field_2', 'type': 'string',
                                  'size': 256},],

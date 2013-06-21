@@ -23,6 +23,8 @@ class Layer(object):
         fields (list): List of fields definitions.
 
         srs (dict): Spatial reference system dictionary.
+
+        extent (list): Spatial extent list. (xmin, xmax, ymin, ymax).
     """
     name = ''
     uuid = None
@@ -33,6 +35,7 @@ class Layer(object):
     num_points = 0
     fields = None
     srs = None
+    extent = None
 
     def __init__(self, **kwargs):
         for key, val in kwargs.items():
@@ -42,10 +45,10 @@ class Layer(object):
     def __str__(self):
         return 'Layer(name=%s, uuid=%s, date_created=%s, date_modified=%s, '\
                'uri=%s, num_features=%d, num_points=%d, fields=%s, '\
-               'srs=%s)' \
+               'srs=%s, extent=%s)' \
             % (self.name, self.uuid, self.date_created, self.date_modified,
                self.uri, self.num_features, self.num_points, self.fields,
-               self.srs)
+               self.srs, self.extent)
 
     def add_features(self, features):
         """Add list of features to this layer.
@@ -182,6 +185,8 @@ def format_layer(layer):
         d['fields'] = layer.fields
     if layer.srs:
         d['srs'] = layer.srs
+    if layer.extent:
+        d['extent'] = layer.extent
     
     return d
 
@@ -203,7 +208,8 @@ def parse_layers(layers):
                 num_features=layer['num_features'],
                 num_points=layer['num_points'],
                 fields=layer['fields'],
-                srs=layer['srs']
+                srs=layer['srs'],
+                extent=layer['extent']
                 ) for layer in layers]
 
 def update_layer(layer_source, layer_destination):
