@@ -1,8 +1,6 @@
 """Layer Features objects"""
 
 import json
-import sys
-import time
 
 import snowfloat.geometry
 import snowfloat.request
@@ -148,7 +146,6 @@ def parse_features(features):
     Returns:
         list: List of Feature objects.
     """
-    thismodule = sys.modules[__name__]
     res = []
     for feature in features:
         if feature['geometry']:
@@ -175,18 +172,26 @@ def parse_features(features):
 
     return res
 
-def get_geometry_from_geojson(d): 
-    if d['type'] == 'GeometryCollection':
+def get_geometry_from_geojson(geojson):
+    """Return Geometry object from GeoJSON dictionary.
+
+    Args:
+        geojson (dict): GeoJSON dictionary.
+
+    Returns:
+        Geometry: Geometry object.
+    """
+    if geojson['type'] == 'GeometryCollection':
         geometries = [
             getattr(
                 snowfloat.geometry, geom['type'])(
                     geom['coordinates'])
-                for geom in d['geometries']]
+                for geom in geojson['geometries']]
         geometry = snowfloat.geometry.GeometryCollection(geometries)
     else:
         geometry = getattr(
-            snowfloat.geometry, d['type'])(
-                d['coordinates'])
+            snowfloat.geometry, geojson['type'])(
+                geojson['coordinates'])
 
     return geometry
 

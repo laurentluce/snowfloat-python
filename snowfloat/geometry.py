@@ -1,9 +1,5 @@
 """Geometries objects: Points, Polygons."""
 
-import json
-import sys
-import time
-
 try:
     import shapely.geometry
     POINT_CLS = shapely.geometry.Point
@@ -94,9 +90,9 @@ class Polygon(Geometry, POLYGON_CLS):
         if POLYGON_CLS != object:
             shapely.geometry.Polygon.__init__(self, coords[0], coords[1:])
         # close the rings if not closed
-        for c in coords:
-            if c[0] != c[-1]:
-                c.append(c[0])
+        for coord in coords:
+            if coord[0] != coord[-1]:
+                coord.append(coord[0])
         Geometry.__init__(self, coords, **kwargs)
 
     def num_points(self):
@@ -174,6 +170,14 @@ class GeometryCollection(Geometry):
 
 
 def convert_coords_2d_3d(coords):
+    """Converts 2D coordinates to 3D coordinates.
+
+    Args:
+        coords (list): List of 2D coordinates.
+
+    Returns:
+        list: List of 3D coordinates.
+    """
     if isinstance(coords[0], list):
         for i in range(len(coords)):
             coords[i] = convert_coords_2d_3d(coords[i])

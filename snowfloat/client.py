@@ -7,7 +7,6 @@ import json
 import time
 
 import snowfloat.layer
-import snowfloat.auth
 import snowfloat.errors
 import snowfloat.request
 import snowfloat.result
@@ -221,7 +220,7 @@ class Client(object):
                 break
 
         # execute import data source task
-        extras={'blob_uuid': blob_uuid}
+        extras = {'blob_uuid': blob_uuid}
         if srs:
             extras['srs'] = srs
         tasks = [snowfloat.task.Task(

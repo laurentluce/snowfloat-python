@@ -8,7 +8,6 @@ from mock import Mock, patch, call
 import requests
 import requests.exceptions
 
-import snowfloat.auth
 import snowfloat.client
 import snowfloat.errors
 import snowfloat.geometry
@@ -17,11 +16,10 @@ import snowfloat.task
 
 class Tests(unittest.TestCase):
    
-    url_prefix = 'http://%s' % (snowfloat.settings.HOST,)
+    url_prefix = 'https://%s' % (snowfloat.settings.HOST,)
 
     def setUp(self):
         snowfloat.settings.HTTP_RETRY_INTERVAL = 0.1
-        snowfloat.auth.session_uuid = 'test_session_uuid'
         self.client = snowfloat.client.Client()
 
         self.features = []

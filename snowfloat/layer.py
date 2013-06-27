@@ -1,7 +1,5 @@
 """Layer of geometries."""
 
-import time
-
 import snowfloat.feature
 import snowfloat.request
 
@@ -180,15 +178,15 @@ def format_layer(layer):
     Returns:
         dict: Layer dictionary to be sent to the server.
     """
-    d = {'name': layer.name}
+    layer_formatted = {'name': layer.name}
     if layer.fields:
-        d['fields'] = layer.fields
+        layer_formatted['fields'] = layer.fields
     if layer.srs:
-        d['srs'] = layer.srs
+        layer_formatted['srs'] = layer.srs
     if layer.extent:
-        d['extent'] = layer.extent
+        layer_formatted['extent'] = layer.extent
     
-    return d
+    return layer_formatted
 
 def parse_layers(layers):
     """Convert layer dictionaries.

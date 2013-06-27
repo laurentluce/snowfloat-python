@@ -16,9 +16,9 @@ class Result(object):
     """
     uuid = None
     uri = None
-    tag = None
     date_created = None
     date_modified = None
+    tag = None
 
     def __init__(self, **kwargs):
         for key, val in kwargs.items():

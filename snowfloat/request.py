@@ -11,7 +11,6 @@ import urllib
 import requests
 import requests.exceptions
 
-import snowfloat.auth
 import snowfloat.errors
 import snowfloat.geometry
 import snowfloat.settings
@@ -133,36 +132,7 @@ def send(method, uri, params=None, data=None, headers=None):
     if request_data is None:
         request_data = {}
 
-    verb = method.__name__.upper()
-    if verb in ('PUT', 'POST'):
-        content_sha = _get_sha(request_data)
-        
-        if isinstance(request_data, file):
-            content_type = 'application/octet-stream'
-        else:
-            content_type = 'application/json'
-    else:
-        content_sha = ''
-        content_type = ''
-
-    date = email.utils.formatdate(usegmt=True)
-
-    if request_params:
-        full_uri = '%s?%s' % (uri, urllib.urlencode(request_params))
-    else:
-        full_uri = uri
-
-    msg = '%s\n%s\n%s\n%s\n%s' % (
-        verb, content_sha, content_type, date, full_uri)
-
-    request_headers = {'Authorization': 'GEO %s:%s' % (
-        snowfloat.settings.API_KEY,
-        _get_hmac_sha(msg, snowfloat.settings.API_PRIVATE_KEY))}
-    
-    if verb in ('PUT', 'POST'):
-        request_headers['Content-Sha'] = content_sha
-        request_headers['Content-Type'] = content_type
-    request_headers['Date'] = date 
+    request_headers = _get_headers(method, uri, request_data, request_params)
 
     if headers:
         request_headers.update(headers)
@@ -181,8 +151,8 @@ def send(method, uri, params=None, data=None, headers=None):
                 return res.json()
             elif res.status_code in (400, 403, 404, 413):
                 break
-        except requests.exceptions.RequestException, e:
-            message = str(e)
+        except requests.exceptions.RequestException, exception:
+            message = str(exception)
             if 'timeout' in message:
                 timeout *= 2
         time.sleep(snowfloat.settings.HTTP_RETRY_INTERVAL)
@@ -203,10 +173,29 @@ def send(method, uri, params=None, data=None, headers=None):
     raise snowfloat.errors.RequestError(status, code, message, more)
 
 def _get_hmac_sha(msg, private_key):
+    """Return HMAC-SHA of the message using the private key.
+
+    Args:
+        msg (str): Message to sign.
+        
+        private_key (str): Key to use to sign.
+
+    Returns:
+
+        str: base64 encoded signature.
+    """
     return base64.b64encode(hmac.new(
         private_key, msg=msg, digestmod=hashlib.sha256).digest())
 
 def _get_sha(request_data):
+    """Return request data SHA-256 checksum.
+
+    Args:
+        request_data (str or file): Request data.
+
+    Returns:
+        str: base64 encoded checksum.
+    """
     if isinstance(request_data, file):
         sha = hashlib.sha256()
         while True:
@@ -240,8 +229,69 @@ def _format_url(uri):
 
     return url
 
-def format_params(kwargs, exclude=None):
+def _get_headers(method, uri, request_data, request_params):
+    """Return dictionary of headers based on request body and parameters.
+
+    Args:
+
+        method (str): HTTP method.
+
+        uri (str): HTTP URI.
+
+        request_data (str or file): Request body.
+        
+        request_params (dict): Request parameters.
+
+    Returns:
+
+        dict: Request headers.
+    """
+    verb = method.__name__.upper()
+    if verb in ('PUT', 'POST'):
+        content_sha = _get_sha(request_data)
+        
+        if isinstance(request_data, file):
+            content_type = 'application/octet-stream'
+        else:
+            content_type = 'application/json'
+    else:
+        content_sha = ''
+        content_type = ''
+
+    date = email.utils.formatdate(usegmt=True)
+
+    if request_params:
+        full_uri = '%s?%s' % (uri, urllib.urlencode(request_params))
+    else:
+        full_uri = uri
+
+    msg = '%s\n%s\n%s\n%s\n%s' % (
+        verb, content_sha, content_type, date, full_uri)
+
+    request_headers = {'Authorization': 'GEO %s:%s' % (
+        snowfloat.settings.API_KEY,
+        _get_hmac_sha(msg, snowfloat.settings.API_PRIVATE_KEY))}
     
+    if verb in ('PUT', 'POST'):
+        request_headers['Content-Sha'] = content_sha
+        request_headers['Content-Type'] = content_type
+    request_headers['Date'] = date 
+
+    return request_headers
+
+def format_params(kwargs, exclude=None):
+    """Return formatted parameters ready to be consumed by the API.
+
+    Args:
+
+        kwargs (dict): Dictionary of parameters.
+
+        exclude (tuple): Tuple of parameters to exclude.
+
+    Returns:
+
+        dict: Dictionary of formatted parameters.
+    """    
     if not exclude:
         exclude = ()
     params = {}
@@ -263,9 +313,9 @@ def format_params(kwargs, exclude=None):
                 and not key in exclude):
             key = key.replace('layer_', 'layer__')
             try:
-                s1 = key[:key.rindex('_')]
-                s2 = key[key.rindex('_')+1:]
-                params[s1 + '__' + s2] = val
+                prefix = key[:key.rindex('_')]
+                suffix = key[key.rindex('_')+1:]
+                params[prefix + '__' + suffix] = val
             except ValueError:
                 params[key + '_exact'] = val
 
