@@ -19,6 +19,7 @@ class Tests(unittest.TestCase):
     url_prefix = 'https://%s' % (snowfloat.settings.HOST,)
 
     def setUp(self):
+        snowfloat.settings.HOST = 'api.snowfloat.com:443'
         snowfloat.settings.HTTP_RETRY_INTERVAL = 0.1
         self.client = snowfloat.client.Client()
 
@@ -79,12 +80,18 @@ class Tests(unittest.TestCase):
     
         email.utils.formatdate = Mock()
         email.utils.formatdate.return_value = 'Sat, 08 Jun 2013 22:12:05 GMT'
+        self.get_sha = snowfloat.request._get_sha
         snowfloat.request._get_sha = Mock()
         snowfloat.request._get_sha.return_value = \
             'n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg='
+        self.get_hmac_sha = snowfloat.request._get_hmac_sha
         snowfloat.request._get_hmac_sha = Mock()
         snowfloat.request._get_hmac_sha.return_value = \
             'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='
+
+    def tearDown(self):
+        snowfloat.request._get_sha = self.get_sha
+        snowfloat.request._get_hmac_sha = self.get_hmac_sha
 
     def get_features_helper(self, method_mock, method, *args, **kwargs):
         r1 = {
@@ -226,6 +233,18 @@ class Tests(unittest.TestCase):
                             'spatial': {'type': 'Point',
                                         'coordinates': [22, 23, 24]}}
                         },
+                        {'type': 'Feature',
+                         'id': 'test_geometry_1',
+                         'geometry': None,
+                         'properties': {
+                            'uri': '/geo/1/layers/test_layer_1/'\
+                                'features/test_geometry_1',
+                            'field_ts': 71,
+                            'field_tag': 'test_tag_8',
+                            'date_created': 72,
+                            'date_modified': 73,
+                            'spatial': None}
+                        },
                         ]}}
         r2 = {
               'next_page_uri': None,
@@ -239,7 +258,8 @@ class Tests(unittest.TestCase):
         m2.json.return_value = r2
         method_mock.side_effect = [m1, m2]
         features = method(*args, **kwargs)
-        
+        self.assertEqual(len(features), 8)
+
         feature = features[0]
         self.assertListEqual(feature.geometry.coordinates, [1, 2, 3])
         self.assertEqual(feature.fields['ts'], 4)
@@ -251,6 +271,13 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.date_modified, 6)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [4, 5, 6])
+        self.assertEqual(str(feature),
+            'Feature(uuid=test_point_1, '\
+            'uri=/geo/1/layers/test_layer_1/features/test_point_1, '\
+            'date_created=5, date_modified=6, '\
+            'geometry=Point(coordinates=[1, 2, 3]), '\
+            'fields={\'tag\': \'test_tag_1\', \'ts\': 4}, '\
+            'layer_uuid=test_layer_1, spatial=Point(coordinates=[4, 5, 6])')
         
         feature = features[1]
         self.assertListEqual(feature.geometry.coordinates, [[[11, 12, 13],
@@ -346,6 +373,17 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.date_modified, 63)
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [22, 23, 24])
+
+        feature = features[7]
+        self.assertIsNone(feature.geometry)
+        self.assertEqual(feature.fields['ts'], 71)
+        self.assertEqual(feature.fields['tag'], 'test_tag_8')
+        self.assertEqual(feature.uri,
+            '/geo/1/layers/test_layer_1/features/test_geometry_1')
+        self.assertEqual(feature.uuid, 'test_geometry_1')
+        self.assertEqual(feature.date_created, 72)
+        self.assertEqual(feature.date_modified, 73)
+        self.assertIsNone(feature.spatial)
 
         distance_lookup = {'type': 'Point',
                            'coordinates': [1, 2, 3],
@@ -779,6 +817,7 @@ class ClientTests(Tests):
         m2.json.return_value = r2
         get_mock.side_effect = [m1, m2]
         layers = self.client.get_layers(name_exact='test_name')
+        
         self.assertEqual(layers[0].name, 'test_tag_1')
         self.assertEqual(layers[0].uri,
             '/geo/1/layers/test_layer_1')
@@ -792,6 +831,15 @@ class ClientTests(Tests):
         self.assertDictEqual(layers[0].srs,
             {'type': 'EPSG', 'properties': {'code': 4326, 'dim': 3}})
         self.assertListEqual(layers[0].extent, [1, 2, 3, 4])
+        self.assertEqual(str(layers[0]),
+            'Layer(name=test_tag_1, uuid=test_layer_1, date_created=1, '\
+            'date_modified=2, uri=/geo/1/layers/test_layer_1, '\
+            'num_features=10, num_points=20, '\
+            'fields=[{\'type\': \'string\', \'name\': \'field_1\', '\
+            '\'size\': 256}], srs={\'type\': \'EPSG\', '\
+            '\'properties\': {\'dim\': 3, \'code\': 4326}}, '\
+            'extent=[1, 2, 3, 4])')
+
         self.assertEqual(layers[1].name, 'test_tag_2')
         self.assertEqual(layers[1].uri,
             '/geo/1/layers/test_layer_2')
@@ -824,6 +872,24 @@ class ClientTests(Tests):
                   params={},
                   timeout=10,
                   verify=False)])
+
+    @patch.object(requests, 'get')
+    def test_get_layers_status_code_413(self, get_mock):
+        get_mock.__name__ = 'get'
+        m = Mock()
+        m.status_code = 413
+        m.json.return_value = {'code': 1, 'message': 'test_message',
+            'more': 'test_more'}
+        get_mock.return_value = m
+        self.assertRaises(snowfloat.errors.RequestError,
+            self.client.get_layers)
+
+    @patch.object(requests, 'get')
+    def test_get_layers_get_error(self, get_mock):
+        get_mock.__name__ = 'get'
+        get_mock.side_effect = requests.exceptions.RequestException('timeout')
+        self.assertRaises(snowfloat.errors.RequestError,
+            self.client.get_layers)
 
     @patch.object(requests, 'post')
     def test_add_layers(self, post_mock):
@@ -1007,6 +1073,12 @@ class ClientTests(Tests):
         self.assertEqual(tasks[0].uri, '/geo/1/tasks/test_task_1')
         self.assertEqual(tasks[0].date_created, 1)
         self.assertEqual(tasks[0].date_modified, 2)
+        self.assertEqual(str(tasks[0]),
+            'Task(uuid=test_task_1, uri=/geo/1/tasks/test_task_1, '\
+            'date_created=1, date_modified=2, operation=test_operation_1, '\
+            'task_filter={\'filter_1\': \'test_task_filter_1\'}, '\
+            'spatial={\'spatial_1\': \'test_task_spatial_1\'} state=started, '\
+            'extras={\'extra\': \'test_extra_1\'} reason=test_reason_1')
         self.assertEqual(tasks[1].operation, 'test_operation_2')
         self.assertDictEqual(tasks[1].task_filter, 
             {'filter_2': 'test_task_filter_2'})
@@ -1096,19 +1168,20 @@ class ClientTests(Tests):
                     task_filter={'layer_uuid_exact': 'test_layer_2'})]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], ['test_result_2',]])
+        self.execute_tasks_add_tasks_helper(_add_tasks_mock)
+
+    def execute_tasks_add_tasks_helper(self, add_tasks_mock):
         d = [
             {'operation': 'test_operation_1',
              'filter': {'layer__uuid__exact': 'test_layer_1'},
-             'spatial': {}},
+             'spatial': {},
+             'extras': {}},
             {'operation': 'test_operation_2',
              'filter': {'layer__uuid__exact': 'test_layer_2'},
-             'spatial': {}},
+             'spatial': {},
+             'extras': {}},
         ]
-        _add_tasks_mock.assert_called_with(d)
-        self.assertEqual(_get_task_mock.call_args_list,
-            [call(task1.uuid), call(task2.uuid)])
-        self.assertEqual(_get_results_mock.call_args_list,
-            [call(task1.uuid), call(task2.uuid)])
+        add_tasks_mock.assert_called_with(d)
 
     @patch.object(snowfloat.client.Client, '_get_results')
     @patch.object(snowfloat.client.Client, '_get_task')
@@ -1139,15 +1212,7 @@ class ClientTests(Tests):
                     task_filter={'layer_uuid_exact': 'test_layer_2'})]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], {'error': 'test_reason'}])
-        d = [
-            {'operation': 'test_operation_1',
-             'filter': {'layer__uuid__exact': 'test_layer_1'},
-             'spatial': {}},
-            {'operation': 'test_operation_2',
-             'filter': {'layer__uuid__exact': 'test_layer_2'},
-             'spatial': {}},
-        ]
-        _add_tasks_mock.assert_called_with(d)
+        self.execute_tasks_add_tasks_helper(_add_tasks_mock)
         self.assertEqual(_get_task_mock.call_args_list,
             [call(task1.uuid), call(task2.uuid)])
         self.assertEqual(_get_results_mock.call_args_list,
@@ -1183,15 +1248,7 @@ class ClientTests(Tests):
                     task_filter={'layer_uuid_exact': 'test_layer_2'})]
         r = self.client.execute_tasks(tasks, interval=0.1)
         self.assertListEqual(r, [['test_result_1',], ['test_result_2',]])
-        d = [
-            {'operation': 'test_operation_1',
-             'filter': {'layer__uuid__exact': 'test_layer_1'},
-             'spatial': {}},
-            {'operation': 'test_operation_2',
-             'filter': {'layer__uuid__exact': 'test_layer_2'},
-             'spatial': {}},
-        ]
-        _add_tasks_mock.assert_called_with(d)
+        self.execute_tasks_add_tasks_helper(_add_tasks_mock)
         self.assertEqual(_get_task_mock.call_args_list,
             [call(task1.uuid), call(task2.uuid), call(task2.uuid)])
         self.assertEqual(_get_results_mock.call_args_list,
@@ -1224,15 +1281,7 @@ class ClientTests(Tests):
                     task_filter={'layer_uuid_exact': 'test_layer_2'})]
         r = self.client.execute_tasks(tasks)
         self.assertListEqual(r, [['test_result_1',], None])
-        d = [
-            {'operation': 'test_operation_1',
-             'filter': {'layer__uuid__exact': 'test_layer_1'},
-             'spatial': {}},
-            {'operation': 'test_operation_2',
-             'filter': {'layer__uuid__exact': 'test_layer_2'},
-             'spatial': {}},
-        ]
-        _add_tasks_mock.assert_called_with(d)
+        self.execute_tasks_add_tasks_helper(_add_tasks_mock)
         self.assertEqual(_get_task_mock.call_args_list,
             [call(task1.uuid), call(task2.uuid)])
         self.assertEqual(_get_results_mock.call_args_list,
@@ -1409,6 +1458,16 @@ class PolygonsTests(Tests):
             [[[0, 0, 0], [1, 1, 0], [1, 0, 0], [0, 0, 0]]])
 
 
+class GeometriesTests(Tests):
+
+    def test_geometry(self):
+        geometry = snowfloat.geometry.Geometry([1, 2, 3])
+        self.assertListEqual(geometry.coordinates, [1, 2, 3])
+        self.assertIsNone(geometry.geometry_type)
+        self.assertRaises(NotImplementedError,
+            geometry.num_points)
+
+
 class ImportDataSourceTests(Tests):
    
     @patch.object(requests, 'get')
@@ -1427,15 +1486,99 @@ class ImportDataSourceTests(Tests):
         post_mock.return_value = m1
         m2 = Mock()
         m2.status_code = 200
+        m2.json.side_effect = snowfloat.errors.RequestError(status=500,
+            code=None, message=None, more=None)
+        delete_mock.return_value = m2
+        m3 = Mock()
+        m3.status_code = 200
+        m3.json.side_effect = [
+            {'uuid': 'test_blob_uuid', 'state': 'started'},
+            {'uuid': 'test_blob_uuid', 'state': 'success'}]
+        get_mock.return_value = m3
+        execute_tasks_mock.return_value = [['test_result',]]
+        tf = tempfile.NamedTemporaryFile(delete=False)
+        tf.close()
+        srs = {'type': 'EPSG',
+               'properties': {'code': 4326, 'dim': 3}}
+        res = self.client.import_geospatial_data(tf.name, srs,
+            state_check_interval=0.1)
+        self.assertEqual(res, 'test_result')
+        self.import_geospatial_data_helper(post_mock, get_mock, delete_mock,
+            execute_tasks_mock)
+        os.remove(tf.name)
+
+    @patch.object(requests, 'get')
+    @patch.object(requests, 'delete')
+    @patch.object(snowfloat.client.Client, 'execute_tasks')
+    @patch.object(requests, 'post')
+    def test_import_geospatial_data_task_error(self, post_mock,
+            execute_tasks_mock, delete_mock, get_mock):
+        get_mock.__name__ = 'get'
+        delete_mock.__name__ = 'delete'
+        post_mock.__name__ = 'post'
+        r = {'uuid': 'test_blob_uuid'}
+        m1 = Mock()
+        m1.status_code = 200
+        m1.json.return_value = r
+        post_mock.return_value = m1
+        m2 = Mock()
+        m2.status_code = 200
+        m2.json.side_effect = snowfloat.errors.RequestError(status=500,
+            code=None, message=None, more=None)
+        delete_mock.return_value = m2
+        m3 = Mock()
+        m3.status_code = 200
+        m3.json.side_effect = [
+            {'uuid': 'test_blob_uuid', 'state': 'started'},
+            {'uuid': 'test_blob_uuid', 'state': 'success'}]
+        get_mock.return_value = m3
+        execute_tasks_mock.return_value = [{'error': 'test_error'},]
+        tf = tempfile.NamedTemporaryFile(delete=False)
+        tf.close()
+        srs = {'type': 'EPSG',
+               'properties': {'code': 4326, 'dim': 3}}
+        self.assertRaises(snowfloat.errors.RequestError,
+            self.client.import_geospatial_data, tf.name, srs,
+            state_check_interval=0.1)
+        self.import_geospatial_data_helper(post_mock, get_mock, delete_mock,
+            execute_tasks_mock)
+        os.remove(tf.name)
+
+    @patch.object(requests, 'get')
+    @patch.object(requests, 'delete')
+    @patch.object(snowfloat.client.Client, 'execute_tasks')
+    @patch.object(requests, 'post')
+    def test_import_geospatial_data_blob_state_failure(self, post_mock,
+            execute_tasks_mock, delete_mock, get_mock):
+        get_mock.__name__ = 'get'
+        delete_mock.__name__ = 'delete'
+        post_mock.__name__ = 'post'
+        r = {'uuid': 'test_blob_uuid'}
+        m1 = Mock()
+        m1.status_code = 200
+        m1.json.return_value = r
+        post_mock.return_value = m1
+        m2 = Mock()
+        m2.status_code = 200
         m2.json.return_value = {}
         delete_mock.return_value = m2
         m3 = Mock()
         m3.status_code = 200
-        m3.json.return_value = {'uuid': 'test_blob_uuid', 'state': 'success'}
+        m3.json.side_effect = [
+            {'uuid': 'test_blob_uuid', 'state': 'started'},
+            {'uuid': 'test_blob_uuid', 'state': 'failure'}]
         get_mock.return_value = m3
         tf = tempfile.NamedTemporaryFile(delete=False)
         tf.close()
-        r = self.client.import_geospatial_data(tf.name)
+        self.assertRaises(snowfloat.errors.RequestError,
+            self.client.import_geospatial_data, tf.name,
+            state_check_interval=0.1)
+        self.import_geospatial_data_helper(post_mock, get_mock, delete_mock,
+            execute_tasks_mock, validate_execute_tasks=False)
+        os.remove(tf.name)
+
+    def import_geospatial_data_helper(self, post_mock, get_mock, delete_mock,
+            execute_tasks_mock, validate_execute_tasks=True):
         # validate post call
         ca = post_mock.call_args
         self.assertEqual(ca[0][0], '%s/geo/1/blobs' % (self.url_prefix,))
@@ -1463,10 +1606,15 @@ class ImportDataSourceTests(Tests):
         self.assertEqual(ca[1]['timeout'], 10)
         self.assertEqual(ca[1]['verify'], False)
         # validate execute_tasks call
-        ca = execute_tasks_mock.call_args
-        task = ca[0][0][0]
-        self.assertEqual(task.operation, 'import_geospatial_data')
-        self.assertDictEqual(task.extras, {'blob_uuid': 'test_blob_uuid'})
+        if validate_execute_tasks:
+            ca = execute_tasks_mock.call_args
+            task = ca[0][0][0]
+            self.assertEqual(task.operation, 'import_geospatial_data')
+            self.assertDictEqual(task.extras, {'blob_uuid': 'test_blob_uuid',
+                'srs': {'type': 'EPSG',
+                        'properties': {'code': 4326, 'dim': 3}}})
+        else:
+            self.assertFalse(execute_tasks_mock.called)
         delete_mock.assert_called_with(
             '%s/geo/1/blobs/test_blob_uuid' % (self.url_prefix),
             headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
@@ -1477,7 +1625,50 @@ class ImportDataSourceTests(Tests):
             params={},
             timeout=10,
             verify=False)
-        os.remove(tf.name)
+    
+
+class RequestErrorTests(unittest.TestCase):
+
+    def test_request_error(self):
+        req = snowfloat.errors.RequestError(500, 1, 'test_message',
+            'test_more')
+        self.assertEqual(str(req),
+            'RequestError(status=500, code=1, message=test_message, ' \
+            'more=test_more)')
+
+
+class RequestTests(unittest.TestCase):
+
+    def setUp(self):
+        snowfloat.settings.HOST = 'api.snowfloat.com:443'
+    
+    def test_get_hmac_sha(self):
+        msg = 'test_msg'
+        private_key = 'test_private_key'
+        res = snowfloat.request._get_hmac_sha(msg, private_key)
+        self.assertEqual(res, 'w5YfAjs+VUh79G1jYgHZFWLA4w9W+MNDRX/9z8kFJKY=')
+
+    def test_get_sha_file(self):
+        tf = tempfile.NamedTemporaryFile(delete=False)
+        tf.write(''.join('a' for e in xrange(10000)))
+        tf.close()
+        tf = open(tf.name)
+        res = snowfloat.request._get_sha(tf)
+        self.assertEqual(res, 'J90fYbhntqD26dikHEMjHeUhB+U65CTej4R7gh20txE=')
+        tf.close()
+
+    def test_get_sha_str(self):
+        res = snowfloat.request._get_sha('test_message')
+        self.assertEqual(res, 'O3SR3AFqwaCy4CNyQCyGH6+kWSlAh+fL4J9wTVgtkx8=')
+
+    def test_format_url_https(self):
+        res = snowfloat.request._format_url('/test_uri')
+        self.assertEqual(res, 'https://api.snowfloat.com:443/test_uri')
+
+    def test_format_url_http(self):
+        snowfloat.settings.HOST = 'api.snowfloat.com:80'
+        res = snowfloat.request._format_url('/test_uri')
+        self.assertEqual(res, 'http://api.snowfloat.com:80/test_uri')
 
 
 if __name__ == "__main__":

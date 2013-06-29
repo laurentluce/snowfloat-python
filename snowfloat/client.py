@@ -190,12 +190,13 @@ class Client(object):
 
         return [results[task.uuid] for task in tasks_to_process]
 
-    def import_geospatial_data(self, path, srs=None):
+    def import_geospatial_data(self, path, srs=None, state_check_interval=5):
         """Import geospatial data.
 
         Args:
             path (str): OGR data archive path.
 
+        Kwargs:
             srs (dict): Spatial reference system to replace the one in the data source file.
         
         Returns:
@@ -207,30 +208,34 @@ class Client(object):
             res = snowfloat.request.post(uri, archive, serialize=False)
         blob_uuid = res['uuid']
 
-        # make sure the blob is in the success state
-        uri = '%s/blobs/%s' % (self.uri, blob_uuid)
-        while True:
-            res = [e for e in snowfloat.request.get(uri)]
-            if res[0]['state'] == 'started':
-                time.sleep(5)
-            else:
-                if res[0]['state'] == 'failure':
+        try:
+            # make sure the blob is in the success state
+            uri = '%s/blobs/%s' % (self.uri, blob_uuid)
+            while True:
+                res = [e for e in snowfloat.request.get(uri)]
+                if res[0]['state'] == 'started':
+                    time.sleep(state_check_interval)
+                elif res[0]['state'] == 'failure':
                     raise snowfloat.errors.RequestError(status=500, 
                         code=None, message='Upload failed.', more=None)
-                break
+                else:
+                    break
 
-        # execute import data source task
-        extras = {'blob_uuid': blob_uuid}
-        if srs:
-            extras['srs'] = srs
-        tasks = [snowfloat.task.Task(
-                    operation='import_geospatial_data',
-                    extras=extras)]
-        res = self.execute_tasks(tasks)
-        
-        # delete blob
-        uri = '%s/blobs/%s' % (self.uri, blob_uuid)
-        snowfloat.request.delete(uri)
+            # execute import data source task
+            extras = {'blob_uuid': blob_uuid}
+            if srs:
+                extras['srs'] = srs
+            tasks = [snowfloat.task.Task(
+                        operation='import_geospatial_data',
+                        extras=extras)]
+            res = self.execute_tasks(tasks)
+        finally: 
+            # delete blob
+            try:
+                uri = '%s/blobs/%s' % (self.uri, blob_uuid)
+                snowfloat.request.delete(uri)
+            except snowfloat.errors.RequestError:
+                pass
 
         if 'error' in res[0]:
             raise snowfloat.errors.RequestError(status=400, 
@@ -292,9 +297,7 @@ def _prepare_tasks(tasks):
         task_to_add['filter'] = snowfloat.request.format_params(
             task.task_filter)
         task_to_add['spatial'] = task.spatial
-
-        if task.extras:
-            task_to_add['extras'] = task.extras
+        task_to_add['extras'] = task.extras
         
         tasks_to_process.append(task_to_add)
 

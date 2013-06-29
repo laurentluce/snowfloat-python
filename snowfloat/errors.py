@@ -10,9 +10,6 @@ class Error(Exception):
     def __init__(self, message):
         Exception.__init__(self, message)
 
-    def __str__(self):
-        return 'Error(message=%s)' % (self.message,)
-
 class RequestError(Error):
     """Server request error.
     

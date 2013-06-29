@@ -134,9 +134,6 @@ def send(method, uri, params=None, data=None, headers=None):
 
     request_headers = _get_headers(method, uri, request_data, request_params)
 
-    if headers:
-        request_headers.update(headers)
-   
     url = _format_url(uri)
 
     message = None
@@ -305,19 +302,16 @@ def format_params(kwargs, exclude=None):
                        'coordinates': kwargs['geometry'].coordinates,
                        'properties': {
                            'distance': distance}
-                }
+                      }
             params['geometry__%s' % (val,)] = json.dumps(geojson)
         elif key == 'order_by':
             params[key] = ','.join(val)            
         elif (not key.startswith('spatial_')
                 and not key in exclude):
             key = key.replace('layer_', 'layer__')
-            try:
-                prefix = key[:key.rindex('_')]
-                suffix = key[key.rindex('_')+1:]
-                params[prefix + '__' + suffix] = val
-            except ValueError:
-                params[key + '_exact'] = val
+            prefix = key[:key.rindex('_')]
+            suffix = key[key.rindex('_')+1:]
+            params[prefix + '__' + suffix] = val
 
     return params
 
