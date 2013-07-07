@@ -9,9 +9,9 @@ API_KEY = 'IY3487E2J6ZHFOW5A7P5'
 API_PRIVATE_KEY = ''
 
 try:
-    from snowfloat.settings_prod import *
+    from settings_prod import *
 except ImportError:
     try:
-        from snowfloat.settings_dev import *
+        from settings_dev import *
     except ImportError:
         pass
