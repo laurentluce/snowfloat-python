@@ -133,6 +133,9 @@ def send(method, uri, params=None, data=None, headers=None):
         request_data = {}
 
     request_headers = _get_headers(method, uri, request_data, request_params)
+    
+    if headers:
+        request_headers.update(headers)
 
     url = _format_url(uri)
 
@@ -152,9 +155,24 @@ def send(method, uri, params=None, data=None, headers=None):
             message = str(exception)
             if 'timeout' in message:
                 timeout *= 2
+            res = None
+
         time.sleep(snowfloat.settings.HTTP_RETRY_INTERVAL)
         retries -= 1
-   
+
+    raise_request_error(res, message)
+
+def raise_request_error(res, message):
+    """Raise a RequestError exception.
+
+    Args:
+        res (Requests response): HTTP response.
+
+        message (str): Request error message.
+
+    Raises:
+        snowfloat.errors.RequestError
+    """
     status = None
     code = None
     more = None
@@ -164,7 +182,7 @@ def send(method, uri, params=None, data=None, headers=None):
         code = content['code']
         message = content['message']
         more = content['more']
-    except (NameError, ValueError):
+    except (NameError, ValueError, AttributeError):
         pass 
 
     raise snowfloat.errors.RequestError(status, code, message, more)

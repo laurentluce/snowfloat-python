@@ -1,6 +1,7 @@
 import email.utils
 import json
 import os
+import sys
 import tempfile
 import unittest
 
@@ -14,10 +15,10 @@ import snowfloat.geometry
 import snowfloat.settings
 import snowfloat.task
 
+url_prefix = 'https://%s' % (snowfloat.settings.HOST,)
+
 class Tests(unittest.TestCase):
    
-    url_prefix = 'https://%s' % (snowfloat.settings.HOST,)
-
     def setUp(self):
         snowfloat.settings.HOST = 'api.snowfloat.com:443'
         snowfloat.settings.HTTP_RETRY_INTERVAL = 0.1
@@ -392,7 +393,7 @@ class Tests(unittest.TestCase):
                             'coordinates': [4, 5, 6]}
         self.assertEqual(method_mock.call_args_list,
             [call('%s/geo/1/layers/test_layer_1/features' % 
-                (self.url_prefix,),
+                (url_prefix,),
                   headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                            'Authorization':
                                'GEO IY3487E2J6ZHFOW5A7P5:'\
@@ -412,7 +413,7 @@ class Tests(unittest.TestCase):
                   verify=False),
              call('%s/geo/1/layers/test_layer_1/features?page=1'\
                     '&page_size=2'
-                  % (self.url_prefix,),
+                  % (url_prefix,),
                   headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                            'Authorization':
                                'GEO IY3487E2J6ZHFOW5A7P5:'\
@@ -652,7 +653,7 @@ class Tests(unittest.TestCase):
             del r['features'][i]['properties']['date_modified']
         self.assertEqual(method_mock.call_args_list,
             [call('%s/geo/1/layers/test_layer_1/features'
-                    % (self.url_prefix,),
+                    % (url_prefix,),
                   headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                            'Content-Type': 'application/json',
                            'Content-Sha':
@@ -672,7 +673,7 @@ class Tests(unittest.TestCase):
         method_mock.return_value = m
         method(*args, **kwargs)
         method_mock.assert_called_with(
-            '%s/geo/1/layers/test_layer_1/features' % (self.url_prefix),
+            '%s/geo/1/layers/test_layer_1/features' % (url_prefix),
             headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                      'Authorization':
                          'GEO IY3487E2J6ZHFOW5A7P5:'\
@@ -691,7 +692,7 @@ class Tests(unittest.TestCase):
         method(*args, **kwargs)
         method_mock.assert_called_with(
             '%s/geo/1/layers/test_layer_1/'\
-                'features/test_feature_1' % (self.url_prefix),
+                'features/test_feature_1' % (url_prefix),
             headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                      'Authorization':
                          'GEO IY3487E2J6ZHFOW5A7P5:'\
@@ -748,7 +749,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(result.date_created, 3)
         self.assertEqual(result.date_modified, 4)
         self.assertEqual(method_mock.call_args_list,
-            [call('%s/geo/1/tasks/test_task_1/results' % (self.url_prefix,),
+            [call('%s/geo/1/tasks/test_task_1/results' % (url_prefix,),
                   headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                            'Authorization':
                                'GEO IY3487E2J6ZHFOW5A7P5:'\
@@ -758,7 +759,7 @@ class Tests(unittest.TestCase):
                   timeout=10,
                   verify=False),
              call('%s/geo/1/tasks/test_task_1/results?page=1&page_size=2'
-                  % (self.url_prefix,),
+                  % (url_prefix,),
                   headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                            'Authorization':
                                'GEO IY3487E2J6ZHFOW5A7P5:'\
@@ -854,7 +855,7 @@ class ClientTests(Tests):
             {'type': 'EPSG', 'properties': {'code': 4327, 'dim': 2}})
         self.assertIsNone(layers[1].extent)
         self.assertEqual(get_mock.call_args_list,
-            [call('%s/geo/1/layers' % (self.url_prefix,),
+            [call('%s/geo/1/layers' % (url_prefix,),
                   headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                            'Authorization':
                                'GEO IY3487E2J6ZHFOW5A7P5:'\
@@ -863,7 +864,7 @@ class ClientTests(Tests):
                   params={'name__exact': 'test_name'},
                   timeout=10,
                   verify=False),
-             call('%s/geo/1/layers?page=1&page_size=2' % (self.url_prefix,),
+             call('%s/geo/1/layers?page=1&page_size=2' % (url_prefix,),
                   headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                            'Authorization':
                                'GEO IY3487E2J6ZHFOW5A7P5:'\
@@ -958,7 +959,7 @@ class ClientTests(Tests):
         self.assertIsNone(layers[1].extent)
         
         self.assertEqual(post_mock.call_args_list,
-            [call('%s/geo/1/layers' % (self.url_prefix,),
+            [call('%s/geo/1/layers' % (url_prefix,),
                   headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                            'Content-Type': 'application/json',
                            'Authorization':
@@ -992,7 +993,7 @@ class ClientTests(Tests):
         delete_mock.return_value = m
         self.client.delete_layers()
         delete_mock.assert_called_with(
-            '%s/geo/1/layers' % (self.url_prefix),
+            '%s/geo/1/layers' % (url_prefix),
             headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                      'Authorization':
                          'GEO IY3487E2J6ZHFOW5A7P5:'\
@@ -1124,7 +1125,7 @@ class ClientTests(Tests):
         self.assertEqual(task.date_created, 1)
         self.assertEqual(task.date_modified, 2)
         get_mock.assert_called_with(
-            '%s/geo/1/tasks/test_task_1' % (self.url_prefix,),
+            '%s/geo/1/tasks/test_task_1' % (url_prefix,),
             headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                      'Authorization':
                          'GEO IY3487E2J6ZHFOW5A7P5:'\
@@ -1346,7 +1347,7 @@ class LayerTests(Tests):
         put_mock.return_value = m
         self.layer.update(name='test_tag')
         put_mock.assert_called_with(
-            '%s/geo/1/layers/test_layer_1' % (self.url_prefix),
+            '%s/geo/1/layers/test_layer_1' % (url_prefix),
             headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                      'Content-Type': 'application/json',
                      'Authorization':
@@ -1369,7 +1370,7 @@ class LayerTests(Tests):
         delete_mock.return_value = m
         self.layer.delete()
         delete_mock.assert_called_with(
-            '%s/geo/1/layers/test_layer_1' % (self.url_prefix),
+            '%s/geo/1/layers/test_layer_1' % (url_prefix),
             headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                      'Authorization':
                          'GEO IY3487E2J6ZHFOW5A7P5:'\
@@ -1426,7 +1427,7 @@ class FeaturesTests(Tests):
               }}
         put_mock.assert_called_with(
             '%s/geo/1/layers/test_layer_1/'\
-                'features/test_feature_1' % (self.url_prefix),
+                'features/test_feature_1' % (url_prefix),
             headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                      'Content-Type': 'application/json',
                      'Authorization':
@@ -1581,7 +1582,7 @@ class ImportDataSourceTests(Tests):
             execute_tasks_mock, validate_execute_tasks=True):
         # validate post call
         ca = post_mock.call_args
-        self.assertEqual(ca[0][0], '%s/geo/1/blobs' % (self.url_prefix,))
+        self.assertEqual(ca[0][0], '%s/geo/1/blobs' % (url_prefix,))
         self.assertDictEqual(ca[1]['headers'],
             {'Authorization':
                  'GEO IY3487E2J6ZHFOW5A7P5:'\
@@ -1596,7 +1597,7 @@ class ImportDataSourceTests(Tests):
         # validate get call
         ca = get_mock.call_args
         self.assertEqual(ca[0][0],
-            '%s/geo/1/blobs/test_blob_uuid' % (self.url_prefix,))
+            '%s/geo/1/blobs/test_blob_uuid' % (url_prefix,))
         self.assertDictEqual(ca[1]['headers'],
             {'Authorization':
                  'GEO IY3487E2J6ZHFOW5A7P5:'\
@@ -1616,7 +1617,7 @@ class ImportDataSourceTests(Tests):
         else:
             self.assertFalse(execute_tasks_mock.called)
         delete_mock.assert_called_with(
-            '%s/geo/1/blobs/test_blob_uuid' % (self.url_prefix),
+            '%s/geo/1/blobs/test_blob_uuid' % (url_prefix),
             headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
                      'Authorization':
                          'GEO IY3487E2J6ZHFOW5A7P5:'\
@@ -1669,6 +1670,55 @@ class RequestTests(unittest.TestCase):
         snowfloat.settings.HOST = 'api.snowfloat.com:80'
         res = snowfloat.request._format_url('/test_uri')
         self.assertEqual(res, 'http://api.snowfloat.com:80/test_uri')
+
+    def test_format_params_query_distance(self):
+        point = snowfloat.geometry.Point([1, 2, 3])
+        kwargs = {'query': 'test_query',
+                  'geometry': point,
+                  'distance': 1}
+        exclude = ('geometry', 'distance')
+        res = snowfloat.request.format_params(kwargs, exclude)
+        geojson = {'type': 'Point',
+                   'coordinates': [1, 2, 3],
+                   'properties': {'distance': 1}}
+        self.assertDictEqual(res,
+            {'geometry__test_query': json.dumps(geojson)})
+
+    def test_format_params_query_distance_missing(self):
+        point = snowfloat.geometry.Point([1, 2, 3])
+        kwargs = {'query': 'test_query',
+                  'geometry': point}
+        exclude = ('geometry', 'distance')
+        res = snowfloat.request.format_params(kwargs, exclude)
+        geojson = {'type': 'Point',
+                   'coordinates': [1, 2, 3],
+                   'properties': {'distance': None}}
+        self.assertDictEqual(res,
+            {'geometry__test_query': json.dumps(geojson)})
+
+    @patch.object(snowfloat.request, '_get_headers')
+    @patch.object(requests, 'get')
+    def test_send_get(self, get_mock, get_headers_mock):
+        get_mock.__name__ = 'get'
+        m = Mock()
+        m.status_code = 200
+        m.json.return_value = 'test_response'
+        get_mock.return_value = m
+        get_headers_mock.return_value = {'header_1': 'test_header_1'}
+        uri = '/test_uri'
+        params = {'param': 'test_param'}
+        headers = {'header_2': 'test_header_2'}
+        res = snowfloat.request.send(get_mock, uri, params=params,
+            headers=headers)
+        self.assertEqual(res, 'test_response')
+        get_mock.assert_called_with(
+            '%s/test_uri' % (url_prefix),
+            headers={'header_1': 'test_header_1',
+                     'header_2': 'test_header_2'},
+            params={'param': 'test_param'},
+            data={},
+            timeout=10,
+            verify=False)
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ try:
     MULTIPOINT_CLS = shapely.geometry.MultiPoint
     MULTIPOLYGON_CLS = shapely.geometry.MultiPolygon
     MULTILINESTRING_CLS = shapely.geometry.MultiLineString
-except ImportError:
+except ImportError: # pragma: no cover
     POINT_CLS = object
     LINESTRING_CLS = object
     POLYGON_CLS = object
