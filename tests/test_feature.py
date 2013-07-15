@@ -33,7 +33,7 @@ class FeaturesTests(tests.helper.Tests):
         put_mock.assert_called_with(
             '%s/geo/1/layers/test_layer_1/'\
                 'features/test_feature_1' % (tests.helper.URL_PREFIX),
-            headers=tests.helper.get_request_headers(),
+            headers=tests.helper.get_request_body_headers(),
             data=json.dumps(geojson),
             params={},
             timeout=10,

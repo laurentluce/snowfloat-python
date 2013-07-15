@@ -20,6 +20,7 @@ class Tests(unittest.TestCase):
     def setUp(self):
         snowfloat.settings.HOST = 'api.snowfloat.com:443'
         snowfloat.settings.HTTP_RETRY_INTERVAL = 0.1
+        snowfloat.settings.API_KEY = 'IY3487E2J6ZHFOW5A7P5'
         self.client = snowfloat.client.Client()
 
         self.features = []
@@ -395,10 +396,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(method_mock.call_args_list,
             [call('%s/geo/1/layers/test_layer_1/features' % 
                 (URL_PREFIX,),
-                  headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
-                           'Authorization':
-                               'GEO IY3487E2J6ZHFOW5A7P5:'\
-                               'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
+                  headers=get_request_no_body_headers(),
                   params={'field_ts__gte': 1,
                           'field_ts__lte': 10,
                           'date_created__lte': '2002-12-25 00:00:00-00:00',
@@ -415,10 +413,7 @@ class Tests(unittest.TestCase):
              call('%s/geo/1/layers/test_layer_1/features?page=1'\
                     '&page_size=2'
                   % (URL_PREFIX,),
-                  headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
-                           'Authorization':
-                               'GEO IY3487E2J6ZHFOW5A7P5:'\
-                               'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
+                  headers=get_request_no_body_headers(),
                   params={},
                   data={},
                   timeout=10,
@@ -657,13 +652,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(method_mock.call_args_list,
             [call('%s/geo/1/layers/test_layer_1/features'
                     % (URL_PREFIX,),
-                  headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
-                           'Content-Type': 'application/json',
-                           'Content-Sha':
-                               'n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=',
-                           'Authorization':
-                               'GEO IY3487E2J6ZHFOW5A7P5:'\
-                               'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
+                  headers=get_request_body_headers(),
                   data=json.dumps(r),
                   params={},
                   timeout=10,
@@ -679,10 +668,7 @@ class Tests(unittest.TestCase):
         method(*args, **kwargs)
         method_mock.assert_called_with(
             '%s/geo/1/layers/test_layer_1/features' % (URL_PREFIX),
-            headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
-                     'Authorization':
-                         'GEO IY3487E2J6ZHFOW5A7P5:'\
-                         'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
+            headers=get_request_no_body_headers(),
             params={'field_ts__gte': 1, 'field_ts__lte': 10,
                     'date_created__lte': '2002-12-25 00:00:00-00:00'},
             data={},
@@ -700,10 +686,7 @@ class Tests(unittest.TestCase):
         method_mock.assert_called_with(
             '%s/geo/1/layers/test_layer_1/'\
                 'features/test_feature_1' % (URL_PREFIX),
-            headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
-                     'Authorization':
-                         'GEO IY3487E2J6ZHFOW5A7P5:'\
-                         'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
+            headers=get_request_no_body_headers(),
             params={},
             data={},
             timeout=10,
@@ -767,33 +750,42 @@ class Tests(unittest.TestCase):
             params = {}
         self.assertEqual(mock.call_args_list,
             [call('%s%s' % (URL_PREFIX, uri_1),
-                  headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
-                           'Authorization':
-                               'GEO IY3487E2J6ZHFOW5A7P5:'\
-                               'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
+                  headers=get_request_no_body_headers(),
                   data={},
                   params=params,
                   timeout=10,
                   verify=False),
              call('%s%s' % (
                       URL_PREFIX, uri_2),
-                  headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
-                           'Authorization':
-                               'GEO IY3487E2J6ZHFOW5A7P5:'\
-                               'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
+                  headers=get_request_no_body_headers(),
                   data={},
                   params={},
                   timeout=10,
                   verify=False)])
 
+    def get_features_test(self, mock, *args):
+        """Client or layer get features test."""
+        mock.__name__ = 'get'
+        point = snowfloat.geometry.Point(coordinates=[1, 2, 3])
+        point2 = snowfloat.geometry.Point(coordinates=[4, 5, 6])
+        self.get_features_helper(mock,
+            *args,
+            field_ts_gte=1,
+            field_ts_lte=10,
+            date_created_lte='2002-12-25 00:00:00-00:00',
+            query='distance_lte',
+            geometry=point,
+            distance=4,
+            spatial_operation='intersection',
+            spatial_geometry=point2,
+            spatial_flag=True,
+            order_by=('-field_ts', 'date_created'))
+ 
 def method_mock_assert_called_with(mock, uri):
     """Requests method mock assert called with helper."""
     mock.assert_called_with(
         '%s%s' % (URL_PREFIX, uri),
-        headers={'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
-                 'Authorization':
-                     'GEO IY3487E2J6ZHFOW5A7P5:'\
-                     'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='},
+        headers=get_request_no_body_headers(),
         data={},
         params={},
         timeout=10,
@@ -807,13 +799,21 @@ def set_method_mock(method_mock, name, status_code, return_value):
     mock.json.return_value = return_value
     method_mock.return_value = mock
                 
-def get_request_headers():
-    """Get request headers dict."""
+def get_request_no_body_headers():
+    """Get headers for a request without a body."""
     return {'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
-            'Content-Type': 'application/json',
+            'Authorization':
+                'GEO IY3487E2J6ZHFOW5A7P5:'\
+                'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I='}
+
+def get_request_body_headers(content_type='application/json'):
+    """Get headers for a request with a body."""
+    return {'Date': 'Sat, 08 Jun 2013 22:12:05 GMT',
+            'Content-Type': content_type,
             'Authorization':
                'GEO IY3487E2J6ZHFOW5A7P5:'\
                'YDA64iuZiGG847KPM+7BvnWKITyGyTwHbb6fVYwRx1I=',
             'Content-Sha':
                'n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg='}
+
 

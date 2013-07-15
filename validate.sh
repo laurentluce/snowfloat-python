@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python tests.py
+python -m unittest discover
 if [ $? -eq 1 ]
 then
     echo "Unit tests failed."
@@ -14,10 +14,17 @@ then
     exit 1
 fi
 
-bash pylint.sh
+bash pylint_snowfloat.sh
 if [ $? -eq 1 ]
 then
-    echo "Pylint not 10/10."
+    echo "Pylint not 10/10 for snowfloat/."
+    exit 1
+fi
+
+bash pylint_tests.sh
+if [ $? -eq 1 ]
+then
+    echo "Pylint not 10/10 for tests/."
     exit 1
 fi
 

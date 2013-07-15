@@ -194,7 +194,7 @@ class ClientTests(tests.helper.Tests):
         
         self.assertEqual(post_mock.call_args_list,
             [call('%s/geo/1/layers' % (tests.helper.URL_PREFIX,),
-                  headers=tests.helper.get_request_headers(),
+                  headers=tests.helper.get_request_body_headers(),
                   data=json.dumps([
                     {'name': 'test_tag_1',
                      'fields': [{'name': 'field_1', 'type': 'string',
@@ -223,21 +223,8 @@ class ClientTests(tests.helper.Tests):
     @patch.object(requests, 'get')
     def test_get_features(self, get_mock):
         """Get layer features."""
-        get_mock.__name__ = 'get'
-        point = snowfloat.geometry.Point(coordinates=[1, 2, 3])
-        point2 = snowfloat.geometry.Point(coordinates=[4, 5, 6])
-        self.get_features_helper(get_mock, self.client.get_features,
-            'test_layer_1',
-            field_ts_gte=1,
-            field_ts_lte=10,
-            date_created_lte='2002-12-25 00:00:00-00:00',
-            query='distance_lte',
-            geometry=point,
-            distance=4,
-            spatial_operation='intersection',
-            spatial_geometry=point2,
-            spatial_flag=True,
-            order_by=('-field_ts', 'date_created'))
+        self.get_features_test(get_mock, self.client.get_features,
+            'test_layer_1')
 
     @patch.object(requests, 'post')
     def test_add_features(self, post_mock):

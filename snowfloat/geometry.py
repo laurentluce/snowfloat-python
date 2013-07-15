@@ -41,6 +41,7 @@ class Geometry(object):
         raise NotImplementedError()
 
 
+# pylint: disable=W0223
 class Point(Geometry, POINT_CLS):
     """Geometry Point.
     """
@@ -58,6 +59,7 @@ class Point(Geometry, POINT_CLS):
         return 1
 
 
+# pylint: disable=W0223
 class LineString(Geometry, LINESTRING_CLS):
     """Geometry LineString.
     """
@@ -77,6 +79,7 @@ class LineString(Geometry, LINESTRING_CLS):
         return len(self.coordinates)
 
 
+# pylint: disable=W0223
 class Polygon(Geometry, POLYGON_CLS):
     """Geometry Polygon."""
 
@@ -97,6 +100,7 @@ class Polygon(Geometry, POLYGON_CLS):
         return len(self.coordinates[0])
 
 
+# pylint: disable=W0223
 class MultiPoint(Geometry, MULTIPOINT_CLS):
     """Geometry MultiPoint."""
 
@@ -115,6 +119,7 @@ class MultiPoint(Geometry, MULTIPOINT_CLS):
         return len(self.coordinates)
 
 
+# pylint: disable=W0223
 class MultiPolygon(Geometry, MULTIPOLYGON_CLS):
     """Geometry MultiPolygon."""
 
@@ -151,6 +156,7 @@ class MultiLineString(Geometry, MULTILINESTRING_CLS):
         return sum([e.num_points() for e in self.linestrings])
 
 
+# pylint: disable=W0223
 class GeometryCollection(Geometry):
     """Geometry Collection."""
 
