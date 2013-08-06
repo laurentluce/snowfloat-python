@@ -100,7 +100,7 @@ class Polygon(Geometry, POLYGON_CLS):
         return len(self.coordinates[0])
 
 
-# pylint: disable=W0223
+# pylint: disable=W0223, R0924
 class MultiPoint(Geometry, MULTIPOINT_CLS):
     """Geometry MultiPoint."""
 

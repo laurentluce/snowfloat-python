@@ -20,7 +20,9 @@ class Layer(object):
 
         fields (list): List of fields definitions.
 
-        srs (dict): Spatial reference system dictionary.
+        epsg (int): Spatial reference system EPSG code.
+
+        dims (int): Spatial reference system number of dimensions.
 
         extent (list): Spatial extent list. (xmin, xmax, ymin, ymax).
     """
@@ -32,7 +34,8 @@ class Layer(object):
     num_features = 0
     num_points = 0
     fields = None
-    srs = None
+    epsg = None
+    dims = None
     extent = None
 
     def __init__(self, **kwargs):
@@ -43,10 +46,10 @@ class Layer(object):
     def __str__(self):
         return 'Layer(name=%s, uuid=%s, date_created=%s, date_modified=%s, '\
                'uri=%s, num_features=%d, num_points=%d, fields=%s, '\
-               'srs=%s, extent=%s)' \
+               'epsg=%d, dims=%d, extent=%s)' \
             % (self.name, self.uuid, self.date_created, self.date_modified,
                self.uri, self.num_features, self.num_points, self.fields,
-               self.srs, self.extent)
+               self.epsg, self.dims, self.extent)
 
     def add_features(self, features):
         """Add list of features to this layer.
@@ -181,8 +184,10 @@ def format_layer(layer):
     layer_formatted = {'name': layer.name}
     if layer.fields:
         layer_formatted['fields'] = layer.fields
-    if layer.srs:
-        layer_formatted['srs'] = layer.srs
+    if layer.epsg:
+        layer_formatted['epsg'] = layer.epsg
+    if layer.dims:
+        layer_formatted['dims'] = layer.dims
     if layer.extent:
         layer_formatted['extent'] = layer.extent
     
@@ -206,7 +211,8 @@ def parse_layers(layers):
                 num_features=layer['num_features'],
                 num_points=layer['num_points'],
                 fields=layer['fields'],
-                srs=layer['srs'],
+                epsg=layer['epsg'],
+                dims=layer['dims'],
                 extent=layer['extent']
                 ) for layer in layers]
 

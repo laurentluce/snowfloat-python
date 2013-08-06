@@ -190,14 +190,14 @@ class Client(object):
 
         return [results[task.uuid] for task in tasks_to_process]
 
-    def import_geospatial_data(self, path, srs=None, state_check_interval=5):
+    def import_geospatial_data(self, path, epsg=None, state_check_interval=5):
         """Import geospatial data.
 
         Args:
             path (str): OGR data archive path.
 
         Kwargs:
-            srs (dict): Spatial reference system to replace the one in the data source file.
+            epsg (int): Spatial reference system EPSG code to replace the one in the data source file.
         
         Returns:
             dict: Dictionary containing the number of layers and features added.
@@ -223,8 +223,8 @@ class Client(object):
 
             # execute import data source task
             extras = {'blob_uuid': blob_uuid}
-            if srs:
-                extras['srs'] = srs
+            if epsg:
+                extras['epsg'] = epsg
             tasks = [snowfloat.task.Task(
                         operation='import_geospatial_data',
                         extras=extras)]

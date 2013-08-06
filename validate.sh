@@ -15,14 +15,14 @@ then
 fi
 
 bash pylint_snowfloat.sh
-if [ $? -eq 1 ]
+if [ $? -ne 0 ]
 then
     echo "Pylint not 10/10 for snowfloat/."
     exit 1
 fi
 
 bash pylint_tests.sh
-if [ $? -eq 1 ]
+if [ $? -ne 0 ]
 then
     echo "Pylint not 10/10 for tests/."
     exit 1
