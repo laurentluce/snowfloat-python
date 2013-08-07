@@ -280,7 +280,7 @@ class Tests(unittest.TestCase):
             'date_created=5, date_modified=6, '\
             'geometry=Point(coordinates=[1, 2, 3]), '\
             'fields={\'tag\': \'test_tag_1\', \'ts\': 4}, '\
-            'layer_uuid=test_layer_1, spatial=Point(coordinates=[4, 5, 6])')
+            'layer_uuid=test_layer_1, spatial=Point(coordinates=[4, 5, 6]))')
         
         feature = features[1]
         self.assertListEqual(feature.geometry.coordinates, [[[11, 12, 13],

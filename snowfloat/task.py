@@ -62,9 +62,9 @@ class Task(object):
         return '%s(uuid=%s, uri=%s, ' \
                 'date_created=%s, date_modified=%s, ' \
                 'operation=%s, ' \
-                'task_filter=%s, spatial=%s ' \
-                'state=%s, extras=%s ' \
-                'reason=%s' \
+                'task_filter=%s, spatial=%s, ' \
+                'state=%s, extras=%s, ' \
+                'reason=%s)' \
             % (self.__class__.__name__,
                self.uuid, self.uri, self.date_created, self.date_modified,
                self.operation,

@@ -292,8 +292,8 @@ class ClientTests(tests.helper.Tests):
             'Task(uuid=test_task_1, uri=/geo/1/tasks/test_task_1, '\
             'date_created=1, date_modified=2, operation=test_operation_1, '\
             'task_filter={\'filter_1\': \'test_task_filter_1\'}, '\
-            'spatial={\'spatial_1\': \'test_task_spatial_1\'} state=started, '\
-            'extras={\'extra\': \'test_extra_1\'} reason=test_reason_1')
+            'spatial={\'spatial_1\': \'test_task_spatial_1\'}, state=started, '\
+            'extras={\'extra\': \'test_extra_1\'}, reason=test_reason_1)')
         self.assertEqual(tasks[1].operation, 'test_operation_2')
         self.assertDictEqual(tasks[1].task_filter, 
             {'filter_2': 'test_task_filter_2'})
