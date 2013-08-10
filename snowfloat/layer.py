@@ -20,7 +20,7 @@ class Layer(object):
 
         fields (list): List of fields definitions.
 
-        epsg (int): Spatial reference system EPSG code.
+        srid (int): Spatial reference system SRID code.
 
         dims (int): Spatial reference system number of dimensions.
 
@@ -34,7 +34,7 @@ class Layer(object):
     num_features = 0
     num_points = 0
     fields = None
-    epsg = None
+    srid = None
     dims = None
     extent = None
 
@@ -46,10 +46,10 @@ class Layer(object):
     def __str__(self):
         return 'Layer(name=%s, uuid=%s, date_created=%s, date_modified=%s, '\
                'uri=%s, num_features=%d, num_points=%d, fields=%s, '\
-               'epsg=%d, dims=%d, extent=%s)' \
+               'srid=%d, dims=%d, extent=%s)' \
             % (self.name, self.uuid, self.date_created, self.date_modified,
                self.uri, self.num_features, self.num_points, self.fields,
-               self.epsg, self.dims, self.extent)
+               self.srid, self.dims, self.extent)
 
     def add_features(self, features):
         """Add list of features to this layer.
@@ -184,8 +184,8 @@ def format_layer(layer):
     layer_formatted = {'name': layer.name}
     if layer.fields:
         layer_formatted['fields'] = layer.fields
-    if layer.epsg:
-        layer_formatted['epsg'] = layer.epsg
+    if layer.srid:
+        layer_formatted['srid'] = layer.srid
     if layer.dims:
         layer_formatted['dims'] = layer.dims
     if layer.extent:
@@ -211,7 +211,7 @@ def parse_layers(layers):
                 num_features=layer['num_features'],
                 num_points=layer['num_points'],
                 fields=layer['fields'],
-                epsg=layer['epsg'],
+                srid=layer['srid'],
                 dims=layer['dims'],
                 extent=layer['extent']
                 ) for layer in layers]

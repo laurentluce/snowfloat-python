@@ -33,7 +33,7 @@ class ClientTests(tests.helper.Tests):
                             'num_points': 20,
                             'fields': [{'name': 'field_1', 'type': 'string',
                                         'size': 256},],
-                            'epsg': 4326,
+                            'srid': 4326,
                             'dims': 3,
                             'extent': [1, 2, 3, 4]
                            },
@@ -46,7 +46,7 @@ class ClientTests(tests.helper.Tests):
                             'num_points': 21,
                             'fields': [{'name': 'field_2', 'type': 'string',
                                         'size': 256},],
-                            'epsg': 4327,
+                            'srid': 4327,
                             'dims': 2,
                             'extent': None
                            }],
@@ -75,7 +75,7 @@ class ClientTests(tests.helper.Tests):
         self.assertEqual(layers[0].num_points, 20)
         self.assertListEqual(layers[0].fields,
             [{'name': 'field_1', 'type': 'string', 'size': 256},])
-        self.assertEqual(layers[0].epsg, 4326)
+        self.assertEqual(layers[0].srid, 4326)
         self.assertEqual(layers[0].dims, 3)
         self.assertListEqual(layers[0].extent, [1, 2, 3, 4])
         self.assertEqual(str(layers[0]),
@@ -83,7 +83,7 @@ class ClientTests(tests.helper.Tests):
             'date_modified=2, uri=/geo/1/layers/test_layer_1, '\
             'num_features=10, num_points=20, '\
             'fields=[{\'type\': \'string\', \'name\': \'field_1\', '\
-            '\'size\': 256}], epsg=4326, dims=3, '\
+            '\'size\': 256}], srid=4326, dims=3, '\
             'extent=[1, 2, 3, 4])')
 
         self.assertEqual(layers[1].name, 'test_tag_2')
@@ -96,7 +96,7 @@ class ClientTests(tests.helper.Tests):
         self.assertEqual(layers[1].num_points, 21)
         self.assertListEqual(layers[1].fields,
             [{'name': 'field_2', 'type': 'string', 'size': 256},])
-        self.assertEqual(layers[1].epsg, 4327)
+        self.assertEqual(layers[1].srid, 4327)
         self.assertEqual(layers[1].dims, 2)
         self.assertIsNone(layers[1].extent)
         self.method_mock_assert_call_args_list(get_mock,
@@ -136,7 +136,7 @@ class ClientTests(tests.helper.Tests):
               'num_features': 0,
               'num_points': 0,
               'fields': [{'name': 'field_1', 'type': 'string', 'size': 256},],
-              'epsg': 4326,
+              'srid': 4326,
               'dims': 3,
               'extent': [1, 2, 3, 4]
              },
@@ -148,7 +148,7 @@ class ClientTests(tests.helper.Tests):
               'num_features': 0,
               'num_points': 0,
               'fields': [{'name': 'field_2', 'type': 'string', 'size': 256},],
-              'epsg': 4327,
+              'srid': 4327,
               'dims': 2,
               'extent': None
              }]
@@ -159,11 +159,11 @@ class ClientTests(tests.helper.Tests):
         layers = [
             snowfloat.layer.Layer(name='test_tag_1',
                 fields=[{'name': 'field_1', 'type': 'string', 'size': 256},],
-                epsg=4326, dims=3,
+                srid=4326, dims=3,
                 extent=[1, 2, 3, 4]),
             snowfloat.layer.Layer(name='test_tag_2',
                 fields=[{'name': 'field_2', 'type': 'string', 'size': 256},],
-                epsg=4327, dims=2),
+                srid=4327, dims=2),
         ]
         layers = self.client.add_layers(layers)
         self.assertEqual(layers[0].name, 'test_tag_1')
@@ -176,7 +176,7 @@ class ClientTests(tests.helper.Tests):
         self.assertEqual(layers[0].num_points, 0)
         self.assertListEqual(layers[0].fields,
             [{'name': 'field_1', 'type': 'string', 'size': 256},])
-        self.assertEqual(layers[0].epsg, 4326)
+        self.assertEqual(layers[0].srid, 4326)
         self.assertEqual(layers[0].dims, 3)
         self.assertListEqual(layers[0].extent, [1, 2, 3, 4])
         self.assertEqual(layers[1].name, 'test_tag_2')
@@ -189,7 +189,7 @@ class ClientTests(tests.helper.Tests):
         self.assertEqual(layers[1].num_points, 0)
         self.assertListEqual(layers[1].fields,
             [{'name': 'field_2', 'type': 'string', 'size': 256},])
-        self.assertEqual(layers[1].epsg, 4327)
+        self.assertEqual(layers[1].srid, 4327)
         self.assertEqual(layers[1].dims, 2)
         self.assertIsNone(layers[1].extent)
         
@@ -200,13 +200,13 @@ class ClientTests(tests.helper.Tests):
                     {'name': 'test_tag_1',
                      'fields': [{'name': 'field_1', 'type': 'string',
                                  'size': 256},],
-                     'epsg': 4326,
+                     'srid': 4326,
                      'dims': 3,
                      'extent': [1, 2, 3, 4]},
                     {'name': 'test_tag_2',
                      'fields': [{'name': 'field_2', 'type': 'string',
                                  'size': 256},],
-                     'epsg': 4327,
+                     'srid': 4327,
                      'dims': 2}
                     ]),
                   params={},
@@ -536,7 +536,7 @@ class ImportDataSourceTests(tests.helper.Tests):
         execute_tasks_mock.return_value = [['test_result',]]
         tfile = tempfile.NamedTemporaryFile(delete=False)
         tfile.close()
-        res = self.client.import_geospatial_data(tfile.name, epsg=4326,
+        res = self.client.import_geospatial_data(tfile.name, srid=4326,
             state_check_interval=0.1)
         self.assertEqual(res, 'test_result')
         self.import_geospatial_data_helper(post_mock, get_mock, delete_mock,
@@ -574,7 +574,7 @@ class ImportDataSourceTests(tests.helper.Tests):
         tfile = tempfile.NamedTemporaryFile(delete=False)
         tfile.close()
         self.assertRaises(snowfloat.errors.RequestError,
-            self.client.import_geospatial_data, tfile.name, epsg=4326,
+            self.client.import_geospatial_data, tfile.name, srid=4326,
             state_check_interval=0.1)
         self.import_geospatial_data_helper(post_mock, get_mock, delete_mock,
             execute_tasks_mock)
@@ -652,7 +652,7 @@ class ImportDataSourceTests(tests.helper.Tests):
             task = call_args[0][0][0]
             self.assertEqual(task.operation, 'import_geospatial_data')
             self.assertDictEqual(task.extras, {'blob_uuid': 'test_blob_uuid',
-                                               'epsg': 4326})
+                                               'srid': 4326})
         else:
             self.assertFalse(execute_tasks_mock.called)
         tests.helper.method_mock_assert_called_with(delete_mock,
