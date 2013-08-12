@@ -92,6 +92,8 @@ class Layer(object):
 
             order_by (tuple): Tuple of attributes and fields to order by.
 
+            query_slice (tuple): Tuple to limit entries returned.
+
         Returns:
             list. List of Feature objects.
         

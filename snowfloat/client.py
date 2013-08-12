@@ -54,6 +54,8 @@ class Client(object):
 
             order_by (tuple): Tuple of attributes and fields to order by.
 
+            query_slice (tuple): Tuple to limit entries returned.
+
         Returns:
             list. List of Layer objects.
         
@@ -115,6 +117,8 @@ class Client(object):
             Field value condition.
 
             order_by (tuple): Tuple of attributes and fields to order by.
+
+            query_slice (tuple): Tuple to limit entries returned.
 
         Returns:
             list. List of Feature objects.

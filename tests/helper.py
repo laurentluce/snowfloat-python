@@ -406,7 +406,9 @@ class Tests(unittest.TestCase):
                           'spatial_geometry':
                             json.dumps(spatial_geometry),
                           'spatial_flag': True,
-                          'order_by': '-field_ts,date_created'},
+                          'order_by': '-field_ts,date_created',
+                          'slice_start': 1,
+                          'slice_end': 20},
                   data={},
                   timeout=10,
                   verify=False),
@@ -779,7 +781,8 @@ class Tests(unittest.TestCase):
             spatial_operation='intersection',
             spatial_geometry=point2,
             spatial_flag=True,
-            order_by=('-field_ts', 'date_created'))
+            order_by=('-field_ts', 'date_created'),
+            query_slice=(1, 20))
  
 def method_mock_assert_called_with(mock, uri):
     """Requests method mock assert called with helper."""

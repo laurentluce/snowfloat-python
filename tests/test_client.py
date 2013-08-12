@@ -63,7 +63,10 @@ class ClientTests(tests.helper.Tests):
         mock_2.status_code = 200
         mock_2.json.return_value = res_2
         get_mock.side_effect = [mock_1, mock_2]
-        layers = self.client.get_layers(name_exact='test_name')
+        layers = self.client.get_layers(
+            name_exact='test_name',
+            order_by=('-name', 'date_created'),
+            query_slice=(1, 20))
         
         self.assertEqual(layers[0].name, 'test_tag_1')
         self.assertEqual(layers[0].uri,
@@ -102,7 +105,10 @@ class ClientTests(tests.helper.Tests):
         self.method_mock_assert_call_args_list(get_mock,
             '/geo/1/layers',
             '/geo/1/layers?page=1&page_size=2',
-            params={'name__exact': 'test_name'})
+            params={'name__exact': 'test_name',
+                    'order_by': '-name,date_created',
+                    'slice_start': 1,
+                    'slice_end': 20})
 
     @patch.object(requests, 'get')
     def test_get_layers_status_code_413(self, get_mock):

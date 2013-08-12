@@ -111,6 +111,10 @@ def get_features(uri, **kwargs):
 
         Feature's attribute condition.
 
+        order_by (tuple): Tuple of attributes and fields to order by.
+
+        query_slice (tuple): Tuple to limit entries returned.
+
     Returns:
         generator. Yield Feature objects.
     """

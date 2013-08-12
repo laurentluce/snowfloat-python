@@ -323,7 +323,11 @@ def format_params(kwargs, exclude=None):
                       }
             params['geometry__%s' % (val,)] = json.dumps(geojson)
         elif key == 'order_by':
-            params[key] = ','.join(val)            
+            params[key] = ','.join(val)
+        elif key == 'query_slice':
+            if len(val) == 2:
+                params['slice_end'] = val[1]
+            params['slice_start'] = val[0]
         elif (not key.startswith('spatial_')
                 and not key in exclude):
             key = key.replace('layer_', 'layer__')

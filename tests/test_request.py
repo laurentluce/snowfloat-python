@@ -80,6 +80,21 @@ class RequestTests(unittest.TestCase):
         self.assertDictEqual(res,
             {'geometry__test_query': json.dumps(geojson)})
 
+    def test_format_params_query_slice_start(self):
+        """Format params for query with query_slice single item."""
+        kwargs = {'query_slice': (1,)}
+        res = snowfloat.request.format_params(kwargs)
+        self.assertDictEqual(res,
+            {'slice_start': 1})
+
+    def test_format_params_query_slice_stop(self):
+        """Format params for query with query_slice two items."""
+        kwargs = {'query_slice': (1, 2)}
+        res = snowfloat.request.format_params(kwargs)
+        self.assertDictEqual(res,
+            {'slice_start': 1,
+             'slice_end': 2})
+
     @patch.object(snowfloat.request, '_get_headers')
     @patch.object(requests, 'get')
     def test_send_get(self, get_mock, get_headers_mock):
