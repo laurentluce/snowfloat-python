@@ -22,8 +22,6 @@ class Geometry(object):
     Attributes:
         coordinates (list): Geometry coordinates. 
         
-        geometry_type (str): Point, LineString... 
-
     """
 
     coordinates = None

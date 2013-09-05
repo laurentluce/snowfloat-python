@@ -84,6 +84,8 @@ class Client(object):
         """Add features to a layer.
 
         Args:
+            layer_uuid (str): Layer's ID.
+
             features (list): List of features to add. Maximum 1000 items.
 
         Returns:
@@ -202,6 +204,8 @@ class Client(object):
 
         Kwargs:
             srid (int): Spatial reference system SRID code to replace the one in the data source file.
+
+            state_check_interval (int): Interval in seconds to check task state.
         
         Returns:
             dict: Dictionary containing the number of layers and features added.
@@ -298,8 +302,9 @@ def _prepare_tasks(tasks):
     for task in tasks:
         # add task
         task_to_add = {'operation': task.operation}
+        exclude = ('geometry',)
         task_to_add['filter'] = snowfloat.request.format_params(
-            task.task_filter)
+            task.task_filter, exclude=exclude)
         task_to_add['spatial'] = task.spatial
         task_to_add['extras'] = task.extras
         

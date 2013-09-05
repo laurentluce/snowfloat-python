@@ -55,7 +55,7 @@ class Layer(object):
         """Add list of features to this layer.
 
         Args:
-            geometries (list): List of features to add. Maximum 1000 items.
+            features (list): List of features to add. Maximum 1000 items.
 
         Returns:
             list. List of Feature objects.
