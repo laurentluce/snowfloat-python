@@ -1,14 +1,14 @@
 #!/bin/bash
 
 python -m unittest discover
-if [ $? -eq 1 ]
+if [ $? -ne 0 ]
 then
     echo "Unit tests failed."
     exit 1
 fi
 
 bash coverage.sh | grep TOTAL | grep "100%"
-if [ $? -eq 1 ]
+if [ $? -ne 0 ]
 then
     echo "Unit tests coverage less than 100%."
     exit 1
