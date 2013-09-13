@@ -149,7 +149,7 @@ def send(method, uri, params=None, data=None, headers=None):
                 timeout=timeout, verify=False)
             if res.status_code == 200:
                 return res.json()
-            elif res.status_code in (400, 403, 404, 413):
+            elif res.status_code in (400, 401, 403, 404, 413):
                 break
         except requests.exceptions.RequestException, exception:
             message = str(exception)
