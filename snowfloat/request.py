@@ -284,8 +284,8 @@ def _get_headers(method, uri, request_data, request_params):
         verb, content_sha, content_type, date, full_uri)
 
     request_headers = {'Authorization': 'GEO %s:%s' % (
-        snowfloat.settings.API_KEY,
-        _get_hmac_sha(msg, snowfloat.settings.API_PRIVATE_KEY))}
+        snowfloat.settings.API_KEY_ID,
+        _get_hmac_sha(msg, snowfloat.settings.API_SECRET_KEY))}
     
     if verb in ('PUT', 'POST'):
         request_headers['Content-Sha'] = content_sha
