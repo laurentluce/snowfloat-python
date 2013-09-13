@@ -17,7 +17,7 @@ def read(fname):
 
 setup(
     name = "snowfloat",
-    version = "0.9",
+    version = "0.10",
     author = "SnowFloat",
     author_email = "snowfloat@snowfloat.com",
     description = ('Client for the SnowFloat geo API (https://www.snowfloat.com)'),
