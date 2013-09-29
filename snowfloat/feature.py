@@ -47,13 +47,24 @@ class Feature(object):
             self.spatial = get_geometry_from_geojson(self.spatial)
     
     def __str__(self):
-        return '%s(uuid=%s, uri=%s, ' \
+        return '%s: uuid=%s, uri=%s, ' \
                 'date_created=%s, date_modified=%s, ' \
                 'geometry=%s, fields=%s, ' \
-                'layer_uuid=%s, spatial=%s)' \
+                'layer_uuid=%s, spatial=%s' \
             % (self.__class__.__name__,
                self.uuid, self.uri, self.date_created, self.date_modified,
                self.geometry, self.fields,
+               self.layer_uuid, self.spatial)
+
+    def __repr__(self):
+        return '%s(geometry=%r, fields=%r, ' \
+                'uuid=%r, uri=%r, ' \
+                'date_created=%r, date_modified=%r, ' \
+                'layer_uuid=%r, spatial=%r)' \
+            % (self.__class__.__name__,
+               self.geometry, self.fields,
+               self.uuid, self.uri,
+               self.date_created, self.date_modified,
                self.layer_uuid, self.spatial)
 
     def update(self, **kwargs):

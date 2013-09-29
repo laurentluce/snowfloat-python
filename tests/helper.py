@@ -275,12 +275,27 @@ class Tests(unittest.TestCase):
         self.assertEqual(feature.spatial.geometry_type, 'Point')
         self.assertListEqual(feature.spatial.coordinates, [4, 5, 6])
         self.assertEqual(str(feature),
-            'Feature(uuid=test_point_1, '\
+            'Feature: uuid=test_point_1, '\
             'uri=/geo/1/layers/test_layer_1/features/test_point_1, '\
             'date_created=5, date_modified=6, '\
-            'geometry=Point(coordinates=[1, 2, 3]), '\
+            'geometry=Point: coordinates=[1, 2, 3], '\
             'fields={\'tag\': \'test_tag_1\', \'ts\': 4}, '\
-            'layer_uuid=test_layer_1, spatial=Point(coordinates=[4, 5, 6]))')
+            'layer_uuid=test_layer_1, spatial=Point: coordinates=[4, 5, 6]')
+        rpr = repr(feature).replace('Feature', 'snowfloat.feature.Feature')
+        rpr = rpr.replace('Point', 'snowfloat.geometry.Point')
+        feature = eval(rpr)
+        self.assertTrue(isinstance(feature, snowfloat.feature.Feature))
+        self.assertEqual(feature.uuid, 'test_point_1')
+        self.assertEqual(feature.date_created, 5)
+        self.assertEqual(feature.date_modified, 6)
+        self.assertEqual(feature.uri,
+            '/geo/1/layers/test_layer_1/features/test_point_1')
+        self.assertDictEqual(feature.fields,
+            {'tag': 'test_tag_1', 'ts': 4})
+        self.assertEqual(feature.layer_uuid, 'test_layer_1')
+        geometry = feature.geometry
+        self.assertEqual(geometry.geometry_type, 'Point')
+        self.assertListEqual(geometry.coordinates, [1, 2, 3])
         
         feature = features[1]
         self.assertListEqual(feature.geometry.coordinates, [[[11, 12, 13],
@@ -727,6 +742,7 @@ class Tests(unittest.TestCase):
         m2.json.return_value = r2
         method_mock.side_effect = [m1, m2]
         results = [e for e in method(*args, **kwargs)]
+        
         result = results[0]
         self.assertEqual(result.uuid, 'test_result_1')
         self.assertEqual(result.uri,
@@ -734,6 +750,19 @@ class Tests(unittest.TestCase):
         self.assertEqual(result.tag, 'test_tag_1')
         self.assertEqual(result.date_created, 1)
         self.assertEqual(result.date_modified, 2)
+        self.assertEqual(str(result),
+            'Result: uuid=test_result_1, ' \
+            'uri=/geo/1/tasks/test_task_1/results/test_result_1, ' \
+            'date_created=1, date_modified=2, tag=test_tag_1')
+        result = eval('snowfloat.result.' + repr(result))
+        self.assertTrue(isinstance(result, snowfloat.result.Result))
+        self.assertEqual(result.uuid, 'test_result_1')
+        self.assertEqual(result.uri,
+            '/geo/1/tasks/test_task_1/results/test_result_1')
+        self.assertEqual(result.tag, 'test_tag_1')
+        self.assertEqual(result.date_created, 1)
+        self.assertEqual(result.date_modified, 2)
+        
         result = results[1]
         self.assertEqual(result.uuid, 'test_result_2')
         self.assertEqual(result.uri,

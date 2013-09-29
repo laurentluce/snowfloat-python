@@ -24,6 +24,19 @@ class Result(object):
         for key, val in kwargs.items():
             getattr(self, key)
             setattr(self, key, val)
+    
+    def __str__(self):
+        return 'Result: uuid=%s, uri=%s, date_created=%s, date_modified=%s, '\
+               'tag=%s' \
+               % (self.uuid, self.uri, self.date_created, self.date_modified,
+                  self.tag)
+               
+    def __repr__(self):
+        return 'Result(uuid=%r, uri=%r, date_created=%r, date_modified=%r, '\
+               'tag=%r)' \
+               % (self.uuid, self.uri, self.date_created, self.date_modified,
+                  self.tag)
+               
 
 def parse_results(results):
     """Convert results dictionaries to Result objects.

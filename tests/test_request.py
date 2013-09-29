@@ -128,8 +128,14 @@ class RequestErrorTests(unittest.TestCase):
         req = snowfloat.errors.RequestError(500, 1, 'test_message',
             'test_more')
         self.assertEqual(str(req),
-            'RequestError(status=500, code=1, message=test_message, ' \
-            'more=test_more)')
+            'RequestError: status=500, code=1, message=test_message, ' \
+            'more=test_more')
+        req = eval('snowfloat.errors.' + repr(req))
+        self.assertTrue(isinstance(req, snowfloat.errors.RequestError))
+        self.assertEqual(req.status, 500)
+        self.assertEqual(req.code, 1)
+        self.assertEqual(req.message, 'test_message')
+        self.assertEqual(req.more, 'test_more')
 
 
 

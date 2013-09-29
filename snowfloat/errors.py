@@ -10,6 +10,7 @@ class Error(Exception):
     def __init__(self, message):
         Exception.__init__(self, message)
 
+
 class RequestError(Error):
     """Server request error.
     
@@ -31,5 +32,10 @@ class RequestError(Error):
         self.more = more
 
     def __str__(self):
-        return 'RequestError(status=%s, code=%s, message=%s, more=%s)' % (
+        return "RequestError: status=%s, code=%s, message=%s, more=%s" % ( 
             self.status, self.code, self.message, self.more)
+
+    def __repr__(self):
+        return "RequestError(status=%r, code=%r, message=%r, more=%r)" % (
+            self.status, self.code, self.message, self.more)
+

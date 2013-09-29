@@ -12,6 +12,7 @@ import tests.helper
 import snowfloat.client
 import snowfloat.errors
 import snowfloat.geometry
+import snowfloat.layer
 import snowfloat.task
 
 class ClientTests(tests.helper.Tests):
@@ -82,13 +83,27 @@ class ClientTests(tests.helper.Tests):
         self.assertEqual(layers[0].dims, 3)
         self.assertListEqual(layers[0].extent, [1, 2, 3, 4])
         self.assertEqual(str(layers[0]),
-            'Layer(name=test_tag_1, uuid=test_layer_1, date_created=1, '\
+            'Layer: name=test_tag_1, uuid=test_layer_1, date_created=1, '\
             'date_modified=2, uri=/geo/1/layers/test_layer_1, '\
             'num_features=10, num_points=20, '\
             'fields=[{\'type\': \'string\', \'name\': \'field_1\', '\
             '\'size\': 256}], srid=4326, dims=3, '\
-            'extent=[1, 2, 3, 4])')
-
+            'extent=[1, 2, 3, 4]')
+        layer = eval('snowfloat.layer.' + repr(layers[0])) 
+        self.assertTrue(isinstance(layer, snowfloat.layer.Layer))
+        self.assertEqual(layer.name, 'test_tag_1')
+        self.assertEqual(layer.uuid, 'test_layer_1')
+        self.assertEqual(layer.date_created, 1)
+        self.assertEqual(layer.date_modified, 2)
+        self.assertEqual(layer.uri, '/geo/1/layers/test_layer_1')
+        self.assertEqual(layer.num_features, 10)
+        self.assertEqual(layer.num_points, 20)
+        self.assertListEqual(layer.fields,
+            [{'type': 'string', 'name': 'field_1', 'size': 256}])
+        self.assertEqual(layer.srid, 4326)
+        self.assertEqual(layer.dims, 3)
+        self.assertListEqual(layer.extent, [1, 2, 3, 4])
+        
         self.assertEqual(layers[1].name, 'test_tag_2')
         self.assertEqual(layers[1].uri,
             '/geo/1/layers/test_layer_2')
@@ -295,11 +310,29 @@ class ClientTests(tests.helper.Tests):
         self.assertEqual(tasks[0].date_created, 1)
         self.assertEqual(tasks[0].date_modified, 2)
         self.assertEqual(str(tasks[0]),
-            'Task(uuid=test_task_1, uri=/geo/1/tasks/test_task_1, '\
+            'Task: uuid=test_task_1, uri=/geo/1/tasks/test_task_1, '\
             'date_created=1, date_modified=2, operation=test_operation_1, '\
             'task_filter={\'filter_1\': \'test_task_filter_1\'}, '\
             'spatial={\'spatial_1\': \'test_task_spatial_1\'}, state=started, '\
-            'extras={\'extra\': \'test_extra_1\'}, reason=test_reason_1)')
+            'extras={\'extra\': \'test_extra_1\'}, reason=test_reason_1')
+        task = tasks[0]
+        rpr = repr(task).replace('Task', 'snowfloat.task.Task')
+        feature = eval(rpr)
+        self.assertTrue(isinstance(task, snowfloat.task.Task))
+        self.assertEqual(task.uuid, 'test_task_1')
+        self.assertEqual(task.date_created, 1)
+        self.assertEqual(task.date_modified, 2)
+        self.assertEqual(task.uri, '/geo/1/tasks/test_task_1')
+        self.assertEqual(task.operation, 'test_operation_1')
+        self.assertDictEqual(task.task_filter,
+            {'filter_1': 'test_task_filter_1'})
+        self.assertDictEqual(task.spatial,
+            {'spatial_1': 'test_task_spatial_1'})
+        self.assertEqual(task.state, 'started')
+        self.assertDictEqual(task.extras,
+            {'extra': 'test_extra_1'})
+        self.assertEqual(task.reason, 'test_reason_1')
+        
         self.assertEqual(tasks[1].operation, 'test_operation_2')
         self.assertDictEqual(tasks[1].task_filter, 
             {'filter_2': 'test_task_filter_2'})

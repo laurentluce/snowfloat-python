@@ -59,12 +59,25 @@ class Task(object):
                 yield result
 
     def __str__(self):
-        return '%s(uuid=%s, uri=%s, ' \
+        return '%s: uuid=%s, uri=%s, ' \
                 'date_created=%s, date_modified=%s, ' \
                 'operation=%s, ' \
                 'task_filter=%s, spatial=%s, ' \
                 'state=%s, extras=%s, ' \
-                'reason=%s)' \
+                'reason=%s' \
+            % (self.__class__.__name__,
+               self.uuid, self.uri, self.date_created, self.date_modified,
+               self.operation,
+               self.task_filter, self.spatial,
+               self.state, self.extras, self.reason)
+
+    def __repr__(self):
+        return '%s(uuid=%r, uri=%r, ' \
+                'date_created=%r, date_modified=%r, ' \
+                'operation=%r, ' \
+                'task_filter=%r, spatial=%r, ' \
+                'state=%r, extras=%r, ' \
+                'reason=%r)' \
             % (self.__class__.__name__,
                self.uuid, self.uri, self.date_created, self.date_modified,
                self.operation,

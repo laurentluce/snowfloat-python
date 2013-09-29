@@ -31,7 +31,11 @@ class Geometry(object):
         self.coordinates = coordinates
     
     def __str__(self):
-        return '%s(coordinates=%s)' \
+        return '%s: coordinates=%s' \
+            % (self.__class__.__name__, self.coordinates)
+
+    def __repr__(self):
+        return '%s(coordinates=%r)' \
             % (self.__class__.__name__, self.coordinates)
 
     def num_points(self):
