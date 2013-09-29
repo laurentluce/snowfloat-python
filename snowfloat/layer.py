@@ -43,18 +43,18 @@ class Layer(object):
             getattr(self, key)
             setattr(self, key, val)
     
-    def __str__(self):
-        return 'Layer: name=%s, uuid=%s, date_created=%s, date_modified=%s, '\
-               'uri=%s, num_features=%d, num_points=%d, fields=%s, '\
-               'srid=%d, dims=%d, extent=%s' \
-            % (self.name, self.uuid, self.date_created, self.date_modified,
-               self.uri, self.num_features, self.num_points, self.fields,
-               self.srid, self.dims, self.extent)
-
     def __repr__(self):
         return 'Layer(name=%r, uuid=%r, date_created=%r, date_modified=%r, '\
                'uri=%r, num_features=%r, num_points=%r, fields=%r, '\
                'srid=%r, dims=%r, extent=%r)' \
+            % (self.name, self.uuid, self.date_created, self.date_modified,
+               self.uri, self.num_features, self.num_points, self.fields,
+               self.srid, self.dims, self.extent)
+
+    def __str__(self):
+        return 'Layer: name=%s, uuid=%s, date_created=%s, date_modified=%s, '\
+               'uri=%s, num_features=%d, num_points=%d, fields=%s, '\
+               'srid=%d, dims=%d, extent=%s' \
             % (self.name, self.uuid, self.date_created, self.date_modified,
                self.uri, self.num_features, self.num_points, self.fields,
                self.srid, self.dims, self.extent)

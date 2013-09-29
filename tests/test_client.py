@@ -317,7 +317,7 @@ class ClientTests(tests.helper.Tests):
             'extras={\'extra\': \'test_extra_1\'}, reason=test_reason_1')
         task = tasks[0]
         rpr = repr(task).replace('Task', 'snowfloat.task.Task')
-        feature = eval(rpr)
+        task = eval(rpr)
         self.assertTrue(isinstance(task, snowfloat.task.Task))
         self.assertEqual(task.uuid, 'test_task_1')
         self.assertEqual(task.date_created, 1)
