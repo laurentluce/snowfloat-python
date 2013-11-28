@@ -216,34 +216,26 @@ class Client(object):
             res = snowfloat.request.post(uri, archive, serialize=False)
         blob_uuid = res['uuid']
 
-        try:
-            # make sure the blob is in the success state
-            uri = '%s/blobs/%s' % (self.uri, blob_uuid)
-            while True:
-                res = [e for e in snowfloat.request.get(uri)]
-                if res[0]['state'] == 'started':
-                    time.sleep(state_check_interval)
-                elif res[0]['state'] == 'failure':
-                    raise snowfloat.errors.RequestError(status=500, 
-                        code=None, message='Upload failed.', more=None)
-                else:
-                    break
+        # make sure the blob is in the success state
+        uri = '%s/blobs/%s' % (self.uri, blob_uuid)
+        while True:
+            res = [e for e in snowfloat.request.get(uri)]
+            if res[0]['state'] == 'started':
+                time.sleep(state_check_interval)
+            elif res[0]['state'] == 'failure':
+                raise snowfloat.errors.RequestError(status=500, 
+                    code=None, message='Upload failed.', more=None)
+            else:
+                break
 
-            # execute import data source task
-            extras = {'blob_uuid': blob_uuid}
-            if srid:
-                extras['srid'] = srid
-            tasks = [snowfloat.task.Task(
-                        operation='import_geospatial_data',
-                        extras=extras)]
-            res = self.execute_tasks(tasks)
-        finally: 
-            # delete blob
-            try:
-                uri = '%s/blobs/%s' % (self.uri, blob_uuid)
-                snowfloat.request.delete(uri)
-            except snowfloat.errors.RequestError:
-                pass
+        # execute import data source task
+        extras = {'blob_uuid': blob_uuid}
+        if srid:
+            extras['srid'] = srid
+        tasks = [snowfloat.task.Task(
+                    operation='import_geospatial_data',
+                    extras=extras)]
+        res = self.execute_tasks(tasks)
 
         if 'error' in res[0]:
             raise snowfloat.errors.RequestError(status=400, 

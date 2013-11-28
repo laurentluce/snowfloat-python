@@ -578,7 +578,7 @@ class ImportDataSourceTests(tests.helper.Tests):
         res = self.client.import_geospatial_data(tfile.name, srid=4326,
             state_check_interval=0.1)
         self.assertEqual(res, 'test_result')
-        self.import_geospatial_data_helper(post_mock, get_mock, delete_mock,
+        self.import_geospatial_data_helper(post_mock, get_mock,
             execute_tasks_mock)
         os.remove(tfile.name)
 
@@ -615,7 +615,7 @@ class ImportDataSourceTests(tests.helper.Tests):
         self.assertRaises(snowfloat.errors.RequestError,
             self.client.import_geospatial_data, tfile.name, srid=4326,
             state_check_interval=0.1)
-        self.import_geospatial_data_helper(post_mock, get_mock, delete_mock,
+        self.import_geospatial_data_helper(post_mock, get_mock,
             execute_tasks_mock)
         os.remove(tfile.name)
 
@@ -650,12 +650,12 @@ class ImportDataSourceTests(tests.helper.Tests):
         self.assertRaises(snowfloat.errors.RequestError,
             self.client.import_geospatial_data, tfile.name,
             state_check_interval=0.1)
-        self.import_geospatial_data_helper(post_mock, get_mock, delete_mock,
+        self.import_geospatial_data_helper(post_mock, get_mock,
             execute_tasks_mock, validate_execute_tasks=False)
         os.remove(tfile.name)
 
     # pylint: disable=R0913
-    def import_geospatial_data_helper(self, post_mock, get_mock, delete_mock,
+    def import_geospatial_data_helper(self, post_mock, get_mock,
             execute_tasks_mock, validate_execute_tasks=True):
         """Import data source test helper."""
         # validate post call
@@ -694,5 +694,3 @@ class ImportDataSourceTests(tests.helper.Tests):
                                                'srid': 4326})
         else:
             self.assertFalse(execute_tasks_mock.called)
-        tests.helper.method_mock_assert_called_with(delete_mock,
-            '/geo/1/blobs/test_blob_uuid') 
