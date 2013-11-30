@@ -290,7 +290,15 @@ def _get_headers(method, uri, request_data, request_params):
     if verb in ('PUT', 'POST'):
         request_headers['Content-Sha'] = content_sha
         request_headers['Content-Type'] = content_type
-    request_headers['Date'] = date 
+    request_headers['Date'] = date
+
+    if snowfloat.settings.USER_API_KEY_ID:
+        request_headers['X-User-API-Key-ID'] = \
+            snowfloat.settings.USER_API_KEY_ID 
+
+    if snowfloat.settings.USER_API_SHARING_KEY:
+        request_headers['X-User-API-Sharing-Key'] = \
+            snowfloat.settings.USER_API_SHARING_KEY 
 
     return request_headers
 

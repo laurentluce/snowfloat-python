@@ -120,6 +120,37 @@ class RequestTests(unittest.TestCase):
             timeout=10,
             verify=False)
 
+    @patch.object(requests, 'get')
+    def test_get_headers(self, get_mock):
+        """Test _get_headers."""
+        get_mock.__name__ = 'get'
+        uri = '/test_uri'
+        request_params = {'param': 'test_param'}
+        request_data = {}
+        headers = snowfloat.request._get_headers(get_mock, uri, request_data,
+            request_params)
+        self.assertEqual(headers['Authorization'],
+                'GEO QWE948OCAYX16G1XVGJM:'\
+                'azh8WQmu8IwP15TFbWafei1s5VWZGAkMzNivHXBlqD4=')
+
+    @patch.object(requests, 'get')
+    def test_get_headers_sharing(self, get_mock):
+        """Test _get_headers with user sharing keys."""
+        get_mock.__name__ = 'get'
+        uri = '/test_uri'
+        request_params = {'param': 'test_param'}
+        request_data = {}
+        snowfloat.settings.USER_API_KEY_ID = 'test_user_api_key_id'
+        snowfloat.settings.USER_API_SHARING_KEY = 'test_user_api_sharing_key'
+        headers = snowfloat.request._get_headers(get_mock, uri, request_data,
+            request_params)
+        self.assertEqual(headers['X-User-API-Key-ID'],
+            'test_user_api_key_id')
+        self.assertEqual(headers['X-User-API-Sharing-Key'],
+            'test_user_api_sharing_key')
+        snowfloat.settings.USER_API_KEY_ID = ''
+        snowfloat.settings.USER_API_SHARING_KEY = ''
+
 
 class RequestErrorTests(unittest.TestCase):
     """Request error tests."""
