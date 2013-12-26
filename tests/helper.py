@@ -21,6 +21,8 @@ class Tests(unittest.TestCase):
         snowfloat.settings.HOST = 'api.snowfloat.com:443'
         snowfloat.settings.HTTP_RETRY_INTERVAL = 0.1
         snowfloat.settings.API_KEY_ID = 'IY3487E2J6ZHFOW5A7P5'
+        snowfloat.settings.API_SECRET_KEY = \
+            'K0VUz+NlxVaf9AoPDcbNcVqF4RfXM4eet7RsyS19'
         self.client = snowfloat.client.Client()
 
         self.features = []

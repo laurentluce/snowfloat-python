@@ -19,6 +19,9 @@ class RequestTests(unittest.TestCase):
     # pylint: disable=C0103
     def setUp(self):
         snowfloat.settings.HOST = 'api.snowfloat.com:443'
+        snowfloat.settings.API_KEY_ID = 'QWE948OCAYX16G1XVGJM'
+        snowfloat.settings.API_SECRET_KEY = \
+            'tYCbpb2ozfSDAzHDtu/zJqsptmw9tyO0kg+aWhne'
     
     def test_get_hmac_sha(self):
         """Get message HMAC-SHA signature."""
